@@ -113,16 +113,11 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 $ yarn upgrade
 ```
 
-[Yarn Upgrade](https://classic.yarnpkg.com/en/docs/cli/upgrade/).
-
 Upgrades packages to their latest version based on the specified range.
-
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
 
+```
 "scripts": {
 "start": "react-scripts start",
 "build": "react-scripts build",
@@ -133,3 +128,4 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 "format": "prettier --write . --config ./.prettierrc",
 "prepare": "husky install"
 }
+```
