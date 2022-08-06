@@ -1,0 +1,7 @@
+# prevent eslint forcing styles /node_modules, javascript and typescript env.
+
+/*.js
+** / *. js
+node_modules
+build
+/src/react-app-env.d.ts
