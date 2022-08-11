@@ -4,7 +4,7 @@ import './App.css';
 function App() {
   return (
     <div className='App'>
-      <header className='App-header'>Streametric</header>
+      <h1 className='App-header'>Streametric</h1>
     </div>
   );
 }

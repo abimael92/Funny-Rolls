@@ -2,7 +2,7 @@
 
 ## Project
 
-This project was initialised using [Create React App](https://reactjs.org/docs/create-a-new-react-app.html) and added an addition configuration of eslint, prettier, editorconfig and finaly husky for precommit scripts.
+The project was initialized using [Create React App](https://reactjs.org/docs/create-a-new-react-app.html) and added additional configuration for eslint, prettier, editorconfig and finally husky for pre-commit scripts.
 
 ## You will need
 
@@ -17,7 +17,7 @@ This project was initialised using [Create React App](https://reactjs.org/docs/c
 
 ## Benefits of using Prettier and ESLint
 
-Prettier was configured to format file on save and there is no need to worry about code formatting anymore. Eslint is used to find problems and syntax issues in the code, it will help us find broken logic that would be found only in run time. This forces a specific code style across the whole codebase.
+Prettier was configured to format files on save. There is no need to worry about code formatting. Eslint is used to find problems and syntax issues in the code and help find broken logic. This enforces a specific code style across the whole codebase.
 
 ## Technologies
 
@@ -57,7 +57,6 @@ The project was mainly developed with the following technologies:
     "prettier": "^2.7.1",
     "husky": "^8.0.0"
   }
-
 ```
 
 ## Folders
@@ -104,16 +103,15 @@ $ yarn start
 
 ### `yarn start`
 
-Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ## Need an upgrade?
 
+Upgrade packages to their latest version based on the specified range.
+
 ```
 $ yarn upgrade
 ```
-
-Upgrades packages to their latest version based on the specified range.
 
 ## Available Scripts
 
