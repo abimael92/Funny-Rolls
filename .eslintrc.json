@@ -22,6 +22,9 @@
     "project": "**/tsconfig.json"
   },
   "plugins": ["react", "react-hooks", "@typescript-eslint", "prettier"],
+  "ignorePatterns": [
+    ".husky/**/*"
+  ],
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/jsx-key": ["error"],
