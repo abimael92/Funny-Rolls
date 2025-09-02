@@ -20,7 +20,7 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
         <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center">
           <Image
             src="/img/title.png"
-            alt="Funny Rolls Logo"
+            alt="Logo Funny Rolls"
             width={110}
             height={110}
             className="object-contain"
@@ -34,16 +34,16 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
 
         {/* Desktop Menu Right */}
         <div className="hidden md:flex items-center gap-6 absolute right-6 top-1/2 -translate-y-1/2">
-          <a href="#home" className="hover:text-amber-600 transition-colors">Home</a>
-          <a href="#menu" className="hover:text-amber-600 transition-colors">Menu</a>
-          <a href="#about" className="hover:text-amber-600 transition-colors">About</a>
-          <a href="#contact" className="hover:text-amber-600 transition-colors">Contact</a>
+          <a href="#home" className="hover:text-amber-600 transition-colors">Inicio</a>
+          <a href="#menu" className="hover:text-amber-600 transition-colors">Menú</a>
+          <a href="#about" className="hover:text-amber-600 transition-colors">Acerca de</a>
+          <a href="#contact" className="hover:text-amber-600 transition-colors">Contacto</a>
           <Button
             onClick={onCartOpen}
             className="relative bg-amber-600 hover:bg-amber-700 text-white rounded-full px-4 py-2 flex items-center gap-2"
           >
             <ShoppingCart className="w-4 h-4" />
-            Cart
+            Carrito
             {cart.length > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
                 {cart.length}
@@ -79,10 +79,10 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-[#C48A6A]/20 animate-scale-in">
           <div className="px-4 py-3 flex flex-col space-y-2">
-            <a href="#home" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Home</a>
-            <a href="#menu" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Menu</a>
-            <a href="#about" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">About</a>
-            <a href="#contact" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Contact</a>
+            <a href="#home" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Inicio</a>
+            <a href="#menu" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Menú</a>
+            <a href="#about" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Acerca de</a>
+            <a href="#contact" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Contacto</a>
           </div>
         </div>
       )}
