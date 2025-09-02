@@ -221,11 +221,14 @@ export default function FunnyRollsPage() {
 
           <Button
             size="lg"
-            className="bg-[#C48A6A] hover:bg-[#8B4513] text-white px-8 py-4 text-lg font-semibold rounded-full transform hover:scale-105 transition-all duration-300 shine-effect"
-            onClick={() => document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })}
+            className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-orange-600 hover:via-amber-600 hover:to-orange-700 text-white px-8 py-4 text-lg font-semibold rounded-full transform hover:scale-105 transition-all duration-300 shadow-lg "
+            onClick={() =>
+              document.getElementById("menu")?.scrollIntoView({ behavior: "smooth" })
+            }
           >
             Order Now
           </Button>
+
         </div>
       </section>
 
