@@ -25,7 +25,7 @@ const products: Product[] = [
     id: 1,
     name: "Classic Giggle Roll",
     price: 4.99,
-    image: "/classic-cinnamon-roll-with-icing.png",
+    image: "/img/classic.jpg",
     description: "Our signature cinnamon roll that'll make you giggle with joy",
     rating: 5,
   },
@@ -33,7 +33,7 @@ const products: Product[] = [
     id: 2,
     name: "Chuckle Chocolate Roll",
     price: 5.99,
-    image: "/chocolate-cinnamon-roll-with-chocolate-drizzle.png",
+    image: "/img/chocolate.jpg",
     description: "Double chocolate goodness that's seriously funny",
     rating: 5,
   },
@@ -117,8 +117,11 @@ export default function FunnyRollsPage() {
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#C48A6A]/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="font-cursive text-2xl text-[#C48A6A]">Funny Rolls</h1>
+            <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-200 to-pink-200 rounded-full flex items-center justify-center">
+                <i className="ri-cake-3-line text-amber-700 text-xl"></i>
+              </div>
+              <span className="font-['Pacifico'] text-2xl text-amber-800">Funny Rolls</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -196,7 +199,7 @@ export default function FunnyRollsPage() {
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/beautiful-cinnamon-rolls-on-rustic-wooden-table-wi.png" alt="Delicious cinnamon rolls" className="w-full h-full object-cover" />
+          <Image src="/beautiful-cinnamon-rolls.jpg" alt="Delicious cinnamon rolls" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
 
@@ -289,7 +292,7 @@ export default function FunnyRollsPage() {
                 daily. Our mission is simple: make people smile while satisfying their sweet tooth.
               </p>
               <p className="text-lg text-gray-600 text-pretty">
-                Every bite is crafted with love, every roll tells a joke, and every customer leaves with a smile. That&apos;s
+                Every bite is crafted with love, every roll tells a joke, and every customer leaves with a smile. That`&apos;`s
                 the Funny Rolls promise!
               </p>
 
@@ -313,7 +316,7 @@ Years of Sweet
 
             <div className="animate-fade-in-up">
               <Image
-                src="/cozy-bakery-interior-with-warm-lighting-and-cinnam.png"
+                src="/img/bakery.jpg"
                 alt="Our cozy bakery"
                 className="w-full h-96 object-cover rounded-lg shadow-lg"
               />
