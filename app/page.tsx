@@ -199,7 +199,13 @@ export default function FunnyRollsPage() {
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/beautiful-cinnamon-rolls.jpg" alt="Delicious cinnamon rolls" className="w-full h-full object-cover" />
+          <Image 
+            src="/img/beautiful-cinnamon-rolls.jpg" 
+            alt="Delicious cinnamon rolls" 
+            width={1200} 
+            height={800}
+            className="w-full h-full object-cover" 
+          />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
 
@@ -247,6 +253,8 @@ export default function FunnyRollsPage() {
                     <Image
                       src={product.image || "/placeholder.svg"}
                       alt={product.name}
+                      width={300}
+                      height={256}
                       className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                     <div className="absolute top-4 right-4">
@@ -316,8 +324,10 @@ Years of Sweet
 
             <div className="animate-fade-in-up">
               <Image
-                src="/img/bakery.jpg"
+                src="/img/bakery-shop.jpg"
                 alt="Our cozy bakery"
+                width={600}
+                height={384}
                 className="w-full h-96 object-cover rounded-lg shadow-lg"
               />
             </div>
