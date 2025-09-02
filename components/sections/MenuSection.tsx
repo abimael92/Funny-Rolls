@@ -1,6 +1,6 @@
 "use client"
 
-import { Product, CartItem } from "@/lib/types"
+import { Product } from "@/lib/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
