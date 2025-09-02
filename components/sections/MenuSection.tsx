@@ -26,11 +26,12 @@ export function MenuSection({ products, addToCart }: MenuSectionProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {products.map((product, index) => (
             <Card
-              key={product.id}
-              className={`group hover:shadow-xl hover:scale-105 transition-all duration-300 border-[#C48A6A]/20`}
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <CardContent className="p-0">
+            key={product.id}
+            className="group hover:shadow-xl hover:scale-105 transition-all duration-300 border-[#C48A6A]/20 p-0 overflow-hidden"
+  style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            {/* Image touches card edges */}
+            <CardContent className="p-0">
                 <div className="relative overflow-hidden rounded-t-lg">
                   <Image
                     src={product.image || "/placeholder.svg"}
