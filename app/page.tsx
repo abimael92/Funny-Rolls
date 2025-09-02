@@ -5,6 +5,7 @@ import { ShoppingCart, Menu, X, Plus, Minus, Star, MapPin, Clock, Phone, Mail } 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import Image from "next/image";
 
 interface Product {
   id: number
@@ -195,7 +196,7 @@ export default function FunnyRollsPage() {
       {/* Hero Section */}
       <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
-          <img src="/beautiful-cinnamon-rolls-on-rustic-wooden-table-wi.png" alt="Delicious cinnamon rolls" className="w-full h-full object-cover" />
+          <Image src="/beautiful-cinnamon-rolls-on-rustic-wooden-table-wi.png" alt="Delicious cinnamon rolls" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
 
@@ -237,7 +238,7 @@ export default function FunnyRollsPage() {
               >
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden rounded-t-lg">
-                    <img
+                    <Image
                       src={product.image || "/placeholder.svg"}
                       alt={product.name}
                       className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
@@ -285,13 +286,13 @@ export default function FunnyRollsPage() {
                 daily. Our mission is simple: make people smile while satisfying their sweet tooth.
               </p>
               <p className="text-lg text-gray-600 text-pretty">
-                Every bite is crafted with love, every roll tells a joke, and every customer leaves with a smile. That's
+                Every bite is crafted with love, every roll tells a joke, and every customer leaves with a smile. That&apos;s
                 the Funny Rolls promise!
               </p>
             </div>
 
             <div className="animate-fade-in-up">
-              <img
+              <Image
                 src="/cozy-bakery-interior-with-warm-lighting-and-cinnam.png"
                 alt="Our cozy bakery"
                 className="w-full h-96 object-cover rounded-lg shadow-lg"
@@ -307,7 +308,7 @@ export default function FunnyRollsPage() {
           <div className="text-center mb-16">
             <h2 className="font-cursive text-4xl md:text-5xl text-[#C48A6A] mb-4">Get in Touch</h2>
             <p className="text-lg text-gray-600 text-pretty">
-              Have a custom order or just want to say hello? We'd love to hear from you!
+              Have a custom order or just want to say hello? We&apos;d love to hear from you!
             </p>
           </div>
 
@@ -418,7 +419,7 @@ export default function FunnyRollsPage() {
                 <div className="space-y-4">
                   {cart.map((item) => (
                     <div key={item.id} className="flex items-center space-x-4 p-4 border rounded-lg">
-                      <img
+                      <Image
                         src={item.image || "/placeholder.svg"}
                         alt={item.name}
                         className="w-16 h-16 object-cover rounded"
