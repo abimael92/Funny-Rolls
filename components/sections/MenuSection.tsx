@@ -17,7 +17,7 @@ export function MenuSection({ products, addToCart }: MenuSectionProps) {
 <section id="menu" className="py-20 px-4">
   <div className="max-w-7xl mx-auto">
     <div className="text-center mb-16">
-      <h2 className="font-cursive text-4xl md:text-5xl text-[#C48A6A] mb-4">Nuestro Menú Divertido</h2>
+      <h2 className="font-cursive text-4xl md:text-5xl text-[#C48A6A] mb-4">Nuestro Divertido Menú</h2>
       <p className="text-lg text-gray-600 max-w-2xl mx-auto text-pretty">
         Cada rollo se hornea fresco todos los días con amor, risas y los mejores ingredientes
       </p>
