@@ -7,24 +7,24 @@ export function About() {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="animate-fade-in-up">
-            <h2 className="font-cursive text-4xl md:text-5xl text-[#C48A6A] mb-6">Our Sweet Story</h2>
+            <h2 className="font-cursive text-4xl md:text-5xl text-[#C48A6A] mb-6">Nuestra Dulce Historia</h2>
             <p className="text-lg text-gray-600 mb-6 text-pretty">
-              Founded in 2020 by a group of friends who believed that laughter and cinnamon rolls go hand in hand,
-              Funny Rolls has been spreading joy one swirl at a time.
+              Fundada en 2020 por un grupo de amigos que creían que la risa y los rollos de canela van de la mano, 
+              Funny Rolls ha estado esparciendo alegría un remolino a la vez.
             </p>
             <p className="text-lg text-gray-600 mb-6 text-pretty">
-              We use only the finest ingredients, traditional recipes with a twist of humor, and bake everything fresh daily. 
-              Our mission is simple: make people smile while satisfying their sweet tooth.
+              Usamos solo los mejores ingredientes, recetas tradicionales con un toque de humor, y horneamos todo fresco a diario. 
+              Nuestra misión es simple: hacer sonreír a las personas mientras satisfacemos su gusto por lo dulce.
             </p>
             <p className="text-lg text-gray-600 text-pretty">
-              Every bite is crafted with love, every roll tells a joke, and every customer leaves with a smile. That&apos;s the Funny Rolls promise!
+              Cada bocado se crea con amor, cada rollo cuenta un chiste, y cada cliente se va con una sonrisa. ¡Esa es la promesa de Funny Rolls!
             </p>
           </div>
 
           <div className="animate-fade-in-up">
             <Image
               src="/img/bakery-shop.jpg"
-              alt="Our cozy bakery"
+              alt="Nuestra acogedora panadería"
               width={600}
               height={384}
               className="w-full h-96 object-cover rounded-lg shadow-lg"
