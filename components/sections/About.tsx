@@ -9,16 +9,17 @@ export function About() {
           <div className="animate-fade-in-up">
             <h2 className="font-cursive text-4xl md:text-5xl text-[#C48A6A] mb-6">Nuestra Dulce Historia</h2>
             <p className="text-lg text-gray-600 mb-6 text-pretty">
-              Fundada en 2020 por un grupo de amigos que creían que la risa y los rollos de canela van de la mano, 
-              Funny Rolls ha estado esparciendo alegría un remolino a la vez.
+            Fundada en 2020 por Martha Isela Gardea, quien creía que todos merecen algo dulce y agradable para alegrar su día, 
+            Funny Rolls ha estado esparciendo alegría y amor con cada rollo, compartiendo su cuidado y cariño con cada persona que lo prueba.
             </p>
             <p className="text-lg text-gray-600 mb-6 text-pretty">
-              Usamos solo los mejores ingredientes, recetas tradicionales con un toque de humor, y horneamos todo fresco a diario. 
-              Nuestra misión es simple: hacer sonreír a las personas mientras satisfacemos su gusto por lo dulce.
-            </p>
-            <p className="text-lg text-gray-600 text-pretty">
-              Cada bocado se crea con amor, cada rollo cuenta un chiste, y cada cliente se va con una sonrisa. ¡Esa es la promesa de Funny Rolls!
-            </p>
+            Seleccionamos solo los mejores ingredientes y combinamos recetas tradicionales con un toque especial de alegría, 
+            horneando todo fresco cada día. Nuestra misión es sencilla: sacar sonrisas mientras deleitamos tu gusto por lo dulce.
+          </p>
+          <p className="text-lg text-gray-600 text-pretty">
+            Cada bocado está hecho con amor, cada rollo tiene su propia chispa de diversión, y cada cliente se va con una sonrisa. 
+            ¡Esa es la promesa de Funny Rolls!
+          </p>
           </div>
 
           <div className="animate-fade-in-up">
