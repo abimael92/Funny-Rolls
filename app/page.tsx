@@ -206,6 +206,9 @@ export default function FunnyRollsPage() {
           <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto text-pretty">
             Deliciously funny cinnamon rolls that will make you laugh out loud and crave more
           </p>
+
+          {/* Fresh-baked cinnamon rolls made daily with love, cinnamon, and a touch of magic. Every bite is pure bliss. */}
+
           <Button
             size="lg"
             className="bg-[#C48A6A] hover:bg-[#8B4513] text-white px-8 py-4 text-lg font-semibold rounded-full transform hover:scale-105 transition-all duration-300 shine-effect"
@@ -288,6 +291,23 @@ export default function FunnyRollsPage() {
                 Every bite is crafted with love, every roll tells a joke, and every customer leaves with a smile. That's
                 the Funny Rolls promise!
               </p>
+
+              {/* Sweet Swirls began in 2018 when our founder, Sarah Martinez, decided to turn her grandmother's secret cinnamon roll recipe into something the whole community could enjoy. What started as weekend farmers market treats has blossomed into the neighborhood's favorite bakery.
+
+Every morning at 5 AM, our bakers arrive to hand-roll each pastry with care. We use only the finest ingredients: organic flour, Madagascar vanilla, Ceylon cinnamon, and farm-fresh butter. No shortcuts, no preservatives—just pure, wholesome goodness.
+
+Our mission is simple: to bring warmth and joy to every customer through the perfect cinnamon roll. Whether you're grabbing breakfast on the go or treating yourself to an afternoon indulgence, we're here to make your day a little sweeter.  
+
+
+
+5000+
+Happy Customers
+200+
+Rolls Daily
+6
+Years of Sweet
+
+*/}
             </div>
 
             <div className="animate-fade-in-up">
@@ -384,6 +404,7 @@ export default function FunnyRollsPage() {
         <div className="max-w-7xl mx-auto text-center">
           <h3 className="font-cursive text-3xl text-[#FFC1C1] mb-4">Funny Rolls</h3>
           <p className="text-lg mb-6">Spreading smiles, one swirl at a time</p>
+          {/* Freshly baked cinnamon rolls made with love and the finest ingredients. Every bite is a warm hug that brings joy to your day. */}
           <div className="flex justify-center space-x-6 mb-6">
             <a href="#" className="hover:text-[#FFC1C1] transition-colors">
               Facebook
@@ -395,7 +416,21 @@ export default function FunnyRollsPage() {
               Twitter
             </a>
           </div>
-          <p className="text-sm opacity-75">© 2024 Funny Rolls. All rights reserved.</p>
+
+          {/* Quick Links
+Menu
+About Us
+Contact
+Catering
+
+
+Store Info
+123 Baker Street
+Sweet Valley, CA 90210
+(555) 123-ROLL
+Daily 7AM - 8PM */}
+
+          <p className="text-sm opacity-75">© 2024 Funny Rolls. All rights reserved. Made with ❤️ and lots of cinnamon.</p>
         </div>
       </footer>
 
