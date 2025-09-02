@@ -51,7 +51,7 @@ export function MenuSection({ products, addToCart }: MenuSectionProps) {
               <h3 className="font-cursive text-xl text-[#C48A6A] mb-2">{product.name}</h3>
               <p className="text-gray-600 mb-4 text-sm">{product.description}</p>
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold text-[#8B4513]">${product.price}</span>
+                <span className="text-2xl font-bold text-[#8B4513]">${product.price}<span className="text-sm align-super">.00</span></span>
                 <Button
                   onClick={() => addToCart(product)}
                   className="bg-[#FFC1C1] hover:bg-[#C48A6A] text-[#8B4513] hover:text-white transform hover:scale-105 transition-all duration-200"
