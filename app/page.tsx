@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Product, CartItem } from "@/lib/types"
 import { products } from "@/lib/data"
 import { Hero } from "@/components/sections/Hero"
@@ -12,14 +12,8 @@ import { Footer } from "@/components/sections/Footer"
 import { CartModal } from "@/components/sections/CartModal"
 
 export default function FunnyRollsPage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [cart, setCart] = useState<CartItem[]>([])
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    setIsVisible(true)
-  }, [])
 
   const addToCart = (product: Product) => {
     setCart((prev) => {
@@ -49,9 +43,6 @@ export default function FunnyRollsPage() {
 
   const getTotalPrice = () =>
     cart.reduce((total, item) => total + item.price * item.quantity, 0)
-
-  const getTotalItems = () =>
-    cart.reduce((total, item) => total + item.quantity, 0)
 
   return (
     <div className="min-h-screen bg-[#FFF5E6]">

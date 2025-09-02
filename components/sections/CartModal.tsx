@@ -1,5 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
+import { CartItem } from "@/lib/types"
 
 export function CartModal({
   isOpen,
@@ -11,7 +12,7 @@ export function CartModal({
 }: {
   isOpen: boolean
   onClose: () => void
-  cart: any[]
+  cart: CartItem[]
   updateQuantity: (id: number, qty: number) => void
   removeFromCart: (id: number) => void
   totalPrice: number
