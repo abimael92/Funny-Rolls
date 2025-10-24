@@ -1,5 +1,4 @@
 // lib/types.ts
-// lib/types.ts
 export interface Product {
 	id: number;
 	name: string;
