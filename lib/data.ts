@@ -77,7 +77,7 @@ export const products: Product[] = [
 		image: '/img/chocolate-cinnamon-roll-with-chocolate-drizzle.png',
 		description: 'Doble chocolate delicioso que es seriamente divertido',
 		rating: 5,
-		available: true,
+		available: false,
 		recipe: {
 			id: '2',
 			name: 'Roll de Choco Risas',
@@ -159,7 +159,7 @@ export const products: Product[] = [
 		image: '/img/blueberry-cinnamon-roll-with-cream-cheese-icing.png',
 		description: 'Repleto de arándanos y risas',
 		rating: 4.9,
-		available: true,
+		available: false,
 		recipe: {
 			id: '4',
 			name: 'Arándano en Verano',
@@ -244,7 +244,7 @@ export const products: Product[] = [
 		image: '/img/caramel-cinnamon-roll-with-crunchy-topping.png',
 		description: 'Delicioso caramelo crujiente que te hará reír a carcajadas',
 		rating: 5,
-		available: true,
+		available: false,
 		recipe: {
 			id: '6',
 			name: 'Caramelo Crujiente',
