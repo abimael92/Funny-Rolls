@@ -85,6 +85,7 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
             <a href="#menu" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Menú</a>
             <a href="#about" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Acerca de</a>
             <a href="#contact" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Contacto</a>
+            <a href="/recipe-calculator" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Calculadora</a>
           </div>
         </div>
       )}
