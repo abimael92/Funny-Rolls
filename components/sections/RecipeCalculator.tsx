@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calculator, Plus, Trash2, Save, Download, } from "lucide-react" // ChevronDown, ChevronUp
+import { Calculator, Plus, Trash2, Save, Download, Upload } from "lucide-react" // Added Upload
 
 export interface Ingredient {
     id: string
@@ -29,43 +29,91 @@ export interface RecipeIngredient {
 
 export function RecipeCalculator() {
     // Ingredients management
-    const [ingredients, setIngredients] = useState<Ingredient[]>([
-        { id: '1', name: 'Harina', price: 25, unit: 'kg', amount: 1 },
-        { id: '2', name: 'Azúcar', price: 18, unit: 'kg', amount: 1 },
-        { id: '3', name: 'Mantequilla', price: 120, unit: 'kg', amount: 1 },
-        { id: '4', name: 'Canela', price: 200, unit: 'kg', amount: 1 },
-        { id: '5', name: 'Levadura', price: 45, unit: 'kg', amount: 1 },
-        { id: '6', name: 'Huevos', price: 45, unit: 'docena', amount: 1 },
-        { id: '7', name: 'Leche', price: 25, unit: 'litro', amount: 1 },
-        { id: '8', name: 'Crema para glaseado', price: 85, unit: 'kg', amount: 1 },
-    ])
-
-    // Recipes management
-    const [recipes, setRecipes] = useState<Recipe[]>([
-        {
-            id: '1',
-            name: 'Roll Clásico Risueño',
-            batchSize: 12,
-            sellingPrice: 50,
-            profitMargin: 60,
-            ingredients: [
-                { ingredientId: '1', amount: 1 },
-                { ingredientId: '2', amount: 0.3 },
-                { ingredientId: '3', amount: 0.25 },
-                { ingredientId: '4', amount: 0.05 },
-                { ingredientId: '5', amount: 0.05 },
-                { ingredientId: '6', amount: 0.5 },
-                { ingredientId: '7', amount: 0.5 },
-                { ingredientId: '8', amount: 0.2 },
-            ]
-        }
-    ])
-
+    const [ingredients, setIngredients] = useState<Ingredient[]>([])
+    const [recipes, setRecipes] = useState<Recipe[]>([])
     const [newIngredient, setNewIngredient] = useState<Omit<Ingredient, 'id'>>({
         name: '', price: 0, unit: '', amount: 1
     })
-    const [selectedRecipe, setSelectedRecipe] = useState<Recipe>(recipes[0])
+    const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
     const [mobileView, setMobileView] = useState<'ingredients' | 'calculator'>('calculator')
+
+    // Load data from localStorage on component mount
+    useEffect(() => {
+        const savedIngredients = localStorage.getItem('recipe-calculator-ingredients')
+        const savedRecipes = localStorage.getItem('recipe-calculator-recipes')
+
+        if (savedIngredients) {
+            setIngredients(JSON.parse(savedIngredients))
+        } else {
+            // Default ingredients if nothing saved
+            const defaultIngredients: Ingredient[] = [
+                { id: '1', name: 'Harina', price: 25, unit: 'kg', amount: 1 },
+                { id: '2', name: 'Azúcar', price: 18, unit: 'kg', amount: 1 },
+                { id: '3', name: 'Mantequilla', price: 120, unit: 'kg', amount: 1 },
+                { id: '4', name: 'Canela', price: 200, unit: 'kg', amount: 1 },
+                { id: '5', name: 'Levadura', price: 45, unit: 'kg', amount: 1 },
+                { id: '6', name: 'Huevos', price: 45, unit: 'docena', amount: 1 },
+                { id: '7', name: 'Leche', price: 25, unit: 'litro', amount: 1 },
+                { id: '8', name: 'Crema para glaseado', price: 85, unit: 'kg', amount: 1 },
+            ]
+            setIngredients(defaultIngredients)
+            localStorage.setItem('recipe-calculator-ingredients', JSON.stringify(defaultIngredients))
+        }
+
+        if (savedRecipes) {
+            const parsedRecipes = JSON.parse(savedRecipes)
+            setRecipes(parsedRecipes)
+            setSelectedRecipe(parsedRecipes[0])
+        } else {
+            // Default recipe if nothing saved
+            const defaultRecipe: Recipe = {
+                id: '1',
+                name: 'Roll Clásico Risueño',
+                batchSize: 12,
+                sellingPrice: 50,
+                profitMargin: 60,
+                ingredients: [
+                    { ingredientId: '1', amount: 1 },
+                    { ingredientId: '2', amount: 0.3 },
+                    { ingredientId: '3', amount: 0.25 },
+                    { ingredientId: '4', amount: 0.05 },
+                    { ingredientId: '5', amount: 0.05 },
+                    { ingredientId: '6', amount: 0.5 },
+                    { ingredientId: '7', amount: 0.5 },
+                    { ingredientId: '8', amount: 0.2 },
+                ]
+            }
+            setRecipes([defaultRecipe])
+            setSelectedRecipe(defaultRecipe)
+            localStorage.setItem('recipe-calculator-recipes', JSON.stringify([defaultRecipe]))
+        }
+    }, [])
+
+    // Save to localStorage whenever data changes
+    useEffect(() => {
+        if (ingredients.length > 0) {
+            localStorage.setItem('recipe-calculator-ingredients', JSON.stringify(ingredients))
+        }
+    }, [ingredients])
+
+    useEffect(() => {
+        if (recipes.length > 0) {
+            localStorage.setItem('recipe-calculator-recipes', JSON.stringify(recipes))
+            if (!selectedRecipe && recipes.length > 0) {
+                setSelectedRecipe(recipes[0])
+            }
+        }
+    }, [recipes, selectedRecipe])
+
+    // Update selectedRecipe when recipes change
+    useEffect(() => {
+        if (selectedRecipe && recipes.length > 0) {
+            const updatedRecipe = recipes.find(r => r.id === selectedRecipe.id)
+            if (updatedRecipe) {
+                setSelectedRecipe(updatedRecipe)
+            }
+        }
+    }, [recipes])
 
     // Calculate ingredient cost per unit
     const getIngredientCostPerUnit = (ingredient: Ingredient) => {
@@ -112,18 +160,22 @@ export function RecipeCalculator() {
                 ...newIngredient,
                 id: Date.now().toString()
             }
-            setIngredients([...ingredients, ingredient])
+            const newIngredients = [...ingredients, ingredient]
+            setIngredients(newIngredients)
             setNewIngredient({ name: '', price: 0, unit: '', amount: 1 })
         }
     }
 
     // Remove ingredient
     const removeIngredient = (id: string) => {
-        setIngredients(ingredients.filter(ing => ing.id !== id))
+        const newIngredients = ingredients.filter(ing => ing.id !== id)
+        setIngredients(newIngredients)
     }
 
     // Update recipe ingredient amount
     const updateRecipeIngredient = (ingredientId: string, amount: number) => {
+        if (!selectedRecipe) return
+
         const updatedRecipe = {
             ...selectedRecipe,
             ingredients: selectedRecipe.ingredients.map(ri =>
@@ -131,47 +183,136 @@ export function RecipeCalculator() {
             )
         }
         setSelectedRecipe(updatedRecipe)
-        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+        const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
+        setRecipes(newRecipes)
     }
 
     // Add ingredient to recipe
     const addIngredientToRecipe = (ingredientId: string) => {
+        if (!selectedRecipe) return
+
         if (!selectedRecipe.ingredients.find(ri => ri.ingredientId === ingredientId)) {
             const updatedRecipe = {
                 ...selectedRecipe,
                 ingredients: [...selectedRecipe.ingredients, { ingredientId, amount: 0.1 }]
             }
             setSelectedRecipe(updatedRecipe)
-            setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+            const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
+            setRecipes(newRecipes)
         }
     }
 
     // Remove ingredient from recipe
     const removeIngredientFromRecipe = (ingredientId: string) => {
+        if (!selectedRecipe) return
+
         const updatedRecipe = {
             ...selectedRecipe,
             ingredients: selectedRecipe.ingredients.filter(ri => ri.ingredientId !== ingredientId)
         }
         setSelectedRecipe(updatedRecipe)
-        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+        const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
+        setRecipes(newRecipes)
     }
 
     // Update recipe selling price
     const updateRecipeSellingPrice = (price: number) => {
+        if (!selectedRecipe) return
+
         const updatedRecipe = {
             ...selectedRecipe,
             sellingPrice: price,
             profitMargin: calculateProfitPercentage({ ...selectedRecipe, sellingPrice: price })
         }
         setSelectedRecipe(updatedRecipe)
-        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+        const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
+        setRecipes(newRecipes)
     }
 
     // Update recipe batch size
     const updateRecipeBatchSize = (size: number) => {
+        if (!selectedRecipe) return
+
         const updatedRecipe = { ...selectedRecipe, batchSize: size }
         setSelectedRecipe(updatedRecipe)
-        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+        const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
+        setRecipes(newRecipes)
+    }
+
+    // Backup/Restore functions
+    const exportData = () => {
+        const data = {
+            ingredients,
+            recipes,
+            exportedAt: new Date().toISOString(),
+            version: '1.0'
+        }
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `recipe-data-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+    }
+
+    const importData = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target?.result as string)
+                if (data.ingredients && data.recipes) {
+                    setIngredients(data.ingredients)
+                    setRecipes(data.recipes)
+                    if (data.recipes.length > 0) {
+                        setSelectedRecipe(data.recipes[0])
+                    }
+                    alert('Datos importados correctamente!')
+                } else {
+                    alert('Archivo inválido: falta ingredients o recipes')
+                }
+            } catch (error) {
+                alert(`Error al importar el archivo: ${error}`)
+            }
+        }
+        reader.readAsText(file)
+        // Reset input
+        event.target.value = ''
+    }
+
+    // Add new recipe function
+    const addNewRecipe = () => {
+        const newRecipe: Recipe = {
+            id: Date.now().toString(),
+            name: 'Nueva Receta',
+            batchSize: 1,
+            sellingPrice: 0,
+            profitMargin: 0,
+            ingredients: []
+        }
+        const newRecipes = [...recipes, newRecipe]
+        setRecipes(newRecipes)
+        setSelectedRecipe(newRecipe)
+    }
+
+    // Update recipe name
+    const updateRecipeName = (recipeId: string, name: string) => {
+        const newRecipes = recipes.map(recipe =>
+            recipe.id === recipeId ? { ...recipe, name } : recipe
+        )
+        setRecipes(newRecipes)
+        if (selectedRecipe?.id === recipeId) {
+            setSelectedRecipe({ ...selectedRecipe, name })
+        }
+    }
+
+    if (!selectedRecipe) {
+        return <div>Cargando...</div>
     }
 
     const costPerItem = calculateCostPerItem(selectedRecipe)
@@ -286,10 +427,9 @@ export function RecipeCalculator() {
             <CardContent className="space-y-6">
                 {/* Recipe Selection and Basic Info */}
                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Receta</label>
+                    <div className="flex gap-2">
                         <select
-                            className="w-full px-3 py-2 border rounded text-sm"
+                            className="flex-1 px-3 py-2 border rounded text-sm"
                             value={selectedRecipe.id}
                             onChange={(e) => setSelectedRecipe(recipes.find(r => r.id === e.target.value) || recipes[0])}
                         >
@@ -297,7 +437,22 @@ export function RecipeCalculator() {
                                 <option key={recipe.id} value={recipe.id}>{recipe.name}</option>
                             ))}
                         </select>
+                        <Button onClick={addNewRecipe} className="bg-green-600 hover:bg-green-700">
+                            <Plus className="h-4 w-4" />
+                        </Button>
                     </div>
+
+                    {/* Recipe name input */}
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Nombre de Receta</label>
+                        <input
+                            type="text"
+                            value={selectedRecipe.name}
+                            onChange={(e) => updateRecipeName(selectedRecipe.id, e.target.value)}
+                            className="w-full px-3 py-2 border rounded text-sm"
+                        />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-2">Lote (unidades)</label>
@@ -438,10 +593,21 @@ export function RecipeCalculator() {
                         <Save className="h-4 w-4 mr-2" />
                         Guardar Receta
                     </Button>
-                    <Button variant="outline" className="flex-1 text-sm py-2">
+                    <Button onClick={exportData} variant="outline" className="flex-1 text-sm py-2">
                         <Download className="h-4 w-4 mr-2" />
                         Exportar
                     </Button>
+                    <Button variant="outline" className="flex-1 text-sm py-2" onClick={() => document.getElementById('import-file')?.click()}>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Importar
+                    </Button>
+                    <input
+                        id="import-file"
+                        type="file"
+                        accept=".json"
+                        onChange={importData}
+                        className="hidden"
+                    />
                 </div>
             </CardContent>
         </Card>
