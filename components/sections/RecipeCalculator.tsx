@@ -189,15 +189,15 @@ export function RecipeCalculator() {
     }
 
     // Update recipe name
-    const updateRecipeName = (recipeId: string, name: string) => {
-        const updatedRecipes = recipes.map(recipe =>
-            recipe.id === recipeId ? { ...recipe, name } : recipe
-        )
-        setRecipes(updatedRecipes)
-        if (selectedRecipe.id === recipeId) {
-            setSelectedRecipe({ ...selectedRecipe, name })
-        }
-    }
+    // const updateRecipeName = (recipeId: string, name: string) => {
+    //     const updatedRecipes = recipes.map(recipe =>
+    //         recipe.id === recipeId ? { ...recipe, name } : recipe
+    //     )
+    //     setRecipes(updatedRecipes)
+    //     if (selectedRecipe.id === recipeId) {
+    //         setSelectedRecipe({ ...selectedRecipe, name })
+    //     }
+    // }
 
     // Calculate costs using utils functions
     const costPerItem = calculateCostPerItem(selectedRecipe, ingredients)
@@ -393,47 +393,30 @@ export function RecipeCalculator() {
                         <label className="block text-sm font-medium mb-2">Seleccionar Receta</label>
                         <select
                             className="w-full px-3 py-2 border rounded text-sm"
-                            value={selectedRecipe.id}
-                            onChange={(e) => setSelectedRecipe(recipes.find(r => r.id === e.target.value) || recipes[0])}
+                            value={selectedRecipe.available ? selectedRecipe.id : recipes.find(r => r.available)?.id || ''}
+                            onChange={(e) => {
+                                const recipe = recipes.find(r => r.id === e.target.value)
+                                if (recipe && recipe.available) setSelectedRecipe(recipe)
+                            }}
                         >
-                            {recipes.map(recipe => (
-                                <option key={recipe.id} value={recipe.id}>
-                                    {recipe.name} {recipe.available ? '✅' : '❌'}
-                                </option>
-                            ))}
+                            {[...recipes]
+                                .sort((a, b) => (b.available ? 1 : 0) - (a.available ? 1 : 0)) // available first
+                                .map(recipe => (
+                                    <option
+                                        key={recipe.id}
+                                        value={recipe.id}
+                                        disabled={!recipe.available}
+                                        className={!recipe.available ? 'text-gray-400 bg-gray-100' : ''}
+                                    >
+                                        {recipe.name} {!recipe.available && '(No disponible)'}
+                                    </option>
+                                ))}
                         </select>
-                    </div>
-
-                    {/* Recipe name input */}
-                    <div>
-                        <label className="block text-sm font-medium mb-2">Nombre de Receta</label>
-                        <input
-                            type="text"
-                            value={selectedRecipe.name}
-                            onChange={(e) => updateRecipeName(selectedRecipe.id, e.target.value)}
-                            className="w-full px-3 py-2 border rounded text-sm"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Lote (unidades)</label>
-                            <input
-                                type="number"
-                                value={selectedRecipe.batchSize}
-                                onChange={(e) => updateRecipeBatchSize(parseInt(e.target.value) || 1)}
-                                className="w-full px-3 py-2 border rounded text-sm"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">Precio Venta</label>
-                            <input
-                                type="number"
-                                value={selectedRecipe.sellingPrice}
-                                onChange={(e) => updateRecipeSellingPrice(parseFloat(e.target.value) || 0)}
-                                className="w-full px-3 py-2 border rounded text-sm"
-                            />
-                        </div>
+                        {!selectedRecipe.available && (
+                            <p className="text-sm text-amber-600 mt-2">
+                                ⚠️ Esta receta no está disponible. Selecciona una receta disponible.
+                            </p>
+                        )}
                     </div>
                 </div>
 
