@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calculator, Plus, Trash2, Save, Download, ChevronDown, ChevronUp } from "lucide-react"
+import { Calculator, Plus, Trash2, Save, Download, } from "lucide-react" // ChevronDown, ChevronUp
 
 export interface Ingredient {
     id: string
