@@ -39,6 +39,7 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
           <a href="#menu" className="hover:text-amber-600 transition-colors">Menú</a>
           <a href="#about" className="hover:text-amber-600 transition-colors">Acerca de</a>
           <a href="#contact" className="hover:text-amber-600 transition-colors">Contacto</a>
+          <a href="/recipe-calculator" className="hover:text-amber-600 transition-colors">Calculadora</a>
           <Button
             onClick={onCartOpen}
             className="relative bg-amber-600 hover:bg-amber-700 text-white rounded-full px-4 py-2 flex items-center gap-2"

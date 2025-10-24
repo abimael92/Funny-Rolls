@@ -1,5 +1,5 @@
 "use client"
-import { MapPin, Clock, Phone, Mail } from "lucide-react"
+import { MapPin, Clock, Phone, } from "lucide-react" //Mail
 import { Button } from "@/components/ui/button"
 
 export function Contact() {
@@ -19,20 +19,20 @@ export function Contact() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-[#C48A6A]" />
-                <span className="text-gray-600"> Calle 9na, #112 Campesina, Ciudad Jimenez, CP 33985</span>
+                <span className="text-gray-600"> Av Palma Real, Valle de San Pedro, 31170 Chihuahua, Chih.</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Clock className="h-5 w-5 text-[#C48A6A]" />
-                <span className="text-gray-600">Lun-Vie: 9AM-5PM, Sab: 9AM-12PM</span>
+                <span className="text-gray-600">Domingo: 12PM-8PM</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-[#C48A6A]" />
                 <span className="text-gray-600">(614) 486-87-71</span>
               </div>
-              <div className="flex items-center space-x-3">
+              {/* <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-[#C48A6A]" />
                 <span className="text-gray-600">rolles.caseros@funnyrolls.com</span>
-              </div>
+              </div> */}
             </div>
           </div>
 
