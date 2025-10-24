@@ -3,39 +3,30 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calculator, Plus, Trash2, Save, Download, Upload } from "lucide-react" // Added Upload
-
-export interface Ingredient {
-    id: string
-    name: string
-    price: number
-    unit: string
-    amount: number
-}
-
-export interface Recipe {
-    id: string
-    name: string
-    ingredients: RecipeIngredient[]
-    batchSize: number
-    sellingPrice: number
-    profitMargin: number
-}
-
-export interface RecipeIngredient {
-    ingredientId: string
-    amount: number
-}
+import { Calculator, Plus, Trash2, Save, Download, Upload, ChefHat, CheckCircle, XCircle } from "lucide-react"
+import Image from "next/image"
+import { products, defaultIngredients } from "@/lib/data";
+import { Ingredient, Recipe } from '@/lib/types';
+import {
+    calculateRecipeCost,
+    calculateCostPerItem,
+    calculateProfit,
+    calculateProfitPercentage,
+    getIngredientCostPerUnit,
+    exportRecipeData,
+    importRecipeData
+} from '@/lib/utils';
 
 export function RecipeCalculator() {
     // Ingredients management
-    const [ingredients, setIngredients] = useState<Ingredient[]>([])
-    const [recipes, setRecipes] = useState<Recipe[]>([])
+    const [ingredients, setIngredients] = useState<Ingredient[]>(defaultIngredients)
+    const [recipes, setRecipes] = useState<Recipe[]>(products.map(p => p.recipe))
     const [newIngredient, setNewIngredient] = useState<Omit<Ingredient, 'id'>>({
         name: '', price: 0, unit: '', amount: 1
     })
-    const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
+    const [selectedRecipe, setSelectedRecipe] = useState<Recipe>(recipes[0])
     const [mobileView, setMobileView] = useState<'ingredients' | 'calculator'>('calculator')
+    const [newStep, setNewStep] = useState('')
 
     // Load data from localStorage on component mount
     useEffect(() => {
@@ -45,18 +36,6 @@ export function RecipeCalculator() {
         if (savedIngredients) {
             setIngredients(JSON.parse(savedIngredients))
         } else {
-            // Default ingredients if nothing saved
-            const defaultIngredients: Ingredient[] = [
-                { id: '1', name: 'Harina', price: 25, unit: 'kg', amount: 1 },
-                { id: '2', name: 'Azúcar', price: 18, unit: 'kg', amount: 1 },
-                { id: '3', name: 'Mantequilla', price: 120, unit: 'kg', amount: 1 },
-                { id: '4', name: 'Canela', price: 200, unit: 'kg', amount: 1 },
-                { id: '5', name: 'Levadura', price: 45, unit: 'kg', amount: 1 },
-                { id: '6', name: 'Huevos', price: 45, unit: 'docena', amount: 1 },
-                { id: '7', name: 'Leche', price: 25, unit: 'litro', amount: 1 },
-                { id: '8', name: 'Crema para glaseado', price: 85, unit: 'kg', amount: 1 },
-            ]
-            setIngredients(defaultIngredients)
             localStorage.setItem('recipe-calculator-ingredients', JSON.stringify(defaultIngredients))
         }
 
@@ -65,93 +44,21 @@ export function RecipeCalculator() {
             setRecipes(parsedRecipes)
             setSelectedRecipe(parsedRecipes[0])
         } else {
-            // Default recipe if nothing saved
-            const defaultRecipe: Recipe = {
-                id: '1',
-                name: 'Roll Clásico Risueño',
-                batchSize: 12,
-                sellingPrice: 50,
-                profitMargin: 60,
-                ingredients: [
-                    { ingredientId: '1', amount: 1 },
-                    { ingredientId: '2', amount: 0.3 },
-                    { ingredientId: '3', amount: 0.25 },
-                    { ingredientId: '4', amount: 0.05 },
-                    { ingredientId: '5', amount: 0.05 },
-                    { ingredientId: '6', amount: 0.5 },
-                    { ingredientId: '7', amount: 0.5 },
-                    { ingredientId: '8', amount: 0.2 },
-                ]
-            }
-            setRecipes([defaultRecipe])
-            setSelectedRecipe(defaultRecipe)
-            localStorage.setItem('recipe-calculator-recipes', JSON.stringify([defaultRecipe]))
+            const initialRecipes = products.map(p => p.recipe)
+            setRecipes(initialRecipes)
+            setSelectedRecipe(initialRecipes[0])
+            localStorage.setItem('recipe-calculator-recipes', JSON.stringify(initialRecipes))
         }
     }, [])
 
     // Save to localStorage whenever data changes
     useEffect(() => {
-        if (ingredients.length > 0) {
-            localStorage.setItem('recipe-calculator-ingredients', JSON.stringify(ingredients))
-        }
+        localStorage.setItem('recipe-calculator-ingredients', JSON.stringify(ingredients))
     }, [ingredients])
 
     useEffect(() => {
-        if (recipes.length > 0) {
-            localStorage.setItem('recipe-calculator-recipes', JSON.stringify(recipes))
-            if (!selectedRecipe && recipes.length > 0) {
-                setSelectedRecipe(recipes[0])
-            }
-        }
-    }, [recipes, selectedRecipe])
-
-    // Update selectedRecipe when recipes change
-    useEffect(() => {
-        if (selectedRecipe && recipes.length > 0) {
-            const updatedRecipe = recipes.find(r => r.id === selectedRecipe.id)
-            if (updatedRecipe) {
-                setSelectedRecipe(updatedRecipe)
-            }
-        }
+        localStorage.setItem('recipe-calculator-recipes', JSON.stringify(recipes))
     }, [recipes])
-
-    // Calculate ingredient cost per unit
-    const getIngredientCostPerUnit = (ingredient: Ingredient) => {
-        return ingredient.price / ingredient.amount
-    }
-
-    // Calculate recipe cost
-    const calculateRecipeCost = (recipe: Recipe) => {
-        let totalCost = 0
-
-        recipe.ingredients.forEach(recipeIngredient => {
-            const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
-            if (ingredient) {
-                const costPerUnit = getIngredientCostPerUnit(ingredient)
-                totalCost += costPerUnit * recipeIngredient.amount
-            }
-        })
-
-        return totalCost
-    }
-
-    // Calculate cost per item
-    const calculateCostPerItem = (recipe: Recipe) => {
-        const totalCost = calculateRecipeCost(recipe)
-        return totalCost / recipe.batchSize
-    }
-
-    // Calculate profit
-    const calculateProfit = (recipe: Recipe) => {
-        const costPerItem = calculateCostPerItem(recipe)
-        return recipe.sellingPrice - costPerItem
-    }
-
-    // Calculate profit percentage
-    const calculateProfitPercentage = (recipe: Recipe) => {
-        const costPerItem = calculateCostPerItem(recipe)
-        return ((recipe.sellingPrice - costPerItem) / recipe.sellingPrice) * 100
-    }
 
     // Add new ingredient
     const addIngredient = () => {
@@ -160,22 +67,18 @@ export function RecipeCalculator() {
                 ...newIngredient,
                 id: Date.now().toString()
             }
-            const newIngredients = [...ingredients, ingredient]
-            setIngredients(newIngredients)
+            setIngredients([...ingredients, ingredient])
             setNewIngredient({ name: '', price: 0, unit: '', amount: 1 })
         }
     }
 
     // Remove ingredient
     const removeIngredient = (id: string) => {
-        const newIngredients = ingredients.filter(ing => ing.id !== id)
-        setIngredients(newIngredients)
+        setIngredients(ingredients.filter(ing => ing.id !== id))
     }
 
     // Update recipe ingredient amount
     const updateRecipeIngredient = (ingredientId: string, amount: number) => {
-        if (!selectedRecipe) return
-
         const updatedRecipe = {
             ...selectedRecipe,
             ingredients: selectedRecipe.ingredients.map(ri =>
@@ -183,142 +86,198 @@ export function RecipeCalculator() {
             )
         }
         setSelectedRecipe(updatedRecipe)
-        const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
-        setRecipes(newRecipes)
+        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
     }
 
     // Add ingredient to recipe
     const addIngredientToRecipe = (ingredientId: string) => {
-        if (!selectedRecipe) return
-
         if (!selectedRecipe.ingredients.find(ri => ri.ingredientId === ingredientId)) {
             const updatedRecipe = {
                 ...selectedRecipe,
                 ingredients: [...selectedRecipe.ingredients, { ingredientId, amount: 0.1 }]
             }
             setSelectedRecipe(updatedRecipe)
-            const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
-            setRecipes(newRecipes)
+            setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
         }
     }
 
     // Remove ingredient from recipe
     const removeIngredientFromRecipe = (ingredientId: string) => {
-        if (!selectedRecipe) return
-
         const updatedRecipe = {
             ...selectedRecipe,
             ingredients: selectedRecipe.ingredients.filter(ri => ri.ingredientId !== ingredientId)
         }
         setSelectedRecipe(updatedRecipe)
-        const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
-        setRecipes(newRecipes)
+        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
     }
 
     // Update recipe selling price
     const updateRecipeSellingPrice = (price: number) => {
-        if (!selectedRecipe) return
-
         const updatedRecipe = {
             ...selectedRecipe,
             sellingPrice: price,
-            profitMargin: calculateProfitPercentage({ ...selectedRecipe, sellingPrice: price })
+            profitMargin: calculateProfitPercentage({ ...selectedRecipe, sellingPrice: price }, ingredients)
         }
         setSelectedRecipe(updatedRecipe)
-        const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
-        setRecipes(newRecipes)
+        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
     }
 
     // Update recipe batch size
     const updateRecipeBatchSize = (size: number) => {
-        if (!selectedRecipe) return
-
         const updatedRecipe = { ...selectedRecipe, batchSize: size }
         setSelectedRecipe(updatedRecipe)
-        const newRecipes = recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r)
-        setRecipes(newRecipes)
+        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+    }
+
+    // Toggle recipe availability
+    const toggleRecipeAvailability = (recipeId: string) => {
+        const updatedRecipes = recipes.map(recipe =>
+            recipe.id === recipeId ? { ...recipe, available: !recipe.available } : recipe
+        )
+        setRecipes(updatedRecipes)
+        if (selectedRecipe.id === recipeId) {
+            setSelectedRecipe({ ...selectedRecipe, available: !selectedRecipe.available })
+        }
+    }
+
+    // Add step to recipe
+    const addStep = () => {
+        if (newStep.trim()) {
+            const updatedRecipe = {
+                ...selectedRecipe,
+                steps: [...selectedRecipe.steps, newStep.trim()]
+            }
+            setSelectedRecipe(updatedRecipe)
+            setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+            setNewStep('')
+        }
+    }
+
+    // Remove step from recipe
+    const removeStep = (index: number) => {
+        const updatedRecipe = {
+            ...selectedRecipe,
+            steps: selectedRecipe.steps.filter((_, i) => i !== index)
+        }
+        setSelectedRecipe(updatedRecipe)
+        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
     }
 
     // Backup/Restore functions
-    const exportData = () => {
-        const data = {
-            ingredients,
-            recipes,
-            exportedAt: new Date().toISOString(),
-            version: '1.0'
-        }
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `recipe-data-${new Date().toISOString().split('T')[0]}.json`
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        URL.revokeObjectURL(url)
+    const handleExportData = () => {
+        exportRecipeData(ingredients, recipes)
     }
 
-    const importData = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) return
 
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target?.result as string)
-                if (data.ingredients && data.recipes) {
-                    setIngredients(data.ingredients)
-                    setRecipes(data.recipes)
-                    if (data.recipes.length > 0) {
-                        setSelectedRecipe(data.recipes[0])
-                    }
-                    alert('Datos importados correctamente!')
-                } else {
-                    alert('Archivo inválido: falta ingredients o recipes')
+        importRecipeData(file)
+            .then((data) => {
+                setIngredients(data.ingredients)
+                setRecipes(data.recipes)
+                if (data.recipes.length > 0) {
+                    setSelectedRecipe(data.recipes[0])
                 }
-            } catch (error) {
-                alert(`Error al importar el archivo: ${error}`)
-            }
-        }
-        reader.readAsText(file)
-        // Reset input
-        event.target.value = ''
-    }
+                alert('Datos importados correctamente!')
+            })
+            .catch((error) => {
+                alert(error.message)
+            })
 
-    // Add new recipe function
-    const addNewRecipe = () => {
-        const newRecipe: Recipe = {
-            id: Date.now().toString(),
-            name: 'Nueva Receta',
-            batchSize: 1,
-            sellingPrice: 0,
-            profitMargin: 0,
-            ingredients: []
-        }
-        const newRecipes = [...recipes, newRecipe]
-        setRecipes(newRecipes)
-        setSelectedRecipe(newRecipe)
+        event.target.value = ''
     }
 
     // Update recipe name
     const updateRecipeName = (recipeId: string, name: string) => {
-        const newRecipes = recipes.map(recipe =>
+        const updatedRecipes = recipes.map(recipe =>
             recipe.id === recipeId ? { ...recipe, name } : recipe
         )
-        setRecipes(newRecipes)
-        if (selectedRecipe?.id === recipeId) {
+        setRecipes(updatedRecipes)
+        if (selectedRecipe.id === recipeId) {
             setSelectedRecipe({ ...selectedRecipe, name })
         }
     }
 
-    if (!selectedRecipe) {
-        return <div>Cargando...</div>
-    }
+    // Calculate costs using utils functions
+    const costPerItem = calculateCostPerItem(selectedRecipe, ingredients)
+    const totalRecipeCost = calculateRecipeCost(selectedRecipe, ingredients)
+    const profit = calculateProfit(selectedRecipe, ingredients)
+    const profitPercentage = calculateProfitPercentage(selectedRecipe, ingredients)
 
-    const costPerItem = calculateCostPerItem(selectedRecipe)
-    const totalRecipeCost = calculateRecipeCost(selectedRecipe)
-    const profit = calculateProfit(selectedRecipe)
-    const profitPercentage = calculateProfitPercentage(selectedRecipe)
+    // Roll Image Display Component
+    const RollDisplay = () => {
+        const product = products.find(p => p.name === selectedRecipe.name)
+
+        return (
+            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+                <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            <ChefHat className="h-6 w-6 text-amber-600" />
+                            <h3 className="font-semibold text-amber-800">Vista del Rollo</h3>
+                        </div>
+                        <Button
+                            onClick={() => toggleRecipeAvailability(selectedRecipe.id)}
+                            variant={selectedRecipe.available ? "default" : "outline"}
+                            className={selectedRecipe.available ? "bg-green-600 hover:bg-green-700" : ""}
+                        >
+                            {selectedRecipe.available ? (
+                                <CheckCircle className="h-4 w-4 mr-2" />
+                            ) : (
+                                <XCircle className="h-4 w-4 mr-2" />
+                            )}
+                            {selectedRecipe.available ? 'Disponible' : 'No Disponible'}
+                        </Button>
+                    </div>
+
+                    <div className="flex flex-col lg:flex-row items-center gap-6">
+                        {/* Roll Image */}
+                        <div className="flex-1 flex justify-center">
+                            <div className="relative">
+                                {product?.image ? (
+                                    <Image
+                                        src={product.image}
+                                        alt={product.name}
+                                        width={160}
+                                        height={160}
+                                        className="rounded-full shadow-lg border-4 border-amber-300 object-cover w-40 h-40"
+                                    />
+                                ) : (
+                                    <div className="w-40 h-40 bg-amber-200 rounded-full flex items-center justify-center text-amber-700 border-4 border-amber-300">
+                                        Sin imagen
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Roll Details */}
+                        <div className="flex-1 text-center lg:text-left">
+                            <h4 className="font-cursive text-xl text-amber-700 mb-2">{selectedRecipe.name}</h4>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Lote:</span>
+                                    <span className="font-semibold">{selectedRecipe.batchSize} unidades</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Precio:</span>
+                                    <span className="font-semibold text-green-600">${selectedRecipe.sellingPrice}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Costo:</span>
+                                    <span className="font-semibold">${costPerItem.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600">Ganancia:</span>
+                                    <span className="font-semibold text-green-600">${profit.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
 
     // Mobile view switcher
     const MobileViewSwitcher = () => (
@@ -425,21 +384,24 @@ export function RecipeCalculator() {
                 <CardTitle className="text-lg">Calculadora de Receta</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+                {/* Roll Display */}
+                <RollDisplay />
+
                 {/* Recipe Selection and Basic Info */}
                 <div className="space-y-4">
-                    <div className="flex gap-2">
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Seleccionar Receta</label>
                         <select
-                            className="flex-1 px-3 py-2 border rounded text-sm"
+                            className="w-full px-3 py-2 border rounded text-sm"
                             value={selectedRecipe.id}
                             onChange={(e) => setSelectedRecipe(recipes.find(r => r.id === e.target.value) || recipes[0])}
                         >
                             {recipes.map(recipe => (
-                                <option key={recipe.id} value={recipe.id}>{recipe.name}</option>
+                                <option key={recipe.id} value={recipe.id}>
+                                    {recipe.name} {recipe.available ? '✅' : '❌'}
+                                </option>
                             ))}
                         </select>
-                        <Button onClick={addNewRecipe} className="bg-green-600 hover:bg-green-700">
-                            <Plus className="h-4 w-4" />
-                        </Button>
                     </div>
 
                     {/* Recipe name input */}
@@ -471,6 +433,41 @@ export function RecipeCalculator() {
                                 onChange={(e) => updateRecipeSellingPrice(parseFloat(e.target.value) || 0)}
                                 className="w-full px-3 py-2 border rounded text-sm"
                             />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Recipe Steps */}
+                <div>
+                    <h3 className="font-semibold mb-3 text-sm">Pasos de Preparación</h3>
+                    <div className="space-y-2">
+                        {selectedRecipe.steps.map((step, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-white">
+                                <div className="flex-1">
+                                    <span className="text-sm font-medium mr-2">{index + 1}.</span>
+                                    <span className="text-sm">{step}</span>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeStep(index)}
+                                    className="text-red-500 hover:text-red-700"
+                                >
+                                    <Trash2 className="h-3 w-3" />
+                                </Button>
+                            </div>
+                        ))}
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                placeholder="Agregar nuevo paso..."
+                                value={newStep}
+                                onChange={(e) => setNewStep(e.target.value)}
+                                className="flex-1 px-3 py-2 border rounded text-sm"
+                            />
+                            <Button onClick={addStep} className="bg-amber-600 hover:bg-amber-700">
+                                <Plus className="h-4 w-4" />
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -566,24 +563,6 @@ export function RecipeCalculator() {
                                 <div className="font-bold text-base text-green-600">{profitPercentage.toFixed(1)}%</div>
                             </div>
                         </div>
-
-                        {/* Profitability Indicator */}
-                        <div className="mt-4">
-                            <div className="flex justify-between text-xs mb-1">
-                                <span>Rentabilidad:</span>
-                                <span className={profitPercentage >= 50 ? 'text-green-600' : profitPercentage >= 30 ? 'text-yellow-600' : 'text-red-600'}>
-                                    {profitPercentage >= 50 ? 'Excelente' : profitPercentage >= 30 ? 'Buena' : 'Baja'}
-                                </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div
-                                    className={`h-2 rounded-full transition-all duration-300 ${profitPercentage >= 50 ? 'bg-green-500' :
-                                        profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
-                                        }`}
-                                    style={{ width: `${Math.min(profitPercentage, 100)}%` }}
-                                ></div>
-                            </div>
-                        </div>
                     </CardContent>
                 </Card>
 
@@ -593,7 +572,7 @@ export function RecipeCalculator() {
                         <Save className="h-4 w-4 mr-2" />
                         Guardar Receta
                     </Button>
-                    <Button onClick={exportData} variant="outline" className="flex-1 text-sm py-2">
+                    <Button onClick={handleExportData} variant="outline" className="flex-1 text-sm py-2">
                         <Download className="h-4 w-4 mr-2" />
                         Exportar
                     </Button>
@@ -605,7 +584,7 @@ export function RecipeCalculator() {
                         id="import-file"
                         type="file"
                         accept=".json"
-                        onChange={importData}
+                        onChange={handleImportData}
                         className="hidden"
                     />
                 </div>
