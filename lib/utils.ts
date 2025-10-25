@@ -82,13 +82,13 @@ export const updateRecipeInProducts = (updatedRecipe: Recipe): void => {
 };
 
 // Local storage helpers
-export const saveToLocalStorage = (key: string, data: any): void => {
+export const saveToLocalStorage = (key: string, data: unknown): void => {
 	if (typeof window !== 'undefined') {
 		localStorage.setItem(key, JSON.stringify(data));
 	}
 };
 
-export const loadFromLocalStorage = (key: string): any => {
+export const loadFromLocalStorage = (key: string): unknown => {
 	if (typeof window !== 'undefined') {
 		const saved = localStorage.getItem(key);
 		return saved ? JSON.parse(saved) : null;
