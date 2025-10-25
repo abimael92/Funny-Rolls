@@ -380,14 +380,16 @@ export function RecipeCalculatorPanel({
 
                     {/* Recipe Ingredients */}
                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-amber-800 text-sm flex items-center gap-2">
-                                Ingredientes de la Receta
+
+                        <div className="flex items-center mb-4">
+                            <h3 className="w-full font-semibold text-amber-800 text-xl flex items-center justify-between">
+                                <span>Ingredientes de la Receta</span>
                                 <span className="text-amber-600 bg-amber-100 px-2 py-1 rounded-full text-xs font-normal">
                                     {selectedRecipe.ingredients.length} ingredientes
                                 </span>
                             </h3>
                         </div>
+
 
                         <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                             {selectedRecipe.ingredients.map((recipeIngredient) => {
