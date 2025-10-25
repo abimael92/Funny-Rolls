@@ -108,7 +108,7 @@ export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPan
                     {ingredients.map((ingredient) => (
                         <div
                             key={ingredient.id}
-                            className="group relative bg-white border-2 border-amber-200 hover:border-amber-400 rounded-xl p-4 transition-all duration-300 hover:shadow-lg"
+                            className="group relative bg-amber-50 border-2 border-amber-200 hover:border-amber-400 rounded-xl p-4 transition-all duration-300 hover:shadow-lg"
                         >
                             {editingIngredientId === ingredient.id ? (
                                 <EditableIngredientRow
@@ -132,8 +132,8 @@ export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPan
                                             {/* Pricing Information */}
                                             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="text-sm text-amber-700">Costo por unidad:</div>
-                                                    <div className="text-lg font-bold text-amber-800">
+                                                    <div className="text-md text-amber-700">Costo por unidad:</div>
+                                                    <div className="text-md font-bold text-amber-800">
                                                         ${getIngredientCostPerUnit(ingredient).toFixed(2)} / {ingredient.unit}
                                                     </div>
                                                 </div>
