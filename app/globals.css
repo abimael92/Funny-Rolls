@@ -163,3 +163,75 @@ html {
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  .flip-card-mobile {
+    min-height: 250px;
+  }
+  
+  .flip-card-content {
+    padding: 0.5rem;
+  }
+  
+  /* Larger image on mobile */
+  .flip-card-image {
+    width: 90px !important;
+    height: 90px !important;
+  }
+  
+  /* Bigger text for better readability */
+  .flip-card-header-text {
+    font-size: 1.25rem !important;
+    font-weight: 600;
+  }
+  
+  /* Larger inputs for mobile */
+  .flip-card-input {
+    font-size: 1rem !important;
+    padding: 0.25rem !important;
+    height: 2rem !important;
+    min-width: 75px !important;
+    border-width: 2px !important;
+  }
+  
+  /* Bigger step text */
+  .flip-card-steps {
+    font-size: 1.2rem !important;
+    line-height: 1.4;
+  }
+  
+  .step-text-mobile {
+    font-size: 01.2rem !important;
+  }
+  
+  /* Larger step numbers */
+  .step-item-mobile span:first-child {
+    font-size: 0.9rem !important;
+    font-weight: 600;
+  }
+  
+  /* Hide Costo and Ganancia on mobile front side */
+  .flex-1 .flex.justify-between:nth-child(3),
+  .flex-1 .flex.justify-between:nth-child(4) {
+    display: none;
+  }
+}
+
+/* Ensure good contrast and no blur */
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Better button sizing */
+.flip-card-button {
+  min-height: 2.5rem;
+  min-width: 2.5rem;
+}
+
+/* Improved input focus */
+.flip-card-input:focus {
+  outline: 2px solid #3b82f6;
+  border-color: #3b82f6;
+}
