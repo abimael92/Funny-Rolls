@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react'; // useEffect useRef
+// import { useReactToPrint } from 'react-to-print';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, Save, Download, Upload } from "lucide-react"
+import { Plus, Trash2, Download, Upload } from "lucide-react"
 import { products } from "@/lib/data"
 import { Ingredient, Recipe } from '@/lib/types'
 import {
@@ -16,6 +17,7 @@ import {
     importRecipeData
 } from '@/lib/utils'
 import { FlipCard } from './FlipCard'
+// import { PrintableRecipe } from './PrintableRecipe'
 
 interface RecipeCalculatorPanelProps {
     selectedRecipe: Recipe
@@ -35,22 +37,62 @@ export function RecipeCalculatorPanel({
     const [newStep, setNewStep] = useState('')
     const [isEditingSteps, setIsEditingSteps] = useState(false)
     const [isCardFlipped, setIsCardFlipped] = useState(false)
-    const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false)
-    const dropdownRef = useRef<HTMLDivElement>(null)
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsMobileDropdownOpen(false)
-            }
-        }
+    // const [showPrintPreview, setShowPrintPreview] = useState(false);
 
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside)
-        }
-    }, [])
+
+    // const [printableContent, setPrintableContent] = useState<HTMLDivElement | null>(null);
+    // const [printableContent, setPrintableContent] = useState<HTMLDivElement | null>(null);
+
+    // Toggle preview
+    // const togglePrintPreview = () => {
+    //     setShowPrintPreview(!showPrintPreview);
+    // };
+
+    // const printRef = useRef<HTMLDivElement>(null);
+
+    // interface PrintOptions {
+    //     content: () => HTMLDivElement | null;
+    //     documentTitle?: string;
+    //     onAfterPrint?: () => void;
+    //     onBeforeGetContent?: () => Promise<void>;
+    //     onPrintError?: (errorLocation: string, error: Error) => void;
+    // }
+
+    // Add this useEffect to debug when the ref attaches
+    // useEffect(() => {
+    //     console.log('Printable content ref updated:', printableContent);
+    // }, [printableContent]);
+
+    // Replace your current handlePrint with this:
+    // const handlePrint = useReactToPrint({
+    //     content: () => {
+    //         console.log('Current printable content:', printableContent);
+    //         if (!printableContent) {
+    //             console.error('No printable content available');
+    //             // Fallback: try to find the element in the DOM
+    //             const fallbackElement = document.querySelector('[data-printable]');
+    //             return fallbackElement as HTMLDivElement;
+    //         }
+    //         return printableContent;
+    //     },
+    //     documentTitle: `${selectedRecipe.name}-receta`,
+    //     onAfterPrint: () => console.log('PDF impreso exitosamente'),
+    //     onPrintError: (errorLocation, error) => {
+    //         console.error('Error al imprimir:', errorLocation, error);
+    //         alert('Error al generar el PDF. Por favor, intenta nuevamente.');
+    //     }
+
+    // } as PrintOptions);
+
+
+    // const printRef = useRef<HTMLDivElement>(null);
+
+    // const handlePrint = useReactToPrint({
+    //     content: () => printRef.current,
+    //     documentTitle: `${selectedRecipe.name}-receta`,
+    //     onAfterPrint: () => console.log('PDF impreso exitosamente'),
+    // } as PrintOptions);
 
     // Update recipe ingredient amount
     const updateRecipeIngredient = (ingredientId: string, amount: number) => {
@@ -172,13 +214,13 @@ export function RecipeCalculatorPanel({
     const profitPercentage = calculateProfitPercentage(selectedRecipe, ingredients)
 
     return (
-        <Card className="w-full">
+        <Card className="w-full ">
             <CardHeader className="pb-4">
                 <CardTitle className="text-xl text-center">Calculadora de Receta</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                {/* Custom Mobile Recipe Dropdown */}
-                <div className="space-y-4 lg:hidden">
+                {/* Recipe Selection - NOW VISIBLE ON MOBILE */}
+                <div className="space-y-4 lg:hidden"> {/* Show on mobile, hide on desktop */}
                     <div>
                         <label className="block text-lg font-medium mb-2">Seleccionar Receta</label>
                         {products.filter(p => p.available).length === 0 ? (
@@ -186,67 +228,29 @@ export function RecipeCalculatorPanel({
                                 <p className="text-amber-700">No hay recetas disponibles</p>
                             </div>
                         ) : (
-                            <div className="relative" ref={dropdownRef}>
-                                {/* Custom dropdown trigger */}
-                                <button
-                                    onClick={() => setIsMobileDropdownOpen(!isMobileDropdownOpen)}
-                                    className="w-full px-4 py-4 border-2 border-amber-500 rounded-xl text-lg font-medium text-amber-700 bg-white flex justify-between items-center shadow-sm hover:shadow-md transition-shadow"
-                                >
-                                    <span className="truncate">{selectedRecipe.name}</span>
-                                    <svg
-                                        className={`w-6 h-6 text-amber-600 transition-transform duration-200 ${isMobileDropdownOpen ? 'rotate-180' : ''}`}
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-
-                                {/* Dropdown menu */}
-                                {isMobileDropdownOpen && (
-                                    <div className="absolute top-full left-0 right-0 bg-white border-2 border-amber-500 rounded-xl mt-2 max-h-80 overflow-y-auto z-50 shadow-xl custom-dropdown">
-                                        {products
-                                            .filter(product => product.available)
-                                            .map(product => (
-                                                <button
-                                                    key={product.recipe.id}
-                                                    onClick={() => {
-                                                        setSelectedRecipe(product.recipe)
-                                                        setIsMobileDropdownOpen(false)
-                                                        setIsCardFlipped(false)
-                                                        setIsEditingSteps(false)
-                                                    }}
-                                                    className={`w-full px-4 py-4 text-left text-lg border-b border-amber-100 last:border-b-0 hover:bg-amber-50 active:bg-amber-100 transition-colors ${selectedRecipe.id === product.recipe.id
-                                                        ? 'bg-amber-100 text-amber-800 font-semibold'
-                                                        : 'text-gray-800'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center justify-between">
-                                                        <span>{product.recipe.name}</span>
-                                                        {selectedRecipe.id === product.recipe.id && (
-                                                            <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                            </svg>
-                                                        )}
-                                                    </div>
-                                                </button>
-                                            ))}
-                                    </div>
-                                )}
-                            </div>
+                            <select
+                                className="w-full px-3 py-2 border border-amber-500 rounded text-lg text-amber-700"
+                                value={selectedRecipe.id}
+                                onChange={(e) => {
+                                    const recipe = recipes.find(r => r.id === e.target.value)
+                                    if (recipe) {
+                                        setSelectedRecipe(recipe)
+                                        setIsCardFlipped(false)
+                                        setIsEditingSteps(false)
+                                    }
+                                }}
+                            >
+                                {products
+                                    .filter(product => product.available)
+                                    .map(product => (
+                                        <option key={product.recipe.id} value={product.recipe.id}>
+                                            {product.recipe.name}
+                                        </option>
+                                    ))}
+                            </select>
                         )}
                     </div>
-
-                    {/* Close dropdown when clicking outside (backdrop) */}
-                    {isMobileDropdownOpen && (
-                        <div
-                            className="fixed inset-0 bg-black bg-opacity-10 z-40 lg:hidden"
-                            onClick={() => setIsMobileDropdownOpen(false)}
-                        />
-                    )}
                 </div>
-
                 {/* Flip Card - Desktop Only */}
                 <div className="hidden lg:block">
                     <FlipCard
@@ -271,33 +275,33 @@ export function RecipeCalculatorPanel({
                 {/* Mobile Price and Ingredients Section */}
                 <div className="lg:hidden space-y-4">
                     {/* Mobile Recipe Header */}
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-2xl p-4">
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-4">
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="font-cursive text-2xl text-blue-800">{selectedRecipe.name}</h2>
+                            <h2 className="font-cursive text-2xl text-amber-800">{selectedRecipe.name}</h2>
                         </div>
 
                         {/* Price Section */}
                         <div className="space-y-3">
-                            <div className="flex justify-between items-center py-2 border-b border-blue-200">
-                                <span className="text-lg font-semibold text-blue-700">Lote (unidades)</span>
+                            <div className="flex justify-between items-center py-2 border-b border-amber-200">
+                                <span className="text-lg font-semibold text-amber-700">Lote (unidades)</span>
                                 <input
                                     type="number"
                                     value={selectedRecipe.batchSize}
                                     onChange={(e) => updateRecipeBatchSize(Number(e.target.value) || 1)}
-                                    className="w-20 px-3 py-2 border-2 border-blue-300 rounded-lg text-lg font-bold text-center"
+                                    className="w-20 px-3 py-2 border-2 border-amber-300 rounded-lg text-lg font-bold text-center"
                                     min="1"
                                 />
                             </div>
 
-                            <div className="flex justify-between items-center py-2 border-b border-blue-200">
-                                <span className="text-lg font-semibold text-blue-700">Precio de venta</span>
+                            <div className="flex justify-between items-center py-2 border-b border-amber-200">
+                                <span className="text-lg font-semibold text-amber-700">Precio de venta</span>
                                 <div className="flex items-center gap-1">
                                     <span className="text-green-600 text-lg">$</span>
                                     <input
                                         type="number"
                                         value={selectedRecipe.sellingPrice}
                                         onChange={(e) => updateRecipeSellingPrice(Number(e.target.value) || 0)}
-                                        className="w-24 px-3 py-2 border-2 border-blue-300 rounded-lg text-lg font-bold text-center"
+                                        className="w-24 px-3 py-2 border-2 border-amber-300 rounded-lg text-lg font-bold text-center"
                                         min="0"
                                         step="0.01"
                                     />
@@ -305,20 +309,20 @@ export function RecipeCalculatorPanel({
                             </div>
 
                             <div className="flex justify-between items-center py-2">
-                                <span className="text-lg font-semibold text-blue-700">Costo por unidad</span>
-                                <span className="text-xl font-bold text-red-800">${costPerItem.toFixed(2)}</span>
+                                <span className="text-lg font-semibold text-amber-700">Costo por unidad</span>
+                                <span className="text-xl font-bold text-amber-800">${costPerItem.toFixed(2)}</span>
                             </div>
 
                             <div className="flex justify-between items-center py-2">
-                                <span className="text-lg font-semibold text-blue-700">Ganancia</span>
+                                <span className="text-lg font-semibold text-amber-700">Ganancia</span>
                                 <span className="text-xl font-bold text-green-600">${profit.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Mobile Ingredients Section */}
-                    <div className="bg-gradient-to-br from-amber-50 to-cyan-50 border-2 border-amber-300 rounded-2xl p-4">
-                        <h3 className="text-xl font-bold text-amber-800 mb-4 text-center">Ingredientes</h3>
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-2xl p-4">
+                        <h3 className="text-xl font-bold text-blue-800 mb-4 text-center">Ingredientes</h3>
 
                         <div className="space-y-3 max-h-96 overflow-y-auto">
                             {selectedRecipe.ingredients.map((recipeIngredient) => {
@@ -328,9 +332,9 @@ export function RecipeCalculatorPanel({
                                 const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount
 
                                 return (
-                                    <div key={recipeIngredient.ingredientId} className="bg-white border-2 border-amber-200 rounded-xl p-3">
+                                    <div key={recipeIngredient.ingredientId} className="bg-white border-2 border-blue-200 rounded-xl p-3">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-lg font-semibold text-amber-800">{ingredient.name}</span>
+                                            <span className="text-lg font-semibold text-blue-800">{ingredient.name}</span>
                                             <span className="text-sm font-bold text-green-600">${cost.toFixed(2)}</span>
                                         </div>
 
@@ -342,9 +346,9 @@ export function RecipeCalculatorPanel({
                                                     min="0"
                                                     value={recipeIngredient.amount}
                                                     onChange={(e) => updateRecipeIngredient(recipeIngredient.ingredientId, Number(e.target.value) || 0)}
-                                                    className="w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-semibold text-center"
+                                                    className="w-20 px-2 py-1 border-2 border-blue-300 rounded-lg text-base font-semibold text-center"
                                                 />
-                                                <span className="text-base font-medium text-amber-700">{ingredient.unit}</span>
+                                                <span className="text-base font-medium text-blue-700">{ingredient.unit}</span>
                                             </div>
 
                                             <button
@@ -360,100 +364,29 @@ export function RecipeCalculatorPanel({
                         </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
-                                Agregar Ingredientes
-                            </h3>
-                            <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
-                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                            {ingredients
-                                .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
-                                .map(ingredient => (
-                                    <button
-                                        key={ingredient.id}
-                                        onClick={() => addIngredientToRecipe(ingredient.id)}
-                                        className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
-                                            <span className="text-base font-medium text-amber-800 group-hover:text-amber-900">
-                                                {ingredient.name}
-                                            </span>
-                                        </div>
-                                    </button>
-                                ))}
-
-                            {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
-                                <div className="w-full text-center py-2">
-                                    <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
                     {/* Mobile Cost Summary */}
                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4">
-                        <h3 className="text-xl font-bold text-green-800 mb-4 text-center">Resumen de Costos</h3>
+                        <h3 className="text-xl font-bold text-green-800 mb-4 text-center">Resumen</h3>
 
-                        <div className="grid grid-cols-2 gap-4 text-center max-h-55 overflow-y-auto pr-2">
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                            <div className="bg-white border-2 border-green-200 rounded-xl p-3">
+                                <div className="text-sm text-gray-600">Costo Total</div>
+                                <div className="text-lg font-bold text-green-700">${totalRecipeCost.toFixed(2)}</div>
+                            </div>
 
-                            <div className="bg-white border-2 border-red-200 rounded-xl p-3">
+                            <div className="bg-white border-2 border-green-200 rounded-xl p-3">
                                 <div className="text-sm text-gray-600">Costo/Unidad</div>
-                                <div className="text-lg font-bold text-red-700">${costPerItem.toFixed(2)}</div>
+                                <div className="text-lg font-bold text-green-700">${costPerItem.toFixed(2)}</div>
                             </div>
 
                             <div className="bg-white border-2 border-green-200 rounded-xl p-3">
-                                <div className="text-sm text-gray-600">Precio de Venta</div>
-                                <div className="text-lg font-bold text-green-700">${(selectedRecipe.sellingPrice)}</div>
-                            </div>
-
-                            <div className="bg-white border-2 border-green-200 rounded-xl p-3">
-                                <div className="text-sm text-gray-600">Ganancia por Unidad</div>
+                                <div className="text-sm text-gray-600">Ganancia</div>
                                 <div className="text-lg font-bold text-green-600">${profit.toFixed(2)}</div>
                             </div>
 
                             <div className="bg-white border-2 border-green-200 rounded-xl p-3">
                                 <div className="text-sm text-gray-600">Margen %</div>
                                 <div className="text-lg font-bold text-green-600">{profitPercentage.toFixed(1)}%</div>
-                            </div>
-
-                            <div className="bg-white border-2 border-red-200 rounded-xl p-3">
-                                <div className="text-sm text-gray-600">Costo Total/Lote</div>
-                                <div className="text-lg font-bold text-red-700">${totalRecipeCost.toFixed(2)}</div>
-                            </div>
-
-                            <div className="bg-white border-2 border-green-200 rounded-xl p-3">
-                                <div className="text-sm text-gray-600">Venta de Lote</div>
-                                <div className="text-lg font-bold text-green-700">${(selectedRecipe.sellingPrice * selectedRecipe.batchSize).toFixed(2)}</div>
-                            </div>
-
-                            <div className="flex flex-col gap-4 p-3 col-span-2">
-
-                                <div className="bg-white border-2 border-red-200 rounded-xl p-3">
-                                    <div className="text-sm text-gray-600">Costo total de Ingredientes</div>
-                                    <div className="text-lg font-bold text-red-700">
-                                        $
-                                        {ingredients
-                                            .reduce((total, ing) => total + ing.price, 0)
-                                            .toFixed(2)
-                                            .replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                    </div>
-                                </div>
-
-                                <div className="bg-white border-2 border-vlue-400 rounded-xl p-3">
-                                    <div className="text-sm text-gray-600">Meta de Lotes</div>
-                                    <div className="text-lg font-bold text-blue-700">
-                                        {Math.ceil(
-                                            ingredients.reduce((total, ing) => total + ing.price, 0) /
-                                            selectedRecipe.sellingPrice
-                                        )}{' '}
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -522,7 +455,8 @@ export function RecipeCalculatorPanel({
                                             </span>
                                         </div>
                                     </button>
-                                ))}
+                                ))
+                            }
 
                             {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
                                 <div className="w-full text-center py-2">
@@ -531,7 +465,6 @@ export function RecipeCalculatorPanel({
                             )}
                         </div>
                     </div>
-
 
                     {/* Recipe Ingredients */}
                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
@@ -689,10 +622,10 @@ export function RecipeCalculatorPanel({
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3">
-                        <Button className="bg-amber-600 hover:bg-amber-700 flex-1 text-sm py-2">
+                        {/* <Button onClick={handlePrint} className="bg-amber-600 hover:bg-amber-700 flex-1 text-sm py-2">
                             <Save className="h-4 w-4 mr-2" />
                             Guardar Receta
-                        </Button>
+                        </Button> */}
                         <Button onClick={handleExportData} variant="outline" className="flex-1 text-sm py-2">
                             <Download className="h-4 w-4 mr-2" />
                             Exportar
@@ -711,31 +644,41 @@ export function RecipeCalculatorPanel({
                     </div>
                 </div>
 
-                {/* MOBILE ACTION BUTTONS - Add this section for mobile */}
-                <div className="lg:hidden flex flex-col gap-3 pt-4">
-                    {/* <Button onClick={handlePrint} className="bg-amber-600 hover:bg-amber-700 flex-1 text-lg py-2">
-                        <Save className="h-[1.2em] w-[1.2em] mr-2" />
-                        Guardar Receta
-                    </Button> */}
-                    <div className="flex gap-3">
-                        <Button onClick={handleExportData} variant="outline" className="bg-amber-500 hover:bg-amber-600 text-white flex-1 text-lg py-2 shadow-sm  transition-colors">
-                            <Download className="h-4 w-4 mr-2" />
-                            Exportar
-                        </Button>
-                        <Button variant="outline" className="bg-gray-300 hover:bg-gray-200 text-gray-80 flex-1 text-lg py-2 shadow-sm transition-colors" onClick={() => document.getElementById('import-file-mobile')?.click()}>
-                            <Upload className="h-4 w-4 mr-2" />
-                            Importar
-                        </Button>
-                    </div>
-                    <input
-                        id="import-file-mobile"
-                        type="file"
-                        accept=".json"
-                        onChange={handleImportData}
-                        className="hidden"
+                {/*  Hidden Printable Content  */}
+                {/* <div
+                    style={{
+                        position: 'fixed',
+                        left: '-10000px',
+                        top: 0,
+                        opacity: 0,
+                        pointerEvents: 'none',
+                    }}>
+                    <PrintableRecipe
+                        ref={printRef}
+                        selectedRecipe={selectedRecipe}
+                        ingredients={ingredients}
+                    // data-printable="true" // Add this line
                     />
-                </div>
+                </div> */}
+
+                {/* Optional: Print Preview */}
+                {/* {showPrintPreview && (
+                    <div className="fixed inset-0 bg-white z-50 p-4 overflow-auto">
+                        <div className="max-w-4xl mx-auto"> */}
+                {/* <div className="flex justify-between mb-4">
+                                <Button onClick={togglePrintPreview}>Cerrar Vista Previa</Button>
+                                <Button onClick={handlePrint}>Imprimir PDF</Button>
+                            </div> */}
+                {/* This one doesn't need the ref since it's just for preview */}
+                {/* <PrintableRecipe
+                                selectedRecipe={selectedRecipe}
+                                ingredients={ingredients}
+                            />
+                        </div>
+                    </div>
+                )} */}
+
             </CardContent>
-        </Card >
+        </Card>
     )
 }

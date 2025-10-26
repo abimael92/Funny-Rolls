@@ -235,3 +235,63 @@ html {
   outline: 2px solid #3b82f6;
   border-color: #3b82f6;
 }
+
+/* Improve select appearance on mobile */
+select {
+  -webkit-appearance: menulist;
+  -moz-appearance: menulist;
+  appearance: menulist;
+}
+
+/* Prevent zoom on iOS when selecting */
+@media screen and (max-width: 768px) {
+  select, input, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Custom scrollbar for dropdowns */
+.custom-dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.custom-dropdown::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.custom-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+
+/* In your global CSS */
+@media print {
+    .print-content {
+        display: block !important;
+        position: static !important;
+        opacity: 1 !important;
+        left: 0 !important;
+        top: 0 !important;
+    }
+    
+    body * {
+        visibility: hidden;
+    }
+    
+    .print-content, .print-content * {
+        visibility: visible;
+    }
+    
+    .print-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+}

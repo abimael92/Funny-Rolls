@@ -174,18 +174,23 @@ export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPan
                         </div>
                     )}
                 </div>
+            </CardContent>
 
+            <CardContent>
                 {/* Mobile Quick Actions */}
-                <div className="lg:hidden bg-amber-50 border border-amber-200 rounded-lg p-4 mt-6">
-                    <h4 className="font-semibold text-amber-800 text-center mb-3">Resumen</h4>
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4">
+                    {/* <div className="lg:hidden bg-green-50 border border-green-800 rounded-lg p-4 mt-6"> */}
+                    <h4 className="font-semibold text-green-800 text-center text-xl mb-3">Resumen</h4>
                     <div className="grid grid-cols-2 gap-4 text-center">
-                        <div className="bg-white border border-amber-300 rounded-lg p-3">
-                            <div className="text-sm text-gray-600">Total</div>
-                            <div className="text-lg font-bold text-amber-700">{ingredients.length}</div>
+                        <div className="bg-white border border-green-500 rounded-lg p-3">
+                            <div className="text-sm text-gray-600">Costo Total</div>
+                            <div className="text-lg font-bold text-green-700">
+                                ${ingredients.reduce((total, ing) => total + ing.price, 0).toFixed(2)}
+                            </div>
                         </div>
-                        <div className="bg-white border border-amber-300 rounded-lg p-3">
+                        <div className="bg-white border border-green-500 rounded-lg p-3">
                             <div className="text-sm text-gray-600">Ingredientes</div>
-                            <div className="text-lg font-bold text-amber-700">{ingredients.length}</div>
+                            <div className="text-lg font-bold text-green-700">{ingredients.length}</div>
                         </div>
                     </div>
                 </div>
