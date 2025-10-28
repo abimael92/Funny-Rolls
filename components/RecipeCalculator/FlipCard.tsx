@@ -58,8 +58,8 @@ export function FlipCard({
                 {/* Front Side - Roll Info */}
                 <div className="absolute inset-0 w-full h-full backface-hidden">
                     <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 h-full">
-                        <CardContent className="p-4 sm:p-6 h-full flex flex-col flip-card-content">
-                            <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <CardContent className="p-2 sm:p-4 h-full flex flex-col flip-card-content">
+                            <div className="flex items-center justify-between mb-1 sm:mb-0">
                                 <div className="flex items-center gap-2 sm:gap-3">
                                     <ChefHat className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" />
                                     <h3 className="font-semibold text-amber-800 text-sm sm:text-base flip-card-header-text">Vista del Rollo</h3>
@@ -84,7 +84,7 @@ export function FlipCard({
                                                 alt={product.name}
                                                 width={160}
                                                 height={160}
-                                                className="rounded-full shadow-lg border-4 border-amber-300 object-cover w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 flip-card-image"
+                                                className="rounded-full shadow-lg border-4 border-amber-300 object-cover w-20 h-20 sm:w-28 sm:h-28 md:w-45 md:h-45 flip-card-image"
                                             />
                                         ) : (
                                             <div className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 bg-amber-200 rounded-full flex items-center justify-center text-amber-700 border-4 border-amber-300 text-xs flip-card-image">
@@ -96,43 +96,44 @@ export function FlipCard({
 
                                 {/* Roll Details */}
                                 <div className="flex-1 w-full text-center lg:text-left">
-                                    <h4 className="font-cursive text-base sm:text-lg md:text-xl text-amber-700 mb-2 sm:mb-3">{selectedRecipe.name}</h4>
-                                    <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm">
+                                    <h4 className="font-cursive text-lg sm:text-xl md:text-2xl text-amber-700 mb-3 sm:mb-4">{selectedRecipe.name}</h4>
+                                    <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-gray-600 text-left">Lote:<br className="hidden sm:block" />(unidades)</span>
+                                            <span className="text-gray-700 text-left font-medium">Lote:<br className="hidden sm:block" />(unidades)</span>
                                             <input
                                                 type="number"
                                                 value={selectedRecipe.batchSize}
                                                 onChange={(e) => updateRecipeBatchSize(Number(e.target.value) || 1)}
-                                                className="w-14 sm:w-16 px-2 py-1 border rounded text-sm flip-card-input"
+                                                className="w-16 sm:w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-bold flip-card-input"
                                                 min="1"
                                             />
                                         </div>
 
                                         <div className="flex justify-between items-center">
-                                            <span className="text-gray-600">Precio:</span>
+                                            <span className="text-gray-700 font-medium">Precio:</span>
                                             <div className="flex items-center gap-1">
-                                                <span className="text-green-600 text-sm">$</span>
+                                                <span className="text-green-600 text-base">$</span>
                                                 <input
                                                     type="number"
                                                     value={selectedRecipe.sellingPrice}
                                                     onChange={(e) => updateRecipeSellingPrice(Number(e.target.value) || 0)}
-                                                    className="w-14 sm:w-16 px-2 py-1 border rounded text-sm flip-card-input"
+                                                    className="w-16 sm:w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-bold flip-card-input"
                                                     min="0"
                                                     step="0.01"
                                                 />
                                             </div>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-600">Costo:</span>
-                                            <span className="font-semibold text-sm">${costPerItem.toFixed(2)}</span>
+                                            <span className="text-gray-700 font-medium">Costo:</span>
+                                            <span className="font-bold text-base">${costPerItem.toFixed(2)}</span>
                                         </div>
                                         <div className="flex justify-between">
-                                            <span className="text-gray-600">Ganancia:</span>
-                                            <span className="font-semibold text-green-600 text-sm">${profit.toFixed(2)}</span>
+                                            <span className="text-gray-700 font-medium">Ganancia:</span>
+                                            <span className="font-bold text-green-600 text-base">${profit.toFixed(2)}</span>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
                         </CardContent>
                     </Card>
