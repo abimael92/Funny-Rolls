@@ -456,7 +456,7 @@ export function RecipeCalculatorPanel({
                                 </div>
 
                                 <div className="bg-white border-2 border-purple-400 rounded-xl p-3">
-                                    <div className="text-sm text-gray-600">Ganancia Aproximada </div>
+                                    <div className="text-sm text-gray-600">Ganancia Aproximada</div>
                                     <div className="text-lg font-bold text-purple-700">
                                         {(
                                             Math.ceil(
