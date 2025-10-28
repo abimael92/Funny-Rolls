@@ -445,13 +445,26 @@ export function RecipeCalculatorPanel({
                                     </div>
                                 </div>
 
-                                <div className="bg-white border-2 border-vlue-400 rounded-xl p-3">
+                                <div className="bg-white border-2 border-blue-400 rounded-xl p-3">
                                     <div className="text-sm text-gray-600">Meta de Lotes</div>
                                     <div className="text-lg font-bold text-blue-700">
                                         {Math.ceil(
                                             ingredients.reduce((total, ing) => total + ing.price, 0) /
                                             selectedRecipe.sellingPrice
                                         )}{' '}
+                                    </div>
+                                </div>
+
+                                <div className="bg-white border-2 border-purple-400 rounded-xl p-3">
+                                    <div className="text-sm text-gray-600">Ganancia Aproximada </div>
+                                    <div className="text-lg font-bold text-purple-700">
+                                        {(
+                                            Math.ceil(
+                                                ingredients.reduce((total, ing) => total + ing.price, 0) /
+                                                selectedRecipe.sellingPrice
+                                            ) *
+                                            (selectedRecipe.sellingPrice * selectedRecipe.batchSize)
+                                        ).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                     </div>
                                 </div>
                             </div>
@@ -471,7 +484,7 @@ export function RecipeCalculatorPanel({
                                 </div>
                             ) : (
                                 <select
-                                    className="w-full px-4 py-4 border-2 border-amber-500 rounded-xl text-lg font-medium text-amber-700 bg-white flex justify-between items-center shadow-sm hover:shadow-md transition-shadow"
+                                    className="w-full px-4 py-4 border-2 border-amber-500 rounded-xl text-lg font-medium text-amber-700 bg-white flex justify-between items-center shadow-sm hover:bg-amber-200 hover:shadow-md transition-all"
                                     value={selectedRecipe.id}
                                     onChange={(e) => {
                                         const recipe = recipes.find(r => r.id === e.target.value)
