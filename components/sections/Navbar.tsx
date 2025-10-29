@@ -14,32 +14,30 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <nav className="sticky top-0 left-0 w-full bg-white shadow-md z-50">
-      <div className="max-w-8xl mx-auto px-6 py-8 flex items-center justify-between relative min-h-[90px]">
+    <nav className="sticky top-0 left-0 w-full bg-amber-100  z-50
+                    shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04),0_0_0_1px_rgba(0,0,0,0.05)]
+                    border-b-8 border-amber-900/80">
+      <div className="max-w-8xl mx-auto px-6 py-8 flex items-center justify-between relative min-h-[120px]">
 
         {/* Logo Left */}
         <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center">
           <Image
             src="/img/title.png"
             alt="Logo Funny Rolls"
-            width={110}
-            height={110}
+            width={180}
+            height={180}
             className="object-contain"
           />
         </div>
 
         {/* Title Center (hidden on mobile) */}
-        <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-amber-800 font-['Pacifico'] text-4xl select-none pointer-events-none">
+        <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-amber-800 font-['Pacifico'] text-6xl select-none pointer-events-none">
           Funny Rolls
         </div>
 
         {/* Desktop Menu Right */}
-        <div className="hidden md:flex items-center gap-6 absolute right-6 top-1/2 -translate-y-1/2">
-          <a href="#home" className="hover:text-amber-600 transition-colors">Inicio</a>
-          <a href="#menu" className="hover:text-amber-600 transition-colors">Menú</a>
-          <a href="#about" className="hover:text-amber-600 transition-colors">Acerca de</a>
-          <a href="#contact" className="hover:text-amber-600 transition-colors">Contacto</a>
-          <a href="/recipe-calculator" className="hover:text-amber-600 transition-colors">Calculadora</a>
+        <div className="hidden md:flex flex-col items-end gap-2 absolute right-6 top-1/2 -translate-y-1/2">
+
           <Button
             onClick={onCartOpen}
             className="relative bg-amber-600 hover:bg-amber-700 text-white rounded-full px-4 py-2 flex items-center gap-2"
@@ -52,6 +50,19 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
               </span>
             )}
           </Button>
+
+          <div className="flex items-center gap-2.5 ml-4">
+            <a href="#home" className="text-warm-brown hover:text-amber-600 transition-colors">Inicio</a>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <a href="#menu" className="text-warm-brown hover:text-amber-600 transition-colors">Menú</a>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <a href="#about" className="text-warm-brown hover:text-amber-600 transition-colors">Acerca de</a>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <a href="#contact" className="text-warm-brown hover:text-amber-600 transition-colors">Contacto</a>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <a href="/recipe-calculator" className="text-warm-brown hover:text-amber-600 transition-colors">Calculadora</a>
+          </div>
+
         </div>
 
         {/* Mobile Menu Right */}
@@ -79,13 +90,28 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-[#C48A6A]/20 animate-scale-in">
-          <div className="px-4 py-3 flex flex-col space-y-2">
-            <a href="#home" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Inicio</a>
-            <a href="#menu" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Menú</a>
-            <a href="#about" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Acerca de</a>
-            <a href="#contact" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Contacto</a>
-            <a href="/recipe-calculator" onClick={() => setIsMenuOpen(false)} className="hover:text-amber-600 transition-colors">Calculadora</a>
+        <div className="md:hidden bg-[#C48A6A]/20 border-t border-[#C48A6A]/20 animate-scale-in">
+          <div className="px-4 py-1.5 flex flex-col">
+            <a href="#home" onClick={() => setIsMenuOpen(false)}
+              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
+              Inicio
+            </a>
+            <a href="#menu" onClick={() => setIsMenuOpen(false)}
+              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
+              Menú
+            </a>
+            <a href="#about" onClick={() => setIsMenuOpen(false)}
+              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
+              Acerca de
+            </a>
+            <a href="#contact" onClick={() => setIsMenuOpen(false)}
+              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
+              Contacto
+            </a>
+            <a href="/recipe-calculator" onClick={() => setIsMenuOpen(false)}
+              className="text-warm-brown transition-colors 0">
+              Calculadora
+            </a>
           </div>
         </div>
       )}
