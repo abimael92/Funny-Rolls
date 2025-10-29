@@ -26,10 +26,10 @@ export function Hero() {
 
       {/* Content */}
       <div className={`relative z-10 text-center text-white px-4 ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}>
-        <h1 className="font-cursive text-4xl md:text-6xl lg:text-7xl mb-6 text-balance">
+        <h1 className="font-cursive text-4xl text-amber-200 md:text-6xl lg:text-7xl mb-6 text-balance [text-shadow:_2px_2px_4px_rgb(0_0_0_/_80%)]">
           ¡Ríe y Disfruta Cada Remolino!
         </h1>
-        <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto text-pretty">
+        <p className="text-xl md:text-2xl mt-8 mb-8 max-w-2xl mx-auto text-pretty">
           Rollos de canela deliciosamente divertidos que te harán sonreír y querer más
         </p>
         <Button
