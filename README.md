@@ -1,36 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Funny Rolls
 
-## Getting Started
+Descripción del Proyecto
+Funny Rolls es una aplicación web moderna y responsive para una panadería especializada en rollos de canela. La plataforma incluye tanto un sitio web de presentación para clientes como una calculadora de costos avanzada para la gestión de recetas.
 
-First, run the development server:
+Características Principales
+- Sitio Web Corporativo: Presentación de productos, información de la empresa y contacto
+- Calculadora de Costos: Herramienta avanzada para calcular costos de producción y rentabilidad
+- Carrito de Compras: Sistema de pedidos en línea
+- Diseño Responsive: Optimizado para dispositivos móviles y desktop
+- Interfaz Bilingüe: Español como idioma principal
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Tecnologías Utilizadas
+- Frontend: Next.js 14, React, TypeScript
+- Styling: Tailwind CSS
+- UI Components: Componentes personalizados con shadcn/ui
+- Fuentes: Google Fonts (Pacifico, Inter)
+- Iconos: Lucide React
+- Almacenamiento: LocalStorage para persistencia de datos
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Estructura del Proyecto
+funny-rolls/
+├── app/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── recipe-calculator/
+│   │   └── page.tsx
+│   └── globals.css
+├── components/
+│   ├── sections/
+│   │   ├── Hero.tsx
+│   │   ├── Navbar.tsx
+│   │   ├── MenuSection.tsx
+│   │   ├── About.tsx
+│   │   ├── Contact.tsx
+│   │   ├── Footer.tsx
+│   │   ├── CartModal.tsx
+│   │   └── RecipeCalculator.tsx
+│   ├── RecipeCalculator/
+│   │   ├── RecipeCalculator.tsx
+│   │   ├── IngredientsPanel.tsx
+│   │   ├── RecipeCalculatorPanel.tsx
+│   │   ├── MobileViewSwitcher.tsx
+│   │   ├── EditableIngredientRow.tsx
+│   │   ├── FlipCard.tsx
+│   │   └── PrintableRecipe.tsx
+│   └── ui/
+│       ├── button.tsx
+│       ├── card.tsx
+│       └── badge.tsx
+├── lib/
+│   ├── types.ts
+│   ├── utils.ts
+│   └── data.ts
+└── public/
+    ├── img/
+    └── favicon/
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Instalación y Configuración
+Prerrequisitos:
+- Node.js 18+
+- npm o yarn
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Pasos:
+1. Clonar el repositorio
+   git clone <repository-url>
+   cd funny-rolls
 
-## Learn More
+2. Instalar dependencias
+   npm install
+   # o
+   yarn install
 
-To learn more about Next.js, take a look at the following resources:
+3. Ejecutar en modo desarrollo
+   npm run dev
+   # o
+   yarn dev
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Abrir en el navegador
+   http://localhost:3000
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Funcionalidades Detalladas
+Sitio Web Principal:
+- Hero: Presentación principal con llamada a la acción
+- Menú: Galería de productos con precios
+- Acerca de: Historia y misión
+- Contacto: Formulario integrado con WhatsApp
+- Navegación sticky con carrito
 
-## Deploy on Vercel
+Calculadora de Costos:
+- Agregar, editar, eliminar ingredientes
+- Cálculo automático de costos, ganancias y márgenes
+- Persistencia con localStorage
+- Exportar e importar datos JSON
+- Diseño responsive y vista flip card móvil
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Diseño y UX
+Paleta de Colores:
+- Principal: #8B4513
+- Secundario: #C48A6A
+- Fondo: #FFF5E6
+- Acentos: #FFC1C1
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Tipografía:
+- Títulos: Pacifico
+- Texto: Inter
+
+Responsive Design:
+- Mobile, Tablet y Desktop
+
+Configuración y Personalización
+Archivo .env.local:
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+Personalización:
+- Productos y precios en lib/data.ts
+- Estilos en app/globals.css y tailwind.config.js
+
+Scripts Disponibles
+npm run dev      # Desarrollo
+npm run build    # Producción
+npm run start    # Servidor
+npm run lint     # Linter
+
+Deployment
+Recomendado: Vercel
+Alternativas: Netlify, Railway, Digital Ocean
+
+Contribución
+1. Fork del proyecto
+2. Crear feature branch
+3. Commit de cambios
+4. Push y Pull Request
+
+Licencia
+Proyecto privado de Funny Rolls.
+
+Equipo
+- Martha Isela Gardea: Fundadora y propietaria
+- Equipo de desarrollo Funny Rolls
+
+Soporte
+WhatsApp: (614) 486-87-71
+Email: [pendiente]
+Dirección: Calle 9na #111, Col Campesina, CP 33985
+
+Funny Rolls - Ríe y Disfruta Cada Remolino!
