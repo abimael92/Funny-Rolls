@@ -16,6 +16,7 @@ export interface Ingredient {
 	price: number;
 	unit: string;
 	amount: number;
+	minAmount: number;
 }
 
 export interface Recipe {
@@ -36,4 +37,20 @@ export interface RecipeIngredient {
 
 export interface CartItem extends Product {
 	quantity: number;
+}
+
+export interface ProductionRecord {
+	id: string;
+	recipeId: string;
+	recipeName: string;
+	batchCount: number;
+	date: string;
+	totalProduced: number;
+}
+
+export interface InventoryItem {
+	ingredientId: string;
+	currentStock: number;
+	unit: string;
+	minimumStock: number;
 }
