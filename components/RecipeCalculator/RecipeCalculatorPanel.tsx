@@ -23,6 +23,7 @@ interface RecipeCalculatorPanelProps {
     recipes: Recipe[]
     setRecipes: (recipes: Recipe[]) => void
     ingredients: Ingredient[]
+    recordProduction: (recipeId: string, batchCount: number) => void // ✅ ADDED THIS PROP
 }
 
 export function RecipeCalculatorPanel({
@@ -30,13 +31,15 @@ export function RecipeCalculatorPanel({
     setSelectedRecipe,
     recipes,
     setRecipes,
-    ingredients
+    ingredients,
+    recordProduction // ✅ ADDED THIS PROP
 }: RecipeCalculatorPanelProps) {
     const [newStep, setNewStep] = useState('')
     const [isEditingSteps, setIsEditingSteps] = useState(false)
     const [isCardFlipped, setIsCardFlipped] = useState(false)
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const [productionBatchCount, setProductionBatchCount] = useState(1)
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -163,6 +166,15 @@ export function RecipeCalculatorPanel({
             })
 
         event.target.value = ''
+    }
+
+    const handleRecordProduction = () => {
+        if (productionBatchCount > 0) {
+            recordProduction(selectedRecipe.id, productionBatchCount) // ✅ NOW THIS WILL WORK
+            setProductionBatchCount(1)
+            // Show success message or notification
+            alert(`Producción registrada: ${productionBatchCount} lote(s) de ${selectedRecipe.name}`)
+        }
     }
 
     // Calculate costs using utils functions
@@ -360,6 +372,33 @@ export function RecipeCalculatorPanel({
                         </div>
                     </div>
 
+                    {/* Mobile Production Registration */}
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-2xl p-4">
+                        <h3 className="text-xl font-bold text-purple-800 mb-4 text-center">Registrar Producción</h3>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-lg font-semibold text-purple-700">Lotes producidos</span>
+                                <input
+                                    type="number"
+                                    value={productionBatchCount}
+                                    onChange={(e) => setProductionBatchCount(Number(e.target.value) || 1)}
+                                    className="w-20 px-3 py-2 border-2 border-purple-300 rounded-lg text-lg font-bold text-center"
+                                    min="1"
+                                />
+                            </div>
+                            <Button
+                                onClick={handleRecordProduction}
+                                className="w-full bg-purple-600 hover:bg-purple-700 text-lg py-3"
+                            >
+                                <Plus className="h-5 w-5 mr-2" />
+                                Registrar Producción
+                            </Button>
+                            <div className="text-center text-sm text-purple-600">
+                                Total: {productionBatchCount * selectedRecipe.batchSize} unidades
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
@@ -507,40 +546,32 @@ export function RecipeCalculatorPanel({
                         </div>
                     </div>
 
-                    {/* Mobile Add Ingredients Section */}
-                    <div className="lg:hidden bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-amber-800 text-sm flex items-center gap-2">
-                                Agregar Ingredientes
-                            </h3>
-                            <div className="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
-                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                            {ingredients
-                                .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
-                                .map(ingredient => (
-                                    <button
-                                        key={ingredient.id}
-                                        onClick={() => addIngredientToRecipe(ingredient.id)}
-                                        className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-3 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <Plus className="h-4 w-4 text-amber-600 group-hover:text-amber-700 transition-colors" />
-                                            <span className="text-sm font-medium text-amber-800 group-hover:text-amber-900">
-                                                {ingredient.name}
-                                            </span>
-                                        </div>
-                                    </button>
-                                ))}
-
-                            {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
-                                <div className="w-full text-center py-2">
-                                    <div className="text-green-600 text-sm">Todos los ingredientes agregados</div>
+                    {/* Desktop Production Registration */}
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-2xl p-4">
+                        <h3 className="text-xl font-bold text-purple-800 mb-4 text-center">Registrar Producción</h3>
+                        <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                                <div className="text-lg font-semibold text-purple-700">Lotes producidos hoy</div>
+                                <div className="text-sm text-purple-600">
+                                    Total: {productionBatchCount * selectedRecipe.batchSize} unidades
                                 </div>
-                            )}
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="number"
+                                    value={productionBatchCount}
+                                    onChange={(e) => setProductionBatchCount(Number(e.target.value) || 1)}
+                                    className="w-20 px-3 py-2 border-2 border-purple-300 rounded-lg text-lg font-bold text-center"
+                                    min="1"
+                                />
+                                <Button
+                                    onClick={handleRecordProduction}
+                                    className="bg-purple-600 hover:bg-purple-700 text-lg py-2"
+                                >
+                                    <Plus className="h-5 w-5 mr-2" />
+                                    Registrar
+                                </Button>
+                            </div>
                         </div>
                     </div>
 
@@ -581,7 +612,6 @@ export function RecipeCalculatorPanel({
                         </div>
                     </div>
 
-
                     {/* Recipe Ingredients */}
                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
 
@@ -593,9 +623,6 @@ export function RecipeCalculatorPanel({
                                 </span>
                             </h3>
                         </div>
-
-
-
 
                         <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                             {selectedRecipe.ingredients.map((recipeIngredient) => {
@@ -696,7 +723,6 @@ export function RecipeCalculatorPanel({
                                 <div className="text-sm text-gray-600">Costo Total</div>
                                 <div className="text-lg font-bold text-purple-700">${totalRecipeCost.toFixed(2)}</div>
                             </div>
-
                         </div>
                     </div>
 
@@ -778,19 +804,13 @@ export function RecipeCalculatorPanel({
                                             ).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                         </span>
                                     </div>
-
                                 </div>
                             </div>
-
                         </CardContent>
                     </Card>
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3">
-                        {/* <Button className="bg-amber-600 hover:bg-amber-700 flex-1 text-sm py-2">
-                            <Save className="h-4 w-4 mr-2" />
-                            Guardar Receta
-                        </Button> */}
                         <Button onClick={handleExportData} variant="outline" className="bg-amber-500 hover:bg-amber-600 text-white flex-1 text-lg py-2 shadow-sm  transition-colors">
                             <Download className="h-4 w-4 mr-2" />
                             Exportar
@@ -809,12 +829,8 @@ export function RecipeCalculatorPanel({
                     </div>
                 </div>
 
-                {/* MOBILE ACTION BUTTONS - Add this section for mobile */}
+                {/* MOBILE ACTION BUTTONS */}
                 <div className="lg:hidden flex flex-col gap-3 pt-4">
-                    {/* <Button onClick={handlePrint} className="bg-amber-600 hover:bg-amber-700 flex-1 text-lg py-2">
-                        <Save className="h-[1.2em] w-[1.2em] mr-2" />
-                        Guardar Receta
-                    </Button> */}
                     <div className="flex gap-3">
                         <Button onClick={handleExportData} variant="outline" className="bg-amber-500 hover:bg-amber-600 text-white flex-1 text-lg py-2 shadow-sm  transition-colors">
                             <Download className="h-4 w-4 mr-2" />
