@@ -8,7 +8,6 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-// Recipe calculation helpers
 export const calculateRecipeCost = (
 	recipe: Recipe,
 	ingredients: Ingredient[]
