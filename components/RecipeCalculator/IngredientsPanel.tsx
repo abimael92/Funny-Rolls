@@ -4,19 +4,27 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calculator, Plus, Trash2, Edit } from "lucide-react"
-import { Ingredient } from '@/lib/types'
+import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
 import { EditableIngredientRow } from './EditableIngredientRow'
 
 interface IngredientsPanelProps {
     ingredients: Ingredient[]
     setIngredients: (ingredients: Ingredient[]) => void
+    inventory: InventoryItem[]
+    updateInventory: (ingredientId: string, newStock: number) => void
+    addInventoryItem: (ingredientId: string, minimumStock: number) => void
 }
 
-export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPanelProps) {
+export function IngredientsPanel({
+    ingredients,
+    setIngredients,
+    inventory,
+    updateInventory
+}: IngredientsPanelProps) {
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
     const [newIngredient, setNewIngredient] = useState<Omit<Ingredient, 'id'>>({
-        name: '', price: 0, unit: '', amount: 1
+        name: '', price: 0, unit: '', amount: 1, minAmount: 0
     })
 
     // Add new ingredient
@@ -27,7 +35,7 @@ export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPan
                 id: Date.now().toString()
             }
             setIngredients([...ingredients, ingredient])
-            setNewIngredient({ name: '', price: 0, unit: '', amount: 1 })
+            setNewIngredient({ name: '', price: 0, unit: '', amount: 1, minAmount: 0 })
         }
     }
 
@@ -64,7 +72,7 @@ export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPan
                             onChange={(e) => setNewIngredient({ ...newIngredient, name: e.target.value })}
                             className="w-full px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                         />
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <input
                                 type="text"
                                 placeholder="Unidad (ej: kg)"
@@ -80,12 +88,25 @@ export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPan
                                 onChange={(e) => setNewIngredient({ ...newIngredient, price: Number(e.target.value) || 0 })}
                                 className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                             />
+
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
                             <input
                                 type="number"
                                 step="0.01"
                                 placeholder="Cantidad"
                                 value={newIngredient.amount === 1 ? '' : newIngredient.amount}
                                 onChange={(e) => setNewIngredient({ ...newIngredient, amount: Number(e.target.value) || 1 })}
+                                className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                            />
+                            <input
+                                type="number"
+                                step="0.01"
+                                min={0}
+                                placeholder="Minimo"
+                                value={newIngredient.minAmount === 0 ? '' : newIngredient.minAmount}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, minAmount: Number(e.target.value) || 0 })}  // Fixed: was updating price instead of minAmount
                                 className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                             />
                         </div>
@@ -104,64 +125,109 @@ export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPan
                 </div>
 
                 {/* Ingredients List */}
-                <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                    {ingredients.map((ingredient) => (
-                        <div
-                            key={ingredient.id}
-                            className="group relative bg-amber-50 border-2 border-amber-200 hover:border-amber-400 rounded-xl p-4 transition-all duration-300 hover:shadow-lg"
-                        >
-                            {editingIngredientId === ingredient.id ? (
-                                <EditableIngredientRow
-                                    ingredient={ingredient}
-                                    onSave={saveEditedIngredient}
-                                    onCancel={() => setEditingIngredientId(null)}
-                                />
-                            ) : (
-                                <>
-                                    {/* Main Content */}
-                                    <div className="flex items-start justify-between">
-                                        {/* Ingredient Info */}
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
-                                                <div className="font-semibold text-gray-900 text-lg">{ingredient.name}</div>
-                                                <div className="text-sm text-amber-600 bg-amber-100 px-3 py-1 rounded-full font-medium">
-                                                    {ingredient.unit}
-                                                </div>
-                                            </div>
+                <div className="space-y-4 max-h-292 overflow-y-auto pr-2">
+                    {ingredients.map((ingredient) => {
+                        const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id)
+                        const currentStock = inventoryItem?.currentStock || 0
 
-                                            {/* Pricing Information */}
-                                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="text-md text-amber-700">Costo por unidad:</div>
-                                                    <div className="text-md font-bold text-amber-800">
-                                                        ${getIngredientCostPerUnit(ingredient).toFixed(2)} / {ingredient.unit}
+                        const isLowStock = currentStock <= ingredient.minAmount
+
+                        return (
+                            <div
+                                key={ingredient.id}
+                                className={`group relative border-2 rounded-xl p-4 transition-all duration-300 hover:shadow-lg ${isLowStock
+                                    ? 'bg-red-50 border-red-200 hover:border-red-400'
+                                    : 'bg-amber-50 border-amber-200 hover:border-amber-400'
+                                    }`}
+                            >
+                                {editingIngredientId === ingredient.id ? (
+                                    <EditableIngredientRow
+                                        ingredient={ingredient}
+                                        onSave={saveEditedIngredient}
+                                        onCancel={() => setEditingIngredientId(null)}
+                                    />
+                                ) : (
+                                    <>
+                                        {/* Main Content */}
+                                        <div className="flex items-start justify-between">
+                                            {/* Ingredient Info */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                                                    <div className="font-semibold text-gray-900 text-xl">{ingredient.name}</div>
+                                                    <div className="text-sm text-amber-600 bg-amber-100 px-3 py-1 rounded-full font-medium">
+                                                        {ingredient.unit}
                                                     </div>
                                                 </div>
+
+                                                {/* Pricing Information */}
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="text-md text-amber-700">Costo por unidad:</div>
+                                                        <div className="text-md font-bold text-amber-800">
+                                                            ${getIngredientCostPerUnit(ingredient).toFixed(2)} / {ingredient.unit}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Inventory Information */}
+                                                <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">
+                                                    <div className="flex items-center justify-between text-md">
+                                                        <span className="text-md  text-gray-800">Stock actual:</span>
+                                                        <div className="flex items-center gap-2 bg-white border-2 border-amber-300 rounded-lg ml-4 px-3 py-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                value={currentStock}
+                                                                onChange={(e) => updateInventory(ingredient.id, Number(e.target.value) || 0)}
+                                                                className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
+                                                            />
+                                                            <span className="text-md text-amber-700 font-semibold">{ingredient.unit}</span>
+                                                        </div>
+                                                    </div>
+                                                    {isLowStock && inventoryItem && (
+                                                        <div className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded mt-2">
+                                                            <div className="flex items-center gap-2 font-semibold text-sm mb-1">
+                                                                Stock bajo
+                                                            </div>
+                                                            <div className="flex items-center p-2 text-xs">
+                                                                <span className="font-medium">Faltan:</span>
+                                                                <span className="font-bold ml-1 text-red-700">
+                                                                    {(ingredient.minAmount - currentStock).toFixed(2)} {ingredient.unit}
+                                                                </span>
+                                                                {/* <span className="font-medium">Actual:</span>
+                                                                <span className="font-bold">{currentStock.toFixed(2)} {ingredient.unit}</span>
+                                                                <span className="text-red-600 mx-1">•</span>
+                                                                <span className="font-medium">Mínimo:</span>
+                                                                <span className="font-bold">{ingredient.minAmount} {ingredient.unit}</span> */}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Action Buttons - Always visible on mobile */}
+                                            <div className="flex items-center gap-1 flex-shrink-0 ml-4 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+                                                <button
+                                                    onClick={() => setEditingIngredientId(ingredient.id)}
+                                                    className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                    title="Editar ingrediente"
+                                                >
+                                                    <Edit className="h-5 w-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => removeIngredient(ingredient.id)}
+                                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                    title="Eliminar ingrediente"
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </button>
                                             </div>
                                         </div>
-
-                                        {/* Action Buttons - Always visible on mobile */}
-                                        <div className="flex items-center gap-1 flex-shrink-0 ml-4 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
-                                            <button
-                                                onClick={() => setEditingIngredientId(ingredient.id)}
-                                                className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                title="Editar ingrediente"
-                                            >
-                                                <Edit className="h-5 w-5" />
-                                            </button>
-                                            <button
-                                                onClick={() => removeIngredient(ingredient.id)}
-                                                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                title="Eliminar ingrediente"
-                                            >
-                                                <Trash2 className="h-5 w-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    ))}
+                                    </>
+                                )}
+                            </div>
+                        )
+                    })}
 
                     {/* Empty State */}
                     {ingredients.length === 0 && (
@@ -179,7 +245,6 @@ export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPan
             <CardContent>
                 {/* Mobile Quick Actions */}
                 <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4">
-                    {/* <div className="lg:hidden bg-green-50 border border-green-800 rounded-lg p-4 mt-6"> */}
                     <h4 className="font-semibold text-green-800 text-center text-xl mb-3">Resumen</h4>
                     <div className="grid grid-cols-2 gap-4 text-center">
                         <div className="bg-white border border-green-500 rounded-lg p-3">
@@ -195,6 +260,6 @@ export function IngredientsPanel({ ingredients, setIngredients }: IngredientsPan
                     </div>
                 </div>
             </CardContent>
-        </Card>
+        </Card >
     )
 }
