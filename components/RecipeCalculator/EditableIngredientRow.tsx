@@ -52,6 +52,14 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                     className="px-2 py-1 border rounded text-sm"
                     placeholder="Cantidad"
                 />
+                <input
+                    type="number"
+                    step="0.01"
+                    value={localIngredient.minAmount}
+                    onChange={(e) => setLocalIngredient(prev => ({ ...prev, minAmount: Number(e.target.value) || 0 }))}
+                    className="px-2 py-1 border rounded text-sm"
+                    placeholder="Mínimo"
+                />
             </div>
             <div className="flex gap-2 mt-2">
                 <Button
