@@ -144,7 +144,7 @@ export function ProductionTrackerPanel({
         return { totalIncome, totalLoss, goodUnits, soldUnits, badUnits };
     };
 
-    const { totalIncome, totalLoss, goodUnits, soldUnits, badUnits } = calculateFinancials();
+    const { totalIncome, totalLoss, } = calculateFinancials();
     // DEBUG
     // console.log('ingredients data: ', ingredients);
     // console.log('inventory data: ', inventory);
@@ -410,7 +410,7 @@ export function ProductionTrackerPanel({
 
                                                 {/* Units Grid */}
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-                                                    {recordItems.map((item, index) => {
+                                                    {recordItems.map((item) => {
                                                         const statusInfo = statusConfig[item.status];
                                                         return (
                                                             <div
