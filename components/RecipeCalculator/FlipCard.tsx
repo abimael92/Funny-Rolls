@@ -103,9 +103,13 @@ export function FlipCard({
                                             <input
                                                 type="number"
                                                 value={selectedRecipe.batchSize}
-                                                onChange={(e) => updateRecipeBatchSize(Number(e.target.value) || 1)}
+                                                onChange={(e) => {
+                                                    const value = Math.max(1, Math.min(1000, Number(e.target.value) || 1))
+                                                    updateRecipeBatchSize(value)
+                                                }}
                                                 className="w-16 sm:w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-bold flip-card-input"
                                                 min="1"
+                                                max="1000"
                                             />
                                         </div>
 
@@ -116,9 +120,13 @@ export function FlipCard({
                                                 <input
                                                     type="number"
                                                     value={selectedRecipe.sellingPrice}
-                                                    onChange={(e) => updateRecipeSellingPrice(Number(e.target.value) || 0)}
+                                                    onChange={(e) => {
+                                                        const value = Math.max(0, Math.min(10000, Number(e.target.value) || 0))
+                                                        updateRecipeSellingPrice(value)
+                                                    }}
                                                     className="w-16 sm:w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-bold flip-card-input"
                                                     min="0"
+                                                    max="10000"
                                                     step="0.01"
                                                 />
                                             </div>
@@ -187,7 +195,8 @@ export function FlipCard({
                                                 <input
                                                     type="text"
                                                     value={step}
-                                                    onChange={(e) => updateStep(index, e.target.value)}
+                                                    maxLength={200}
+                                                    onChange={(e) => updateStep(index, e.target.value.slice(0, 200))}
                                                     className="flex-1 px-2 py-1 border rounded text-xs sm:text-sm bg-white min-w-0 flip-card-input"
                                                 />
                                             ) : (
@@ -213,7 +222,8 @@ export function FlipCard({
                                             type="text"
                                             placeholder="Agregar nuevo paso..."
                                             value={newStep}
-                                            onChange={(e) => setNewStep(e.target.value)}
+                                            maxLength={200}
+                                            onChange={(e) => setNewStep(e.target.value.slice(0, 200))}
                                             className="flex-1 px-2 py-1 sm:px-3 sm:py-2 border rounded text-xs sm:text-sm flip-card-input"
                                         />
                                         <Button
