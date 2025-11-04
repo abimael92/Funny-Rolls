@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { products, defaultIngredients } from "@/lib/data"
-import { Ingredient, Recipe } from '@/lib/types'
+import { Ingredient, InventoryItem, Recipe, ProductionRecord } from '@/lib/types'
 import { MobileViewSwitcher } from './MobileViewSwitcher'
 import { IngredientsPanel } from './IngredientsPanel'
 import { RecipeCalculatorPanel } from './RecipeCalculatorPanel'
@@ -16,44 +16,59 @@ export function RecipeCalculator() {
     const [mobileView, setMobileView] = useState<'ingredients' | 'calculator' | 'production'>('calculator')
     const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>([])
     const [inventory, setInventory] = useState<InventoryItem[]>([])
+    const [error, setError] = useState<string | null>(null)
 
-    // Load data from localStorage on component mount
+    // Safe localStorage functions
+    const safeSetLocalStorage = (key: string, data: unknown) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(data))
+        } catch (err) {
+            console.error(`Failed to save data. \n ${err}`);
+            setError('Failed to save data. Storage might be full.')
+        }
+    }
+
+    const safeGetLocalStorage = <T,>(key: string, fallback: T): T => {
+        try {
+            const item = localStorage.getItem(key)
+            return item ? JSON.parse(item) : fallback
+        } catch (err) {
+            console.error(`Failed to save data. \n ${err}`);
+            setError('Failed to load saved data.')
+            return fallback
+        }
+    }
+
+    // Input validation
+    const validateNumber = (value: string, min: number = 0, max: number = 10000): number => {
+        const num = parseFloat(value)
+        if (isNaN(num)) return min
+        if (num < min) return min
+        if (num > max) return max
+        return Math.round(num * 100) / 100
+    }
+
+    // Load data from localStorage
     useEffect(() => {
-        const savedIngredients = localStorage.getItem('recipe-calculator-ingredients')
-        const savedRecipes = localStorage.getItem('recipe-calculator-recipes')
-        const savedProductionHistory = localStorage.getItem('recipe-calculator-production-history')
-        const savedInventory = localStorage.getItem('recipe-calculator-inventory')
+        const savedIngredients = safeGetLocalStorage('recipe-calculator-ingredients', defaultIngredients)
+        const savedRecipes = safeGetLocalStorage('recipe-calculator-recipes', products.map(p => p.recipe))
+        const savedProductionHistory = safeGetLocalStorage('recipe-calculator-production-history', [])
+        const savedInventory = safeGetLocalStorage('recipe-calculator-inventory', [])
 
-        if (savedIngredients) {
-            setIngredients(JSON.parse(savedIngredients))
+        setIngredients(savedIngredients)
+
+        const recipesWithSteps = savedRecipes.map((recipe: Recipe) => ({
+            ...recipe,
+            steps: recipe.steps || []
+        }))
+        setRecipes(recipesWithSteps)
+        setSelectedRecipe(recipesWithSteps[0])
+
+        setProductionHistory(savedProductionHistory)
+
+        if (savedInventory.length > 0) {
+            setInventory(savedInventory)
         } else {
-            localStorage.setItem('recipe-calculator-ingredients', JSON.stringify(defaultIngredients))
-        }
-
-        if (savedRecipes) {
-            const parsedRecipes = JSON.parse(savedRecipes)
-            // Ensure all recipes have steps array
-            const recipesWithSteps = parsedRecipes.map((recipe: Recipe) => ({
-                ...recipe,
-                steps: recipe.steps || []
-            }))
-            setRecipes(recipesWithSteps)
-            setSelectedRecipe(recipesWithSteps[0])
-        } else {
-            const initialRecipes = products.map(p => p.recipe)
-            setRecipes(initialRecipes)
-            setSelectedRecipe(initialRecipes[0])
-            localStorage.setItem('recipe-calculator-recipes', JSON.stringify(initialRecipes))
-        }
-
-        if (savedProductionHistory) {
-            setProductionHistory(JSON.parse(savedProductionHistory))
-        }
-
-        if (savedInventory) {
-            setInventory(JSON.parse(savedInventory))
-        } else {
-            // Initialize inventory from ingredients
             const initialInventory = defaultIngredients.map(ingredient => ({
                 ingredientId: ingredient.id,
                 currentStock: 0,
@@ -61,39 +76,65 @@ export function RecipeCalculator() {
                 minimumStock: 0
             }))
             setInventory(initialInventory)
-            localStorage.setItem('recipe-calculator-inventory', JSON.stringify(initialInventory))
         }
     }, [])
 
-    // Save to localStorage whenever data changes
+    // Save to localStorage with error handling
     useEffect(() => {
-        localStorage.setItem('recipe-calculator-ingredients', JSON.stringify(ingredients))
+        safeSetLocalStorage('recipe-calculator-ingredients', ingredients)
     }, [ingredients])
 
     useEffect(() => {
-        localStorage.setItem('recipe-calculator-recipes', JSON.stringify(recipes))
+        safeSetLocalStorage('recipe-calculator-recipes', recipes)
     }, [recipes])
 
     useEffect(() => {
-        localStorage.setItem('recipe-calculator-production-history', JSON.stringify(productionHistory))
+        safeSetLocalStorage('recipe-calculator-production-history', productionHistory)
     }, [productionHistory])
 
     useEffect(() => {
-        localStorage.setItem('recipe-calculator-inventory', JSON.stringify(inventory))
+        safeSetLocalStorage('recipe-calculator-inventory', inventory)
     }, [inventory])
 
-    // Function to record production
+    // Enhanced record production with validation
     const recordProduction = (recipeId: string, batchCount: number, date: Date = new Date()) => {
+        setError(null)
+
+        const validBatchCount = validateNumber(batchCount.toString(), 1, 1000)
+        if (validBatchCount <= 0) {
+            setError('Batch count must be at least 1')
+            return
+        }
+
         const recipe = recipes.find(r => r.id === recipeId)
-        if (!recipe) return
+        if (!recipe) {
+            setError('Recipe not found')
+            return
+        }
+
+        // Check inventory
+        const lowStockIngredients: string[] = []
+        recipe.ingredients.forEach(recipeIngredient => {
+            const inventoryItem = inventory.find(item => item.ingredientId === recipeIngredient.ingredientId)
+            const ingredient = ingredients.find(ing => ing.id === recipeIngredient.ingredientId)
+            const requiredAmount = recipeIngredient.amount * validBatchCount
+            if (inventoryItem && inventoryItem.currentStock < requiredAmount && ingredient) {
+                lowStockIngredients.push(ingredient.name)
+            }
+        })
+
+        if (lowStockIngredients.length > 0) {
+            setError(`Low stock: ${lowStockIngredients.join(', ')}`)
+            return
+        }
 
         const productionRecord: ProductionRecord = {
             id: Date.now().toString(),
             recipeId,
             recipeName: recipe.name,
-            batchCount,
+            batchCount: validBatchCount,
             date: date.toISOString(),
-            totalProduced: batchCount * recipe.batchSize
+            totalProduced: validBatchCount * recipe.batchSize
         }
 
         // Update production history
@@ -104,7 +145,7 @@ export function RecipeCalculator() {
         recipe.ingredients.forEach(recipeIngredient => {
             const inventoryItem = updatedInventory.find(item => item.ingredientId === recipeIngredient.ingredientId)
             if (inventoryItem) {
-                const amountUsed = recipeIngredient.amount * batchCount
+                const amountUsed = recipeIngredient.amount * validBatchCount
                 inventoryItem.currentStock = Math.max(0, inventoryItem.currentStock - amountUsed)
             }
         })
@@ -113,9 +154,10 @@ export function RecipeCalculator() {
 
     // Function to update inventory manually
     const updateInventory = (ingredientId: string, newStock: number) => {
+        const validStock = validateNumber(newStock.toString(), 0, 100000)
         setInventory(prev => prev.map(item =>
             item.ingredientId === ingredientId
-                ? { ...item, currentStock: newStock }
+                ? { ...item, currentStock: validStock }
                 : item
         ))
     }
@@ -123,13 +165,17 @@ export function RecipeCalculator() {
     // Function to add inventory item
     const addInventoryItem = (ingredientId: string, minimumStock: number = 0) => {
         const ingredient = ingredients.find(ing => ing.id === ingredientId)
-        if (!ingredient || inventory.find(item => item.ingredientId === ingredientId)) return
+        if (!ingredient || inventory.find(item => item.ingredientId === ingredientId)) {
+            setError('Ingredient already in inventory or not found')
+            return
+        }
 
+        const validMinStock = validateNumber(minimumStock.toString(), 0, 10000)
         const newInventoryItem: InventoryItem = {
             ingredientId,
             currentStock: 0,
             unit: ingredient.unit,
-            minimumStock
+            minimumStock: validMinStock
         }
         setInventory(prev => [...prev, newInventoryItem])
     }
@@ -145,6 +191,21 @@ export function RecipeCalculator() {
                     Calcula los costos de tus recetas y optimiza tus ganancias
                 </p>
             </div>
+
+            {/* Error Display */}
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mx-4 lg:mx-0">
+                    <div className="flex justify-between items-center">
+                        <span>{error}</span>
+                        <button
+                            onClick={() => setError(null)}
+                            className="text-red-700 hover:text-red-900 font-bold"
+                        >
+                            ×
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Mobile View Switcher */}
             <MobileViewSwitcher
@@ -165,7 +226,6 @@ export function RecipeCalculator() {
                     />
                 </div>
 
-                {/* Recipe Calculator Panel - Hidden on mobile unless selected */}
                 <div className={`${mobileView === 'calculator' ? 'block' : 'hidden'} lg:block lg:col-span-2`}>
                     <RecipeCalculatorPanel
                         selectedRecipe={selectedRecipe}
@@ -190,21 +250,4 @@ export function RecipeCalculator() {
             </div>
         </div>
     )
-}
-
-// Add these types to your types file (lib/types.ts)
-export interface ProductionRecord {
-    id: string
-    recipeId: string
-    recipeName: string
-    batchCount: number
-    date: string
-    totalProduced: number
-}
-
-export interface InventoryItem {
-    ingredientId: string
-    currentStock: number
-    unit: string
-    minimumStock: number
 }
