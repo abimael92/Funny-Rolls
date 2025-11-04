@@ -22,6 +22,7 @@ export function IngredientsPanel({
     inventory,
     updateInventory
 }: IngredientsPanelProps) {
+    const [error, setError] = useState<string | null>(null)
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
     const [newIngredient, setNewIngredient] = useState<Omit<Ingredient, 'id'>>({
         name: '', price: 0, unit: '', amount: 1, minAmount: 0
@@ -29,19 +30,42 @@ export function IngredientsPanel({
 
     // Add new ingredient
     const addIngredient = () => {
-        if (newIngredient.name && newIngredient.unit && newIngredient.price > 0) {
-            const ingredient: Ingredient = {
-                ...newIngredient,
-                id: Date.now().toString()
-            }
-            setIngredients([...ingredients, ingredient])
-            setNewIngredient({ name: '', price: 0, unit: '', amount: 1, minAmount: 0 })
+        setError(null)
+
+        if (!newIngredient.name.trim()) {
+            setError('El nombre del ingrediente es requerido')
+            return
         }
+        if (!newIngredient.unit.trim()) {
+            setError('La unidad es requerida')
+            return
+        }
+        if (newIngredient.price <= 0) {
+            setError('El precio debe ser mayor a 0')
+            return
+        }
+        if (newIngredient.amount <= 0) {
+            setError('La cantidad debe ser mayor a 0')
+            return
+        }
+        if (newIngredient.minAmount < 0) {
+            setError('El stock mínimo no puede ser negativo')
+            return
+        }
+
+        const ingredient: Ingredient = {
+            ...newIngredient,
+            id: Date.now().toString()
+        }
+        setIngredients([...ingredients, ingredient])
+        setNewIngredient({ name: '', price: 0, unit: '', amount: 1, minAmount: 0 })
     }
 
     // Remove ingredient
     const removeIngredient = (id: string) => {
-        setIngredients(ingredients.filter(ing => ing.id !== id))
+        if (window.confirm('¿Estás seguro de que quieres eliminar este ingrediente?')) {
+            setIngredients(ingredients.filter(ing => ing.id !== id))
+        }
     }
 
     // Save edited ingredient
@@ -61,15 +85,34 @@ export function IngredientsPanel({
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+
+                {/* Error Display */}
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        <div className="flex justify-between items-center">
+                            <span>{error}</span>
+                            <button
+                                onClick={() => setError(null)}
+                                className="text-red-700 hover:text-red-900 font-bold"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Add New Ingredient */}
                 <div className="space-y-3 p-4 bg-amber-50 rounded-lg border border-amber-300 mb-8">
                     <h3 className="font-semibold text-lg text-amber-800 text-center">Agregar Ingrediente</h3>
                     <div className="space-y-3">
                         <input
                             type="text"
+                            maxLength={50}
                             placeholder="Nombre del ingrediente"
                             value={newIngredient.name}
-                            onChange={(e) => setNewIngredient({ ...newIngredient, name: e.target.value })}
+                            onChange={(e) => setNewIngredient({
+                                ...newIngredient, name: e.target.value.slice(0, 50)
+                            })}
                             className="w-full px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                         />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -77,16 +120,22 @@ export function IngredientsPanel({
                                 type="text"
                                 placeholder="Unidad (ej: kg)"
                                 value={newIngredient.unit}
-                                onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
+                                maxLength={10}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value.slice(0, 10) })}
                                 className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                             />
                             <input
                                 type="number"
                                 step="0.01"
+                                min="0.01"
                                 placeholder="Precio $"
                                 value={newIngredient.price === 0 ? '' : newIngredient.price}
-                                onChange={(e) => setNewIngredient({ ...newIngredient, price: Number(e.target.value) || 0 })}
                                 className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                onChange={(e) => setNewIngredient({ ...newIngredient, price: Math.max(0.01, Number(e.target.value) || 0) })}
+                                onBlur={(e) => {
+                                    const value = Number(e.target.value)
+                                    if (value <= 0) setNewIngredient({ ...newIngredient, price: 0.01 })
+                                }}
                             />
 
                         </div>
@@ -95,9 +144,10 @@ export function IngredientsPanel({
                             <input
                                 type="number"
                                 step="0.01"
+                                min="0.01"
                                 placeholder="Cantidad"
                                 value={newIngredient.amount === 1 ? '' : newIngredient.amount}
-                                onChange={(e) => setNewIngredient({ ...newIngredient, amount: Number(e.target.value) || 1 })}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, amount: Math.max(0.01, Number(e.target.value) || 1) })}
                                 className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                             />
                             <input
@@ -106,7 +156,7 @@ export function IngredientsPanel({
                                 min={0}
                                 placeholder="Minimo"
                                 value={newIngredient.minAmount === 0 ? '' : newIngredient.minAmount}
-                                onChange={(e) => setNewIngredient({ ...newIngredient, minAmount: Number(e.target.value) || 0 })}  // Fixed: was updating price instead of minAmount
+                                onChange={(e) => setNewIngredient({ ...newIngredient, minAmount: Math.max(0, Number(e.target.value) || 0) })}
                                 className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                             />
                         </div>
@@ -177,9 +227,13 @@ export function IngredientsPanel({
                                                             <input
                                                                 type="number"
                                                                 step="0.01"
+                                                                min="0"
                                                                 value={currentStock}
-                                                                onChange={(e) => updateInventory(ingredient.id, Number(e.target.value) || 0)}
                                                                 className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
+                                                                onChange={(e) => {
+                                                                    const value = Math.max(0, Number(e.target.value) || 0)
+                                                                    updateInventory(ingredient.id, value)
+                                                                }}
                                                             />
                                                             <span className="text-md text-amber-700 font-semibold">{ingredient.unit}</span>
                                                         </div>
