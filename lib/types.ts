@@ -46,6 +46,17 @@ export interface ProductionRecord {
 	batchCount: number;
 	date: string;
 	totalProduced: number;
+	items?: ProductionItem[];
+	status?: ProductionStatus;
+	unitPrice?: number;
+}
+
+export type ProductionStatus = 'good' | 'sold' | 'bad' | 'burned' | 'damaged';
+
+export interface ProductionItem {
+	id: string;
+	status: ProductionStatus;
+	quantity: number;
 }
 
 export interface InventoryItem {

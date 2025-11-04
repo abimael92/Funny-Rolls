@@ -27,12 +27,18 @@ export function ProductionTrackerPanel({
     productionHistory,
     inventory,
     ingredients,
+    recipes,
     updateInventory,
     updateProductionStatus
 }: ProductionTrackerPanelProps) {
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [expandedRecords, setExpandedRecords] = useState<Set<string>>(new Set());
     const [currentProductionItems, setCurrentProductionItems] = useState<{ [recordId: string]: ProductionItem[] }>({})
+
+    console.log('this are props', productionHistory,
+        recipes,
+    );
+
 
     // Toggle accordion
     const toggleRecord = (recordId: string) => {
@@ -92,28 +98,44 @@ export function ProductionTrackerPanel({
         let badUnits = 0;
 
         productionHistory.forEach(record => {
+
+            console.log('thius is it ', record);
+
+            const recipe = recipes.find(r => r.name === record.recipeName);
+            const unitPrice = recipe?.sellingPrice || 0;
+
+
+            //     // Find the recipe to get selling price
+            // const recipe = recipes.find(r => r.name === record.recipeName);
+            // const unitPrice = recipe?.sellingPrice || 0; // Get selling price from recipe
+
+            // Combine record items with current production items
+            const allItems = [...(record.items || []), ...(currentProductionItems[record.id] || [])];
+
             // If record has individual items, calculate per item
-            if (record.items && record.items.length > 0) {
-                record.items.forEach(item => {
+
+            if (allItems.length > 0) {
+                allItems.forEach(item => {
                     if (item.status === 'sold') {
-                        totalIncome += item.quantity * (record.unitPrice || 0);
+                        totalIncome += item.quantity * unitPrice;
                         soldUnits += item.quantity;
                     } else if (item.status === 'good') {
                         goodUnits += item.quantity;
                     } else {
-                        totalLoss += item.quantity * (record.unitPrice || 0);
+                        totalLoss += item.quantity * unitPrice;
                         badUnits += item.quantity;
                     }
                 });
             } else {
                 // Fallback to record-level status
+
                 if (record.status === 'sold') {
-                    totalIncome += record.totalProduced * (record.unitPrice || 0);
+                    totalIncome += record.totalProduced * unitPrice;
                     soldUnits += record.totalProduced;
                 } else if (record.status === 'good') {
                     goodUnits += record.totalProduced;
                 } else {
-                    totalLoss += record.totalProduced * (record.unitPrice || 0);
+                    totalLoss += record.totalProduced * unitPrice;
                     badUnits += record.totalProduced;
                 }
             }
@@ -122,8 +144,7 @@ export function ProductionTrackerPanel({
         return { totalIncome, totalLoss, goodUnits, soldUnits, badUnits };
     };
 
-    const { totalIncome, totalLoss, goodUnits, soldUnits, badUnits } = calculateFinancials();
-
+    const { totalIncome, totalLoss, } = calculateFinancials();
     // DEBUG
     // console.log('ingredients data: ', ingredients);
     // console.log('inventory data: ', inventory);
@@ -389,7 +410,7 @@ export function ProductionTrackerPanel({
 
                                                 {/* Units Grid */}
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-                                                    {recordItems.map((item, index) => {
+                                                    {recordItems.map((item) => {
                                                         const statusInfo = statusConfig[item.status];
                                                         return (
                                                             <div
@@ -485,11 +506,27 @@ export function ProductionTrackerPanel({
                                                                 );
                                                             })}
                                                         </div>
+                                                        <div className="grid grid-cols-2 md:grid-cols-2 mt-4 gap-4">
+
+
+                                                            <div className="bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-4 text-center">
+                                                                <div className="text-2xl font-bold text-amber-700">${totalIncome.toFixed(2)}</div>
+                                                                <div className="text-sm text-amber-600">Ingresos (Vendido)</div>
+                                                            </div>
+                                                            <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-4 text-center">
+                                                                <div className="text-2xl font-bold text-red-700">${totalLoss.toFixed(2)}</div>
+                                                                <div className="text-sm text-red-600">Pérdidas (Defectuoso)</div>
+                                                            </div>
+                                                        </div>
+
                                                         <div className="mt-3 text-center text-sm text-gray-600">
                                                             Total unidades verificadas: <strong>{totalItems}</strong> de <strong>{record.totalProduced}</strong> producidas
                                                         </div>
                                                     </div>
                                                 )}
+
+                                                {/* Production Stats */}
+
                                             </div>
                                         )}
                                     </div>
