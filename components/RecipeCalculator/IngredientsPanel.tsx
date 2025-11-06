@@ -26,7 +26,7 @@ export function IngredientsPanel({
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
     const [newIngredient, setNewIngredient] = useState<Omit<Ingredient, 'id'>>({
         name: '', price: 0, unit: '', amount: 1, minAmount: 0
-    })
+    });
 
     // Add new ingredient
     const addIngredient = () => {
@@ -117,13 +117,41 @@ export function IngredientsPanel({
                         />
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <input
-                                type="text"
-                                placeholder="Unidad (ej: kg)"
-                                value={newIngredient.unit}
-                                maxLength={10}
-                                onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value.slice(0, 10) })}
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                placeholder="Cantidad"
+                                value={newIngredient.amount === 1 ? '' : newIngredient.amount}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, amount: Math.max(0.01, Number(e.target.value) || 1) })}
                                 className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                             />
+                            {/* Unit Selector in Add Form */}
+                            {/* <label className="text-sm text-gray-600 mb-1">Unidad</label> */}
+                            <select
+                                value={newIngredient.unit}
+                                onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
+                                className="px-4 py-3 border-2 border-amber-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-gray-900"
+                            >
+                                <option value="" className="text-base">Seleccionar unidad</option>
+                                <option value="kg">kg</option>
+                                <option value="g">g</option>
+                                <option value="lb">lb</option>
+                                <option value="oz">oz</option>
+                                <option value="l">l</option>
+                                <option value="ml">ml</option>
+                                <option value="cup">cup</option>
+                                <option value="tbsp">tbsp</option>
+                                <option value="tsp">tsp</option>
+                                <option value="unidad">unidad</option>
+                                <option value="docena">docena</option>
+                                <option value="paquete">paquete</option>
+                                <option value="sobre">sobre</option>
+                            </select>
+
+
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
                             <input
                                 type="number"
                                 step="0.01"
@@ -138,18 +166,6 @@ export function IngredientsPanel({
                                 }}
                             />
 
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                placeholder="Cantidad"
-                                value={newIngredient.amount === 1 ? '' : newIngredient.amount}
-                                onChange={(e) => setNewIngredient({ ...newIngredient, amount: Math.max(0.01, Number(e.target.value) || 1) })}
-                                className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                            />
                             <input
                                 type="number"
                                 step="0.01"

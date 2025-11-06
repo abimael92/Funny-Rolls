@@ -65,3 +65,36 @@ export interface InventoryItem {
 	unit: string;
 	minimumStock: number;
 }
+
+export interface UnitInfo {
+	unit: string;
+	category: 'weight' | 'volume' | 'count' | 'other';
+	preferredDecimals: number;
+}
+
+export interface IngredientWithConversions extends Ingredient {
+	unitInfo: UnitInfo;
+	compatibleUnits?: string[];
+}
+
+// Common unit configurations
+export const COMMON_UNITS: UnitInfo[] = [
+	// Weight units
+	{ unit: 'kg', category: 'weight', preferredDecimals: 3 },
+	{ unit: 'g', category: 'weight', preferredDecimals: 1 },
+	{ unit: 'lb', category: 'weight', preferredDecimals: 3 },
+	{ unit: 'oz', category: 'weight', preferredDecimals: 1 },
+
+	// Volume units
+	{ unit: 'l', category: 'volume', preferredDecimals: 3 },
+	{ unit: 'ml', category: 'volume', preferredDecimals: 0 },
+	{ unit: 'cup', category: 'volume', preferredDecimals: 2 },
+	{ unit: 'tbsp', category: 'volume', preferredDecimals: 1 },
+	{ unit: 'tsp', category: 'volume', preferredDecimals: 1 },
+
+	// Count units
+	{ unit: 'unidad', category: 'count', preferredDecimals: 0 },
+	{ unit: 'docena', category: 'count', preferredDecimals: 1 },
+	{ unit: 'paquete', category: 'count', preferredDecimals: 0 },
+	{ unit: 'sobre', category: 'count', preferredDecimals: 0 },
+];
