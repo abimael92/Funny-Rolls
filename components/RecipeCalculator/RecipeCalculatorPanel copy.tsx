@@ -485,13 +485,7 @@ export function RecipeCalculatorPanel({
 
                                         <div className="flex items-center justify-between">
                                             {/* Ingredient Info */}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <div className="font-semibold text-gray-900 text-sm">{ingredient.name}</div>
-                                                    <div className="text-xs text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                                                        ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
-                                                    </div>
-                                                </div>
+                              
 
                                                 {/* Amount Input */}
                                                 <div className="flex justify-between items-center gap-2 w-full">
@@ -598,7 +592,7 @@ export function RecipeCalculatorPanel({
                                     <div
                                         className={`h - 2 rounded - full transition - all duration - 300 ${
         profitPercentage >= 50 ? 'bg-green-500' :
-        profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
+            profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
     } `}
                                         style={{ width: `${ Math.min(profitPercentage, 100) }% ` }}
                                     ></div>
