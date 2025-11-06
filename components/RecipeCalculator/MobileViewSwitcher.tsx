@@ -35,9 +35,10 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
                 aria-selected={mobileView === 'calculator'}
                 aria-label={getAriaLabel('Calculator', mobileView === 'calculator')}
                 tabIndex={mobileView === 'calculator' ? 0 : -1}
-                className={`flex-1 py-4 px-3 text-center font-medium flex items-center justify-center gap-2 transition-all duration-200 ${mobileView === 'calculator'
-                    ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
-                    : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25 active:bg-amber-100'
+                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-medium 
+                    transition-all duration-200 ${mobileView === 'calculator'
+                        ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
+                        : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25 active:bg-amber-100'
                     }`}
             >
                 <ChefHat className="h-4 w-4" aria-hidden="true" />
@@ -53,9 +54,10 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
                 aria-selected={mobileView === 'ingredients'}
                 aria-label={getAriaLabel('Ingredients', mobileView === 'ingredients')}
                 tabIndex={mobileView === 'ingredients' ? 0 : -1}
-                className={`flex-1 py-4 px-3 text-center font-medium flex items-center justify-center gap-2 transition-all duration-200 ${mobileView === 'ingredients'
-                    ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
-                    : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25'
+                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-medium
+                    transition-all duration-200 ${mobileView === 'ingredients'
+                        ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
+                        : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25'
                     }`}
             >
                 <Calculator className="h-4 w-4" aria-hidden="true" />
@@ -71,9 +73,10 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
                 aria-selected={mobileView === 'production'}
                 aria-label={getAriaLabel('Production', mobileView === 'production')}
                 tabIndex={mobileView === 'production' ? 0 : -1}
-                className={`flex-1 py-4 px-3 text-center font-medium flex items-center justify-center gap-2 transition-all duration-200 ${mobileView === 'production'
-                    ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
-                    : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25'
+                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-medium
+                    transition-all duration-200 ${mobileView === 'production'
+                        ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
+                        : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25'
                     }`}
             >
                 <BarChart3 className="h-4 w-4" aria-hidden="true" />
