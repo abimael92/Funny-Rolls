@@ -24,12 +24,17 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
     }
 
     return (
-        <div className="lg:hidden flex border-b border-amber-200 bg-white sticky top-0 z-10 mb-6 shadow-sm" role="tablist"
-            aria-label="Mobile navigation tabs">
+        <div
+            className="lg:hidden flex border border-amber-300 bg-white sticky top-0 z-10 mb-6 rounded-xl shadow-lg mt-4 mx-auto w-[95%] overflow-hidden"
+            role="tablist"
+            aria-label="Mobile navigation tabs"
+        >
+
+
             <button
                 onClick={() => setMobileView('calculator')}
                 onKeyDown={(e) => handleKeyPress(e, 'calculator')}
-                className={`flex-1 py-4 text-center font-medium flex items-center justify-center gap-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 ${mobileView === 'calculator'
+                className={`flex-1 py-4 px-3 text-center font-medium flex items-center justify-center gap-2 transition-all duration-200 ${mobileView === 'calculator'
                     ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
                     : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25 active:bg-amber-100'
                     }`}
@@ -41,24 +46,40 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
                 <ChefHat className="h-4 w-4" aria-hidden="true" />
                 <span>Calculadora</span>
             </button>
+
+            <div className="flex-shrink-0 w-px bg-amber-300 my-2"></div>
+
             <button
                 onClick={() => setMobileView('ingredients')}
-                className={`flex-1 py-4 text-center font-medium flex items-center justify-center gap-2 transition-all duration-200 ${mobileView === 'ingredients'
+                onKeyDown={(e) => handleKeyPress(e, 'ingredients')}
+                className={`flex-1 py-4 px-3 text-center font-medium flex items-center justify-center gap-2 transition-all duration-200 ${mobileView === 'ingredients'
                     ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
                     : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25'
                     }`}
+                role="tab"
+                aria-selected={mobileView === 'ingredients'}
+                aria-label={getAriaLabel('Ingredients', mobileView === 'ingredients')}
+                tabIndex={mobileView === 'ingredients' ? 0 : -1}
             >
-                <Calculator className="h-4 w-4" />
+                <Calculator className="h-4 w-4" aria-hidden="true" />
                 <span>Ingredientes</span>
             </button>
+
+            <div className="flex-shrink-0 w-px bg-amber-300 my-2"></div>
+
             <button
                 onClick={() => setMobileView('production')}
-                className={`flex-1 py-4 text-center font-medium flex items-center justify-center gap-2 transition-all duration-200 ${mobileView === 'production'
+                onKeyDown={(e) => handleKeyPress(e, 'production')}
+                className={`flex-1 py-4 px-3 text-center font-medium flex items-center justify-center gap-2 transition-all duration-200 ${mobileView === 'production'
                     ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
                     : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25'
                     }`}
+                role="tab"
+                aria-selected={mobileView === 'production'}
+                aria-label={getAriaLabel('Production', mobileView === 'production')}
+                tabIndex={mobileView === 'production' ? 0 : -1}
             >
-                <BarChart3 className="h-4 w-4" />
+                <BarChart3 className="h-4 w-4" aria-hidden="true" />
                 <span>Producción</span>
             </button>
         </div>
