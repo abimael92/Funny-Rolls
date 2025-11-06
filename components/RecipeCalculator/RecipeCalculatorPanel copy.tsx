@@ -180,11 +180,7 @@ export function RecipeCalculatorPanel({
         setSelectedRecipe(updatedRecipe)
     }
 
-    // Save steps and exit edit mode
-    const saveSteps = () => {
-        setRecipes(recipes.map(r => r.id === selectedRecipe.id ? selectedRecipe : r))
-        setIsEditingSteps(false)
-    }
+
 
     // Backup/Restore functions
     const handleExportData = () => {
