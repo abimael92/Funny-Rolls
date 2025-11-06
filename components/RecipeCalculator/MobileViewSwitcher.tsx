@@ -24,12 +24,9 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
     }
 
     return (
-        <div
-            className="lg:hidden flex border border-amber-300 bg-white sticky top-0 z-10 mb-6 rounded-xl shadow-lg mt-4 mx-auto w-[95%] overflow-hidden"
+        <div className="lg:hidden flex border border-amber-300 bg-white sticky top-0 z-10 mb-6 rounded-xl shadow-lg mt-4 mx-auto w-[95%] overflow-hidden"
             role="tablist"
-            aria-label="Mobile navigation tabs"
-        >
-
+            aria-label="Mobile navigation tabs">
 
             <button
                 onClick={() => setMobileView('calculator')}
