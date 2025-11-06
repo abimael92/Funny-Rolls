@@ -216,6 +216,24 @@ export function FlipCard({
                                     </div>
                                 ))}
 
+                                {isEditingSteps && (
+                                    <div className="flex gap-2 mt-3">
+                                        <input
+                                            type="text"
+                                            placeholder="Agregar nuevo paso..."
+                                            value={newStep}
+                                            maxLength={200}
+                                            onChange={(e) => setNewStep(e.target.value.slice(0, 200))}
+                                            className="flex-1 px-2 py-1 sm:px-3 sm:py-2 border rounded text-xs sm:text-sm flip-card-input"
+                                        />
+                                        <Button
+                                            onClick={addStep}
+                                            className="bg-blue-600 hover:bg-blue-700 h-8 w-8 sm:h-10 sm:w-10 p-0 flip-card-button"
+                                        >
+                                            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

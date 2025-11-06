@@ -185,16 +185,7 @@ export function RecipeCalculatorPanel({
     // Backup/Restore functions
     const handleExportData = () => {
         exportRecipeData(ingredients, recipes)
-    }
-
-    const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (!file) return
-
-        importRecipeData(file)
-            .then((data) => {
-                // This would need to be handled in the parent component
-                alert(`Datos importados correctamente! here is your ${data}`)
+    } your ${ data }`)
             })
             .catch((error) => {
                 alert(error.message)
@@ -490,7 +481,7 @@ export function RecipeCalculatorPanel({
                                     >
                                         {/* Cost percentage bar */}
                                         <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-amber-400 to-orange-400 rounded-t-xl"
-                                            style={{ width: `${Math.min(costPercentage, 100)}%` }}></div>
+                                            style={{ width: `${ Math.min(costPercentage, 100) }% ` }}></div>
 
                                         <div className="flex items-center justify-between">
                                             {/* Ingredient Info */}
@@ -605,10 +596,11 @@ export function RecipeCalculatorPanel({
                                 </div>
                                 <div className="w-full bg-gray-200 rounded-full h-2">
                                     <div
-                                        className={`h-2 rounded-full transition-all duration-300 ${profitPercentage >= 50 ? 'bg-green-500' :
-                                            profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
-                                            }`}
-                                        style={{ width: `${Math.min(profitPercentage, 100)}%` }}
+                                        className={`h - 2 rounded - full transition - all duration - 300 ${
+        profitPercentage >= 50 ? 'bg-green-500' :
+        profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
+    } `}
+                                        style={{ width: `${ Math.min(profitPercentage, 100) }% ` }}
                                     ></div>
                                 </div>
                             </div>
