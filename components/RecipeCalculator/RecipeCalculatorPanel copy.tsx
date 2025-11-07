@@ -300,26 +300,7 @@ export function RecipeCalculatorPanel({
                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4">
                         <h3 className="text-xl font-bold text-green-800 mb-4 text-center">Resumen</h3>
 
-                        <div className="grid grid-cols-2 gap-4 text-center">
-                            <div className="bg-white border-2 border-green-200 rounded-xl p-3">
-                                <div className="text-sm text-gray-600">Costo Total</div>
-                                <div className="text-lg font-bold text-green-700">${totalRecipeCost.toFixed(2)}</div>
-                            </div>
-
-                            <div className="bg-white border-2 border-green-200 rounded-xl p-3">
-                                <div className="text-sm text-gray-600">Costo/Unidad</div>
-                                <div className="text-lg font-bold text-green-700">${costPerItem.toFixed(2)}</div>
-                            </div>
-
-                            <div className="bg-white border-2 border-green-200 rounded-xl p-3">
-                                <div className="text-sm text-gray-600">Ganancia</div>
-                                <div className="text-lg font-bold text-green-600">${profit.toFixed(2)}</div>
-                            </div>
-
-                            <div className="bg-white border-2 border-green-200 rounded-xl p-3">
-                                <div className="text-sm text-gray-600">Margen %</div>
-                                <div className="text-lg font-bold text-green-600">{profitPercentage.toFixed(1)}%</div>
-                            </div>
+             
                         </div>
                     </div>
                 </div>
