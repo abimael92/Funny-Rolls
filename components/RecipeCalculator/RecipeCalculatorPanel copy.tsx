@@ -38,61 +38,6 @@ export function RecipeCalculatorPanel({
     const [isEditingSteps, setIsEditingSteps] = useState(false)
     const [isCardFlipped, setIsCardFlipped] = useState(false)
 
-    // const [showPrintPreview, setShowPrintPreview] = useState(false);
-
-
-    // const [printableContent, setPrintableContent] = useState<HTMLDivElement | null>(null);
-    // const [printableContent, setPrintableContent] = useState<HTMLDivElement | null>(null);
-
-    // Toggle preview
-    // const togglePrintPreview = () => {
-    //     setShowPrintPreview(!showPrintPreview);
-    // };
-
-    // const printRef = useRef<HTMLDivElement>(null);
-
-    // interface PrintOptions {
-    //     content: () => HTMLDivElement | null;
-    //     documentTitle?: string;
-    //     onAfterPrint?: () => void;
-    //     onBeforeGetContent?: () => Promise<void>;
-    //     onPrintError?: (errorLocation: string, error: Error) => void;
-    // }
-
-    // Add this useEffect to debug when the ref attaches
-    // useEffect(() => {
-    //     console.log('Printable content ref updated:', printableContent);
-    // }, [printableContent]);
-
-    // Replace your current handlePrint with this:
-    // const handlePrint = useReactToPrint({
-    //     content: () => {
-    //         console.log('Current printable content:', printableContent);
-    //         if (!printableContent) {
-    //             console.error('No printable content available');
-    //             // Fallback: try to find the element in the DOM
-    //             const fallbackElement = document.querySelector('[data-printable]');
-    //             return fallbackElement as HTMLDivElement;
-    //         }
-    //         return printableContent;
-    //     },
-    //     documentTitle: `${selectedRecipe.name}-receta`,
-    //     onAfterPrint: () => console.log('PDF impreso exitosamente'),
-    //     onPrintError: (errorLocation, error) => {
-    //         console.error('Error al imprimir:', errorLocation, error);
-    //         alert('Error al generar el PDF. Por favor, intenta nuevamente.');
-    //     }
-
-    // } as PrintOptions);
-
-
-    // const printRef = useRef<HTMLDivElement>(null);
-
-    // const handlePrint = useReactToPrint({
-    //     content: () => printRef.current,
-    //     documentTitle: `${selectedRecipe.name}-receta`,
-    //     onAfterPrint: () => console.log('PDF impreso exitosamente'),
-    // } as PrintOptions);
 
     // Update recipe ingredient amount
     const updateRecipeIngredient = (ingredientId: string, amount: number) => {
