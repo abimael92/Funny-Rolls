@@ -702,28 +702,7 @@ export function RecipeCalculatorPanel({
                             )}
                         </div>
 
-                        {/* Quick Stats */}
-                        <div className="grid grid-cols-2 gap-4 mt-10 lg:grid-cols-4">
-                            <div className="bg-white border-2 border-red-200 rounded-xl p-3 text-center">
-                                <div className="text-sm text-gray-600">Costo/Unidad</div>
-                                <div className="text-lg font-bold text-red-700">${costPerItem.toFixed(2)}</div>
-                            </div>
 
-                            <div className="bg-white border-2 border-green-200 rounded-xl p-3 text-center">
-                                <div className="text-sm text-gray-600">Ganancia/Unidad</div>
-                                <div className="text-lg font-bold text-green-600">${profit.toFixed(2)}</div>
-                            </div>
-
-                            <div className="bg-white border-2 border-blue-200 rounded-xl p-3 text-center">
-                                <div className="text-sm text-gray-600">Margen %</div>
-                                <div className="text-lg font-bold text-blue-600">{profitPercentage.toFixed(1)}%</div>
-                            </div>
-
-                            <div className="bg-white border-2 border-purple-200 rounded-xl p-3 text-center">
-                                <div className="text-sm text-gray-600">Costo Total</div>
-                                <div className="text-lg font-bold text-purple-700">${totalRecipeCost.toFixed(2)}</div>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Cost Summary */}
