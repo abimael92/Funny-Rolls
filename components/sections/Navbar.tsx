@@ -5,7 +5,7 @@ import { CartItem } from "@/lib/types"
 import { ShoppingCart, Menu, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 interface NavbarProps {
   cart: CartItem[]
@@ -15,8 +15,24 @@ interface NavbarProps {
 export function Navbar({ cart, onCartOpen }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   const isHomePage = pathname === "/"
+
+  // Handle navigation with proper scrolling - FIXED
+  const handleNavigation = (hash: string) => {
+    if (isHomePage) {
+      // On home page, scroll to section
+      const element = document.querySelector(hash)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
+      setIsMenuOpen(false)
+    } else {
+      // On other pages, navigate to home page with hash - FIXED
+      router.push(`/${hash}`)
+    }
+  }
 
   return (
     <nav className="sticky top-0 left-0 w-full bg-amber-100 z-50
@@ -59,29 +75,38 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
           </Button>
 
           <div className="flex items-center gap-2.5 ml-4">
-            {isHomePage ? (
-              <>
-                <a href="#home" className="text-warm-brown hover:text-amber-600 transition-colors">Inicio</a>
-                <div className="w-px h-4 bg-amber-800/50"></div>
-                <a href="#menu" className="text-warm-brown hover:text-amber-600 transition-colors">Menú</a>
-                <div className="w-px h-4 bg-amber-800/50"></div>
-                <a href="#about" className="text-warm-brown hover:text-amber-600 transition-colors">Acerca de</a>
-                <div className="w-px h-4 bg-amber-800/50"></div>
-                <a href="#contact" className="text-warm-brown hover:text-amber-600 transition-colors">Contacto</a>
-              </>
-            ) : (
-              <>
-                <Link href="/#home" className="text-warm-brown hover:text-amber-600 transition-colors">Inicio</Link>
-                <div className="w-px h-4 bg-amber-800/50"></div>
-                <Link href="/#menu" className="text-warm-brown hover:text-amber-600 transition-colors">Menú</Link>
-                <div className="w-px h-4 bg-amber-800/50"></div>
-                <Link href="/#about" className="text-warm-brown hover:text-amber-600 transition-colors">Acerca de</Link>
-                <div className="w-px h-4 bg-amber-800/50"></div>
-                <Link href="/#contact" className="text-warm-brown hover:text-amber-600 transition-colors">Contacto</Link>
-              </>
-            )}
+            <button
+              onClick={() => handleNavigation('#home')}
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
+              Inicio
+            </button>
             <div className="w-px h-4 bg-amber-800/50"></div>
-            <Link href="/recipe-calculator" className="text-warm-brown hover:text-amber-600 transition-colors">
+            <button
+              onClick={() => handleNavigation('#menu')}
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
+              Menú
+            </button>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <button
+              onClick={() => handleNavigation('#about')}
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
+              Acerca de
+            </button>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <button
+              onClick={() => handleNavigation('#contact')}
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
+              Contacto
+            </button>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <Link
+              href="/recipe-calculator"
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
               Calculadora
             </Link>
           </div>
@@ -115,47 +140,35 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
       {isMenuOpen && (
         <div className="md:hidden bg-[#C48A6A]/20 border-t border-[#C48A6A]/20 animate-scale-in">
           <div className="px-4 py-1.5 flex flex-col">
-            {isHomePage ? (
-              <>
-                <a href="#home" onClick={() => setIsMenuOpen(false)}
-                  className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
-                  Inicio
-                </a>
-                <a href="#menu" onClick={() => setIsMenuOpen(false)}
-                  className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
-                  Menú
-                </a>
-                <a href="#about" onClick={() => setIsMenuOpen(false)}
-                  className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
-                  Acerca de
-                </a>
-                <a href="#contact" onClick={() => setIsMenuOpen(false)}
-                  className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
-                  Contacto
-                </a>
-              </>
-            ) : (
-              <>
-                <Link href="/#home" onClick={() => setIsMenuOpen(false)}
-                  className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
-                  Inicio
-                </Link>
-                <Link href="/#menu" onClick={() => setIsMenuOpen(false)}
-                  className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
-                  Menú
-                </Link>
-                <Link href="/#about" onClick={() => setIsMenuOpen(false)}
-                  className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
-                  Acerca de
-                </Link>
-                <Link href="/#contact" onClick={() => setIsMenuOpen(false)}
-                  className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30">
-                  Contacto
-                </Link>
-              </>
-            )}
-            <Link href="/recipe-calculator" onClick={() => setIsMenuOpen(false)}
-              className="text-warm-brown transition-colors py-1">
+            <button
+              onClick={() => handleNavigation('#home')}
+              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
+            >
+              Inicio
+            </button>
+            <button
+              onClick={() => handleNavigation('#menu')}
+              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
+            >
+              Menú
+            </button>
+            <button
+              onClick={() => handleNavigation('#about')}
+              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
+            >
+              Acerca de
+            </button>
+            <button
+              onClick={() => handleNavigation('#contact')}
+              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
+            >
+              Contacto
+            </button>
+            <Link
+              href="/recipe-calculator"
+              onClick={() => setIsMenuOpen(false)}
+              className="text-warm-brown transition-colors py-1 text-left"
+            >
               Calculadora
             </Link>
           </div>
