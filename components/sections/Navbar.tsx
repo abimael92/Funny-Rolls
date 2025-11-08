@@ -22,15 +22,14 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
   // Handle navigation with proper scrolling - FIXED
   const handleNavigation = (hash: string) => {
     if (isHomePage) {
-      // On home page, scroll to section
       const element = document.querySelector(hash)
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' })
       }
       setIsMenuOpen(false)
     } else {
-      // On other pages, navigate to home page with hash - FIXED
-      router.push(`/${hash}`)
+      // Navigate to home page with hash
+      router.push(`/${hash}`) // This should be just the hash, not preceded by slash
     }
   }
 

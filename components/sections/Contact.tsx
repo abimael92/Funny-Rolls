@@ -39,7 +39,7 @@ _Enviado desde Funny Rolls Website_`;
   };
 
   return (
-    <section id="contact" className="py-20 px-4 bg-[#FFF5E6]">
+    <section id="contact" className="py-20 px-4 bg-[#FFF5E6] scroll-mt-24">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="font-cursive text-4xl md:text-5xl text-[#8B4513] mb-4">Contáctanos</h2>
