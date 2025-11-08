@@ -11,7 +11,7 @@ export function Hero() {
   }, [])
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden scroll-mt-24">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image

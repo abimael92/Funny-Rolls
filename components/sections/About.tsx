@@ -3,7 +3,7 @@ import Image from "next/image"
 
 export function About() {
   return (
-    <section id="about" className="py-20 px-4 bg-amber-100">
+    <section id="about" className="py-20 px-4 bg-amber-100 scroll-mt-24">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="animate-fade-in-up">
