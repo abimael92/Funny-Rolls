@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package, TrendingUp, ChevronDown, ChevronUp } from "lucide-react"
 import { Ingredient, Recipe, ProductionRecord, InventoryItem } from '@/lib/types'
+import { UnitConverter } from '../../lib/unit-conversion';
 
 interface ProductionTrackerPanelProps {
     productionHistory: ProductionRecord[]
@@ -173,6 +174,27 @@ export function ProductionTrackerPanel({
         damaged: { label: 'Dañado', color: 'bg-purple-100 border-purple-500 text-purple-800', income: false }
     };
 
+    // Conversion function
+    const convertToReadableUnit = (amount: number, unit: string): string => {
+        // For small amounts, convert to more appropriate units
+        if (unit === 'kg' && amount < 1) {
+            const converted = UnitConverter.convert({ value: amount, unit: 'kg' }, 'g');
+            return converted ? `${converted.value.toFixed(0)}g` : `${amount} ${unit}`;
+        }
+
+        if ((unit === 'l' || unit === 'litro') && amount < 1) {
+            const converted = UnitConverter.convert({ value: amount, unit: 'l' }, 'ml');
+            return converted ? `${converted.value.toFixed(0)}ml` : `${amount} ${unit}`;
+        }
+
+        if (unit === 'docena' && amount < 1) {
+            const converted = UnitConverter.convert({ value: amount, unit: 'docena' }, 'unidad');
+            return converted ? `${converted.value.toFixed(0)} unidades` : `${amount} ${unit}`;
+        }
+
+        // Return original if no conversion needed or conversion fails
+        return `${amount} ${unit}`;
+    };
 
 
     console.log(" LOW STOCK ITEMS:", lowStockItems)
@@ -300,7 +322,7 @@ export function ProductionTrackerPanel({
                                                 </div>
                                             </div>
                                             <div className="text-xs text-red-800  font-medium px-3 py-2 rounded-lg mt-1">
-                                                Mínimo: {ingredient.minAmount} {item.unit}
+                                                Mínimo: {convertToReadableUnit(ingredient.minAmount, item.unit)}
                                             </div>
                                         </div>
                                     )
