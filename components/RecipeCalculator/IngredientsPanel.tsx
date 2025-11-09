@@ -258,25 +258,25 @@ export function IngredientsPanel({
                                                     </div>
                                                 </div>
 
-                                                {/* Inventory Information */}
-                                                <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">
-                                                    <div className="flex items-center justify-between text-md">
-                                                        <span className="text-md  text-gray-800">Stock actual:</span>
-                                                        <div className="flex items-center gap-2 bg-white border-2 border-amber-300 rounded-lg ml-4 px-3 py-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
-                                                            <input
-                                                                type="number"
-                                                                step="0.01"
-                                                                min="0"
-                                                                value={currentStock}
-                                                                className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
-                                                                onChange={(e) => {
-                                                                    const value = Math.max(0, Number(e.target.value) || 0)
-                                                                    updateInventory(ingredient.id, value)
-                                                                }}
-                                                            />
-                                                            <span className="text-md text-amber-700 font-semibold">{ingredient.unit}</span>
-                                                        </div>
+                                                {/* Inventory Information */} <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">                                                <div className="flex items-center justify-between text-md">
+                                                    <span className="text-md text-gray-800">Stock actual:</span>
+                                                    <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg ml-4 px-3 py-2 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0"
+                                                            value={currentStock}
+                                                            className="w-16 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0 text-right"
+                                                            onChange={(e) => {
+                                                                const value = Math.max(0, Number(e.target.value) || 0)
+                                                                updateInventory(ingredient.id, value)
+                                                            }}
+                                                        />
+                                                        <span className="text-md text-amber-700 font-semibold ml-2 whitespace-nowrap">
+                                                            {ingredient.unit}
+                                                        </span>
                                                     </div>
+                                                </div>
                                                     {isLowStock && inventoryItem && (
                                                         <div className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded mt-2">
                                                             <div className="flex items-center gap-2 font-semibold text-sm mb-1">
