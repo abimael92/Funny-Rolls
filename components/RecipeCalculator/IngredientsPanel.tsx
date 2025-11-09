@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calculator, Plus, Trash2, Edit } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
+import { UnitConverter } from '../../lib/unit-conversion';
 import { EditableIngredientRow } from './EditableIngredientRow'
 
 interface IngredientsPanelProps {
@@ -75,6 +76,28 @@ export function IngredientsPanel({
         ))
         setEditingIngredientId(null)
     }
+
+    // Conversion function
+    const convertToReadableUnit = (amount: number, unit: string): string => {
+        // For small amounts, convert to more appropriate units
+        if (unit === 'kg' && amount < 1) {
+            const converted = UnitConverter.convert({ value: amount, unit: 'kg' }, 'g');
+            return converted ? `${converted.value.toFixed(0)}g` : `${amount} ${unit}`;
+        }
+
+        if ((unit === 'l' || unit === 'litro') && amount < 1) {
+            const converted = UnitConverter.convert({ value: amount, unit: 'l' }, 'ml');
+            return converted ? `${converted.value.toFixed(0)}ml` : `${amount} ${unit}`;
+        }
+
+        if (unit === 'docena' && amount < 1) {
+            const converted = UnitConverter.convert({ value: amount, unit: 'docena' }, 'unidad');
+            return converted ? `${converted.value.toFixed(0)} unidades` : `${amount} ${unit}`;
+        }
+
+        // Return original if no conversion needed or conversion fails
+        return `${amount} ${unit}`;
+    };
 
     return (
         <Card className="w-full">
@@ -235,25 +258,25 @@ export function IngredientsPanel({
                                                     </div>
                                                 </div>
 
-                                                {/* Inventory Information */}
-                                                <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">
-                                                    <div className="flex items-center justify-between text-md">
-                                                        <span className="text-md  text-gray-800">Stock actual:</span>
-                                                        <div className="flex items-center gap-2 bg-white border-2 border-amber-300 rounded-lg ml-4 px-3 py-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
-                                                            <input
-                                                                type="number"
-                                                                step="0.01"
-                                                                min="0"
-                                                                value={currentStock}
-                                                                className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
-                                                                onChange={(e) => {
-                                                                    const value = Math.max(0, Number(e.target.value) || 0)
-                                                                    updateInventory(ingredient.id, value)
-                                                                }}
-                                                            />
-                                                            <span className="text-md text-amber-700 font-semibold">{ingredient.unit}</span>
-                                                        </div>
+                                                {/* Inventory Information */} <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">                                                <div className="flex items-center justify-between text-md">
+                                                    <span className="text-md text-gray-800">Stock actual:</span>
+                                                    <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg ml-4 px-3 py-2 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0"
+                                                            value={currentStock}
+                                                            className="w-16 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0 text-right"
+                                                            onChange={(e) => {
+                                                                const value = Math.max(0, Number(e.target.value) || 0)
+                                                                updateInventory(ingredient.id, value)
+                                                            }}
+                                                        />
+                                                        <span className="text-md text-amber-700 font-semibold ml-2 whitespace-nowrap">
+                                                            {ingredient.unit}
+                                                        </span>
                                                     </div>
+                                                </div>
                                                     {isLowStock && inventoryItem && (
                                                         <div className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded mt-2">
                                                             <div className="flex items-center gap-2 font-semibold text-sm mb-1">
@@ -262,7 +285,7 @@ export function IngredientsPanel({
                                                             <div className="flex items-center p-2 text-xs">
                                                                 <span className="font-medium">Faltan:</span>
                                                                 <span className="font-bold ml-1 text-red-700">
-                                                                    {(ingredient.minAmount - currentStock).toFixed(2)} {ingredient.unit}
+                                                                    {convertToReadableUnit(Number((ingredient.minAmount - currentStock).toFixed(2)), ingredient.unit)}
                                                                 </span>
                                                                 {/* <span className="font-medium">Actual:</span>
                                                                 <span className="font-bold">{currentStock.toFixed(2)} {ingredient.unit}</span>

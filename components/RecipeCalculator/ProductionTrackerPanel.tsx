@@ -36,11 +36,6 @@ export function ProductionTrackerPanel({
     const [expandedRecords, setExpandedRecords] = useState<Set<string>>(new Set());
     const [currentProductionItems, setCurrentProductionItems] = useState<{ [recordId: string]: ProductionItem[] }>({})
 
-    console.log('this are props', productionHistory,
-        recipes,
-    );
-
-
     // Toggle accordion
     const toggleRecord = (recordId: string) => {
         const newExpanded = new Set(expandedRecords);
