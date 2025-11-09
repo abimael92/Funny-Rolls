@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calculator, Plus, Trash2, Edit } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
+import { UnitConverter } from '../../lib/unit-conversion';
 import { EditableIngredientRow } from './EditableIngredientRow'
 
 interface IngredientsPanelProps {
@@ -75,6 +76,28 @@ export function IngredientsPanel({
         ))
         setEditingIngredientId(null)
     }
+
+    // Conversion function
+    const convertToReadableUnit = (amount: number, unit: string): string => {
+        // For small amounts, convert to more appropriate units
+        if (unit === 'kg' && amount < 1) {
+            const converted = UnitConverter.convert({ value: amount, unit: 'kg' }, 'g');
+            return converted ? `${converted.value.toFixed(0)}g` : `${amount} ${unit}`;
+        }
+
+        if ((unit === 'l' || unit === 'litro') && amount < 1) {
+            const converted = UnitConverter.convert({ value: amount, unit: 'l' }, 'ml');
+            return converted ? `${converted.value.toFixed(0)}ml` : `${amount} ${unit}`;
+        }
+
+        if (unit === 'docena' && amount < 1) {
+            const converted = UnitConverter.convert({ value: amount, unit: 'docena' }, 'unidad');
+            return converted ? `${converted.value.toFixed(0)} unidades` : `${amount} ${unit}`;
+        }
+
+        // Return original if no conversion needed or conversion fails
+        return `${amount} ${unit}`;
+    };
 
     return (
         <Card className="w-full">
@@ -262,7 +285,7 @@ export function IngredientsPanel({
                                                             <div className="flex items-center p-2 text-xs">
                                                                 <span className="font-medium">Faltan:</span>
                                                                 <span className="font-bold ml-1 text-red-700">
-                                                                    {(ingredient.minAmount - currentStock).toFixed(2)} {ingredient.unit}
+                                                                    {convertToReadableUnit(Number((ingredient.minAmount - currentStock).toFixed(2)), ingredient.unit)}
                                                                 </span>
                                                                 {/* <span className="font-medium">Actual:</span>
                                                                 <span className="font-bold">{currentStock.toFixed(2)} {ingredient.unit}</span>
