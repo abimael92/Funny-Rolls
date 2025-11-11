@@ -80,7 +80,7 @@ _Enviado desde Funny Rolls Website_`;
                 type="text"
                 id="name"
                 name="name"
-                className="w-full px-4 py-3 border border-[#C48A6A]/30 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-[#C48A6A]/30 bg-amber-100 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent transition-all"
                 placeholder="Tu nombre"
                 required
               />
@@ -102,7 +102,7 @@ _Enviado desde Funny Rolls Website_`;
                 type="tel"
                 id="phone"
                 name="phone"
-                className="w-full px-4 py-3 border border-[#C48A6A]/30 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-[#C48A6A]/30 bg-amber-100 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent transition-all"
                 placeholder="+52 123 456 7890"
                 required
               />
@@ -113,7 +113,7 @@ _Enviado desde Funny Rolls Website_`;
                 id="message"
                 name="message"
                 rows={4}
-                className="w-full px-4 py-3 border border-[#C48A6A]/30 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-[#C48A6A]/30 bg-amber-100 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent transition-all"
                 placeholder="Cuéntanos sobre tu pedido personalizado o solo saluda"
                 required
               />
