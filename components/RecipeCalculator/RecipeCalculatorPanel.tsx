@@ -618,7 +618,7 @@ export function RecipeCalculatorPanel({
                         <div className="flex items-center mb-4">
                             <h3 className="w-full font-semibold text-amber-800 text-xl flex items-center justify-between">
                                 <span>Ingredientes de la Receta</span>
-                                <span className="text-amber-600 bg-amber-100 px-2 py-1 rounded-full text-xs font-normal">
+                                <span className=" text-sm text-amber-700 bg-amber-100 px-2 py-1 rounded-full font-normal">
                                     {selectedRecipe.ingredients.length} ingredientes
                                 </span>
                             </h3>
