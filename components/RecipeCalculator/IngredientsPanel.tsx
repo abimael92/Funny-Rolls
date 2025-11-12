@@ -258,7 +258,8 @@ export function IngredientsPanel({
                                                     </div>
                                                 </div>
 
-                                                {/* Inventory Information */} <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">                                                <div className="flex items-center justify-between text-md">
+                                                {/* Inventory Information */}
+                                                <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">                                                <div className="flex items-center justify-between text-md">
                                                     <span className="text-md text-gray-800">Stock actual:</span>
                                                     <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg ml-4 px-3 py-2 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
                                                         <input
