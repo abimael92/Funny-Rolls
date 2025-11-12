@@ -261,18 +261,50 @@ export function IngredientsPanel({
                                                 {/* Inventory Information */}
                                                 <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">                                                <div className="flex items-center justify-between text-md">
                                                     <span className="text-md text-gray-800">Stock actual:</span>
-                                                    <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg ml-4 px-3 py-2 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
+
+                                                    <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-2 py-1 ml-4 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm">
+
+                                                        {/* Custom Decrement Button */}
+                                                        <button
+                                                            type="button"
+                                                            className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                                                            onClick={() => {
+                                                                const newValue = Math.max(0, (currentStock - 1) || 0);
+                                                                updateInventory(ingredient.id, newValue);
+                                                            }}
+                                                        >
+                                                            <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                                            </svg>
+                                                        </button>
+
+                                                        {/* Number Input */}
                                                         <input
                                                             type="number"
                                                             step="0.01"
                                                             min="0"
                                                             value={currentStock}
-                                                            className="w-16 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0 text-right"
+                                                            className="w-10 bg-transparent border-none text-center text-sm font-bold text-amber-900 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                             onChange={(e) => {
                                                                 const value = Math.max(0, Number(e.target.value) || 0)
                                                                 updateInventory(ingredient.id, value)
                                                             }}
                                                         />
+
+                                                        {/* Custom Increment Button */}
+                                                        <button
+                                                            type="button"
+                                                            className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                                                            onClick={() => {
+                                                                const newValue = (currentStock + 1) || 1;
+                                                                updateInventory(ingredient.id, newValue);
+                                                            }}
+                                                        >
+                                                            <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                            </svg>
+                                                        </button>
+
                                                         <span className="text-md text-amber-700 font-semibold ml-2 whitespace-nowrap">
                                                             {ingredient.unit}
                                                         </span>
