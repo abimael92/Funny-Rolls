@@ -11,25 +11,50 @@ Funny Rolls
 
 [Características](#-características) • [Demo](#-demo-live) • [Instalación](#-instalación) • [Tecnologías](#-tecnologías) • [Estructura](#-estructura-del-proyecto)
 
+##  Demo Live
+
+**URL de Producción:** [https://funny-rolls.vercel.app](https://funny-rolls.vercel.app)
 
 
-Descripción del Proyecto
+# Descripción del Proyecto
 Funny Rolls es una aplicación web moderna y responsive para una panadería especializada en rollos de canela. La plataforma incluye tanto un sitio web de presentación para clientes como una calculadora de costos avanzada para la gestión de recetas.
 
-Características Principales
+# Características Principales
 - Sitio Web Corporativo: Presentación de productos, información de la empresa y contacto
 - Calculadora de Costos: Herramienta avanzada para calcular costos de producción y rentabilidad
 - Carrito de Compras: Sistema de pedidos en línea
-- Diseño Responsive: Optimizado para dispositivos móviles y desktop
-- Interfaz Bilingüe: Español como idioma principal
+- **Diseño Responsive** - Optimizado para móviles, tablets y desktop
+- **Interfaz Bilingüe** - Español como idioma principal con arquitectura para internacionalización
+- **SEO Friendly** - Metadatos optimizados y estructura semántica
 
-Tecnologías Utilizadas
+### **Calculadora de Costos Avanzada**
+- **Gestión de Ingredientes** - Agregar, editar, eliminar con validación en tiempo real
+- **Cálculos Automáticos** - Costos, ganancias, márgenes y precios de venta
+- **Persistencia Local** - Datos guardados automáticamente en localStorage
+- **Exportación/Importación** - Backup y restauración de datos en JSON
+- **Vista Móvil Adaptativa** - Diseño flip-card para mejor experiencia en móviles
+
+###  **Sistema E-commerce**
+- **Carrito Inteligente** - Gestión de pedidos con modal interactivo
+- **Integración WhatsApp** - Pedidos directos vía WhatsApp Business
+- **Galería de Productos** - Presentación visual atractiva de rollos especiales
+- **Gestión de Inventario** - Control de disponibilidad y precios
+
+
+
+###  Capturas de Pantalla
+| Página Principal | Calculadora | Carrito |
+|------------------|-------------|---------|
+| ![Home](https://via.placeholder.com/300x200/8B4513/FFFFFF?text=Home) | ![Calculator](https://via.placeholder.com/300x200/C48A6A/FFFFFF?text=Calculator) | ![Cart](https://via.placeholder.com/300x200/FFC1C1/000000?text=Cart) |
+
+##  Tecnologías
 - Frontend: Next.js 14, React, TypeScript
 - Styling: Tailwind CSS
 - UI Components: Componentes personalizados con shadcn/ui
 - Fuentes: Google Fonts (Pacifico, Inter)
 - Iconos: Lucide React
 - Almacenamiento: LocalStorage para persistencia de datos
+
 
 Estructura del Proyecto
 funny-rolls/
