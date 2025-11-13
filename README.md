@@ -1,5 +1,18 @@
 Funny Rolls
 
+![Funny Rolls Banner](https://via.placeholder.com/1200x400/8B4513/FFFFFF?text=Funny+Rolls+-+Ríe+y+Disfruta+Cada+Remolino!)
+
+**Una experiencia dulce y moderna para amantes de los rollos de canela**  
+*Calculadora de costos integrada + E-commerce elegante*
+
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+
+[Características](#-características) • [Demo](#-demo-live) • [Instalación](#-instalación) • [Tecnologías](#-tecnologías) • [Estructura](#-estructura-del-proyecto)
+
+
+
 Descripción del Proyecto
 Funny Rolls es una aplicación web moderna y responsive para una panadería especializada en rollos de canela. La plataforma incluye tanto un sitio web de presentación para clientes como una calculadora de costos avanzada para la gestión de recetas.
 
