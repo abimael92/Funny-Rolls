@@ -729,21 +729,21 @@ export function RecipeCalculatorPanel({
                     {/* Cost Summary */}
                     <Card className="bg-amber-50 border-amber-200">
                         <CardContent className="p-4">
-                            <h3 className="font-semibold mb-3 text-amber-800 text-xl">Resumen de Costos</h3>
+                            <h3 className="font-semibold mb-3 text-amber-800 text-2xl text-center">Resumen de Costos</h3>
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
+                                <div className="text-center">
                                     <div className="text-gray-600 text-md">Costo Total Lote</div>
                                     <div className="font-bold text-lg">${totalRecipeCost.toFixed(2)}</div>
                                 </div>
-                                <div>
+                                <div className="text-center">
                                     <div className="text-gray-600 text-md">Costo por Unidad</div>
                                     <div className="font-bold text-lg">${costPerItem.toFixed(2)}</div>
                                 </div>
-                                <div>
+                                <div className="text-center">
                                     <div className="text-gray-600 text-md">Ganancia/Unidad</div>
                                     <div className="font-bold text-lg text-green-600">${profit.toFixed(2)}</div>
                                 </div>
-                                <div>
+                                <div className="text-center">
                                     <div className="text-gray-600 text-md">Margen %</div>
                                     <div className="font-bold text-lg text-green-600">{profitPercentage.toFixed(1)}%</div>
                                 </div>
@@ -778,7 +778,7 @@ export function RecipeCalculatorPanel({
                                         </div>
                                     </div>
 
-                                    <div className="bg-white border-2 border-blue-400 rounded-xl p-4">
+                                    <div className="bg-white border-2 border-blue-300 rounded-xl p-4">
                                         <div className="text-sm text-gray-600 mb-2">Meta de Lotes</div>
                                         <div className="text-xl font-bold text-blue-700">
                                             {Math.ceil(
