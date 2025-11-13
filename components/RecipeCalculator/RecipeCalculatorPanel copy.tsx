@@ -694,12 +694,6 @@ export function RecipeCalculatorPanel({
                                 )
                             })}
 
-                            {selectedRecipe.ingredients.length === 0 && (
-                                <div className="text-center py-8">
-                                    <div className="text-amber-500 text-sm mb-2">No hay ingredientes en esta receta</div>
-                                    <div className="text-amber-400 text-xs">Agrega ingredientes usando la sección de arriba</div>
-                                </div>
-                            )}
                         </div>
 
 

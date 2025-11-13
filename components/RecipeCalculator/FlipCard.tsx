@@ -100,37 +100,102 @@ export function FlipCard({
                                     <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-700 text-left font-medium">Lote:<br className="hidden sm:block" />(unidades)</span>
-                                            <input
-                                                type="number"
-                                                value={selectedRecipe.batchSize}
-                                                onChange={(e) => {
-                                                    const value = Math.max(1, Math.min(1000, Number(e.target.value) || 1))
-                                                    updateRecipeBatchSize(value)
-                                                }}
-                                                className="w-16 sm:w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-bold flip-card-input"
-                                                min="1"
-                                                max="1000"
-                                            />
+
+                                            <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg p-1 ml-4 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm">
+
+                                                {/* Custom Decrement Button */}
+                                                <button
+                                                    type="button"
+                                                    className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                                                    onClick={() => {
+                                                        const newValue = Math.max(0, (selectedRecipe.batchSize - 1) || 0);
+                                                        updateRecipeBatchSize(newValue);
+                                                    }}
+                                                >
+                                                    <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                                    </svg>
+                                                </button>
+
+                                                {/* Number Input */}
+                                                <input
+                                                    type="number"
+                                                    value={selectedRecipe.batchSize}
+                                                    onChange={(e) => {
+                                                        const value = Math.max(1, Math.min(1000, Number(e.target.value) || 1))
+                                                        updateRecipeBatchSize(value)
+                                                    }}
+                                                    className="w-10 sm:w-14 px-2 py-1 text-base text-center font-bold flip-card-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                    min="1"
+                                                    max="1000"
+                                                />
+
+                                                {/* Custom Increment Button */}
+                                                <button
+                                                    type="button"
+                                                    className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                                                    onClick={() => {
+                                                        const newValue = (selectedRecipe.batchSize + 1) || 1;
+                                                        updateRecipeBatchSize(newValue);
+                                                    }}
+                                                >
+                                                    <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-700 font-medium">Precio:</span>
                                             <div className="flex items-center gap-1">
                                                 <span className="text-green-600 text-base">$</span>
-                                                <input
-                                                    type="number"
-                                                    value={selectedRecipe.sellingPrice}
-                                                    onChange={(e) => {
-                                                        const value = Math.max(0, Math.min(10000, Number(e.target.value) || 0))
-                                                        updateRecipeSellingPrice(value)
-                                                    }}
-                                                    className="w-16 sm:w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-bold flip-card-input"
-                                                    min="0"
-                                                    max="10000"
-                                                    step="0.01"
-                                                />
+                                                <div className="flex items-center bg-white border-2 border-green-300 rounded-lg p-1 ml-4 hover:border-green-400 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-200 transition-all duration-200 shadow-sm">
+
+                                                    {/* Custom Decrement Button */}
+                                                    <button
+                                                        type="button"
+                                                        className="w-4 h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-l-md border-r border-green-200 hover:bg-agreenber-100 active:bg-green-200 transition-colors duration-150 group"
+                                                        onClick={() => {
+                                                            const newValue = Math.max(0, (selectedRecipe.batchSize - 1) || 0);
+                                                            updateRecipeBatchSize(newValue);
+                                                        }}
+                                                    >
+                                                        <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                                        </svg>
+                                                    </button>
+
+                                                    <input
+                                                        type="number"
+                                                        value={selectedRecipe.sellingPrice}
+                                                        onChange={(e) => {
+                                                            const value = Math.max(0, Math.min(10000, Number(e.target.value) || 0))
+                                                            updateRecipeSellingPrice(value)
+                                                        }}
+                                                        className="w-15 sm:w-15 p-1 text-base text-center text-green-600 font-bold flip-card-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                        min="0"
+                                                        max="10000"
+                                                        step="0.01"
+                                                    />
+
+                                                    {/* Custom Increment Button */}
+                                                    <button
+                                                        type="button"
+                                                        className="w-4 h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-r-md border-l border-green-200 hover:bg-green-100 active:bg-amber-200 transition-colors duration-150 group"
+                                                        onClick={() => {
+                                                            const newValue = (selectedRecipe.batchSize + 1) || 1;
+                                                            updateRecipeBatchSize(newValue);
+                                                        }}
+                                                    >
+                                                        <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
+
                                         <div className="flex justify-between">
                                             <span className="text-gray-700 font-medium">Costo:</span>
                                             <span className="font-bold text-base">${costPerItem.toFixed(2)}</span>
