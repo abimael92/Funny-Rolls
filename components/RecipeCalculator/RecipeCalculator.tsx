@@ -73,7 +73,8 @@ export function RecipeCalculator() {
                 ingredientId: ingredient.id,
                 currentStock: 0,
                 unit: ingredient.unit,
-                minimumStock: 0
+                minimumStock: 0,
+                lastUpdated: new Date().toISOString()
             }))
             setInventory(initialInventory)
         }
