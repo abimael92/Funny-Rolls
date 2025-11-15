@@ -11,7 +11,7 @@ export default function RecipeCalculatorPage() {
         <div className="min-h-screen bg-[#FFF5E6]">
             <Navbar cart={cart} onCartOpen={() => { }} />
             <div className="py-8">
-                <div className="max-w-6xl mx-auto px-4">
+                <div className=" mx-auto px-20">
                     <RecipeCalculator />
                 </div>
             </div>

@@ -157,8 +157,8 @@ export function FlipCard({
                                                         type="button"
                                                         className="w-4 h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-l-md border-r border-green-200 hover:bg-agreenber-100 active:bg-green-200 transition-colors duration-150 group"
                                                         onClick={() => {
-                                                            const newValue = Math.max(0, (selectedRecipe.batchSize - 1) || 0);
-                                                            updateRecipeBatchSize(newValue);
+                                                            const newValue = Math.max(0, (selectedRecipe.sellingPrice - 1) || 0);
+                                                            updateRecipeSellingPrice(newValue);
                                                         }}
                                                     >
                                                         <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,8 +184,8 @@ export function FlipCard({
                                                         type="button"
                                                         className="w-4 h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-r-md border-l border-green-200 hover:bg-green-100 active:bg-amber-200 transition-colors duration-150 group"
                                                         onClick={() => {
-                                                            const newValue = (selectedRecipe.batchSize + 1) || 1;
-                                                            updateRecipeBatchSize(newValue);
+                                                            const newValue = (selectedRecipe.sellingPrice + 1) || 1;
+                                                            updateRecipeSellingPrice(newValue);
                                                         }}
                                                     >
                                                         <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
