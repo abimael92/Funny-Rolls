@@ -28,8 +28,7 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
       }
       setIsMenuOpen(false)
     } else {
-      // Navigate to home page with hash
-      router.push(`/${hash}`) // This should be just the hash, not preceded by slash
+      router.push(`/${hash}`)
     }
   }
 
@@ -37,28 +36,33 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
     <nav className="sticky top-0 left-0 w-full bg-amber-100 z-50
                     shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04),0_0_0_1px_rgba(0,0,0,0.05)]
                     border-b-8 border-amber-900/80">
-      <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between relative min-h-[120px]">
+
+      <div className="w-full flex items-center justify-between relative min-h-[100px] px-8">
+
 
         {/* Logo Left */}
-        <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center">
+        <div className="flex-shrink-0 flex items-center">
+
           <Link href="/">
             <Image
               src="/img/title.png"
               alt="Logo Funny Rolls"
-              width={100}
-              height={100}
+              width={160}
+              height={160}
               className="object-contain cursor-pointer"
             />
           </Link>
         </div>
 
         {/* Title Center (hidden on mobile) */}
-        <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-amber-800 font-['Pacifico'] text-3xl select-none pointer-events-none">
-          Funny Rolls
+        <div className="hidden md:block flex-1 text-center px-4">
+          <div className="hidden md:block absolute px-2  mx-2 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-amber-800 font-['Pacifico'] text-5xl select-none pointer-events-none">
+            Funny Rolls
+          </div>
         </div>
 
         {/* Desktop Menu Right */}
-        <div className="hidden md:flex flex-col items-end gap-2 absolute right-6 top-1/2 -translate-y-1/2">
+        <div className="hidden md:flex flex-col items-end gap-2 ml-auto mt-5">
 
           <Button
             onClick={onCartOpen}
@@ -73,50 +77,42 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
             )}
           </Button>
 
-          <div className="group ml-4 relative">
-            <div className="flex items-center gap-1.5 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">
-              <button
-                onClick={() => handleNavigation('#home')}
-                className="text-warm-brown hover:text-amber-600 transition-colors"
-              >
-                Inicio
-              </button>
-              <div className="w-px h-4 bg-amber-800/50"></div>
-
-              <button
-                onClick={() => handleNavigation('#menu')}
-                className="text-warm-brown hover:text-amber-600 transition-colors"
-              >
-                Menú
-              </button>
-              <div className="w-px h-4 bg-amber-800/50"></div>
-
-              <button
-                onClick={() => handleNavigation('#about')}
-                className="text-warm-brown hover:text-amber-600 transition-colors"
-              >
-                Acerca de
-              </button>
-              <div className="w-px h-4 bg-amber-800/50"></div>
-
-              <button
-                onClick={() => handleNavigation('#contact')}
-                className="text-warm-brown hover:text-amber-600 transition-colors"
-              >
-                Contacto
-              </button>
-              <div className="w-px h-4 bg-amber-800/50"></div>
-
-              <Link
-                href="/recipe-calculator"
-                className="text-warm-brown hover:text-amber-600 transition-colors"
-              >
-                Calculadora
-              </Link>
-            </div>
+          <div className="flex items-center gap-1 ">
+            <button
+              onClick={() => handleNavigation('#home')}
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
+              Inicio
+            </button>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <button
+              onClick={() => handleNavigation('#menu')}
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
+              Menú
+            </button>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <button
+              onClick={() => handleNavigation('#about')}
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
+              Acerca de
+            </button>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <button
+              onClick={() => handleNavigation('#contact')}
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
+              Contacto
+            </button>
+            <div className="w-px h-4 bg-amber-800/50"></div>
+            <Link
+              href="/recipe-calculator"
+              className="text-warm-brown hover:text-amber-600 transition-colors"
+            >
+              Calculadora
+            </Link>
           </div>
-
-
         </div>
 
         {/* Mobile Menu Right */}
@@ -143,43 +139,45 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-[#C48A6A]/20 border-t border-[#C48A6A]/20 animate-scale-in">
-          <div className="px-4 py-1.5 flex flex-col">
-            <button
-              onClick={() => handleNavigation('#home')}
-              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
-            >
-              Inicio
-            </button>
-            <button
-              onClick={() => handleNavigation('#menu')}
-              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
-            >
-              Menú
-            </button>
-            <button
-              onClick={() => handleNavigation('#about')}
-              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
-            >
-              Acerca de
-            </button>
-            <button
-              onClick={() => handleNavigation('#contact')}
-              className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
-            >
-              Contacto
-            </button>
-            <Link
-              href="/recipe-calculator"
-              onClick={() => setIsMenuOpen(false)}
-              className="text-warm-brown transition-colors py-1 text-left"
-            >
-              Calculadora
-            </Link>
+      {
+        isMenuOpen && (
+          <div className="md:hidden bg-[#C48A6A]/20 border-t border-[#C48A6A]/20 animate-scale-in">
+            <div className="px-4 py-1.5 flex flex-col">
+              <button
+                onClick={() => handleNavigation('#home')}
+                className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
+              >
+                Inicio
+              </button>
+              <button
+                onClick={() => handleNavigation('#menu')}
+                className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
+              >
+                Menú
+              </button>
+              <button
+                onClick={() => handleNavigation('#about')}
+                className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
+              >
+                Acerca de
+              </button>
+              <button
+                onClick={() => handleNavigation('#contact')}
+                className="text-warm-brown py-1 border-b transition-colors border-[#C48A6A]/30 text-left"
+              >
+                Contacto
+              </button>
+              <Link
+                href="/recipe-calculator"
+                onClick={() => setIsMenuOpen(false)}
+                className="text-warm-brown transition-colors py-1 text-left"
+              >
+                Calculadora
+              </Link>
+            </div>
           </div>
-        </div>
-      )}
-    </nav>
+        )
+      }
+    </nav >
   )
 }
