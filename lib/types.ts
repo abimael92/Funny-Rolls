@@ -85,7 +85,7 @@ export interface InventoryItem {
 	currentStock: number;
 	unit: string;
 	minimumStock: number;
-	lastUpdated: string | Date;
+	lastUpdated?: string | Date;
 	costPerUnit?: number;
 	supplier?: string;
 }
