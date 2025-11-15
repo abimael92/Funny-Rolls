@@ -37,7 +37,7 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
     <nav className="sticky top-0 left-0 w-full bg-amber-100 z-50
                     shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04),0_0_0_1px_rgba(0,0,0,0.05)]
                     border-b-8 border-amber-900/80">
-      <div className="max-w-8xl mx-auto px-6 py-8 flex items-center justify-between relative min-h-[120px]">
+      <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between relative min-h-[120px]">
 
         {/* Logo Left */}
         <div className="absolute left-6 top-1/2 -translate-y-1/2 flex items-center">
@@ -45,15 +45,15 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
             <Image
               src="/img/title.png"
               alt="Logo Funny Rolls"
-              width={180}
-              height={180}
+              width={100}
+              height={100}
               className="object-contain cursor-pointer"
             />
           </Link>
         </div>
 
         {/* Title Center (hidden on mobile) */}
-        <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-amber-800 font-['Pacifico'] text-6xl select-none pointer-events-none">
+        <div className="hidden md:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-amber-800 font-['Pacifico'] text-3xl select-none pointer-events-none">
           Funny Rolls
         </div>
 
@@ -73,42 +73,49 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
             )}
           </Button>
 
-          <div className="flex items-center gap-2.5 ml-4">
-            <button
-              onClick={() => handleNavigation('#home')}
-              className="text-warm-brown hover:text-amber-600 transition-colors"
-            >
-              Inicio
-            </button>
-            <div className="w-px h-4 bg-amber-800/50"></div>
-            <button
-              onClick={() => handleNavigation('#menu')}
-              className="text-warm-brown hover:text-amber-600 transition-colors"
-            >
-              Menú
-            </button>
-            <div className="w-px h-4 bg-amber-800/50"></div>
-            <button
-              onClick={() => handleNavigation('#about')}
-              className="text-warm-brown hover:text-amber-600 transition-colors"
-            >
-              Acerca de
-            </button>
-            <div className="w-px h-4 bg-amber-800/50"></div>
-            <button
-              onClick={() => handleNavigation('#contact')}
-              className="text-warm-brown hover:text-amber-600 transition-colors"
-            >
-              Contacto
-            </button>
-            <div className="w-px h-4 bg-amber-800/50"></div>
-            <Link
-              href="/recipe-calculator"
-              className="text-warm-brown hover:text-amber-600 transition-colors"
-            >
-              Calculadora
-            </Link>
+          <div className="group ml-4 relative">
+            <div className="flex items-center gap-1.5 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">
+              <button
+                onClick={() => handleNavigation('#home')}
+                className="text-warm-brown hover:text-amber-600 transition-colors"
+              >
+                Inicio
+              </button>
+              <div className="w-px h-4 bg-amber-800/50"></div>
+
+              <button
+                onClick={() => handleNavigation('#menu')}
+                className="text-warm-brown hover:text-amber-600 transition-colors"
+              >
+                Menú
+              </button>
+              <div className="w-px h-4 bg-amber-800/50"></div>
+
+              <button
+                onClick={() => handleNavigation('#about')}
+                className="text-warm-brown hover:text-amber-600 transition-colors"
+              >
+                Acerca de
+              </button>
+              <div className="w-px h-4 bg-amber-800/50"></div>
+
+              <button
+                onClick={() => handleNavigation('#contact')}
+                className="text-warm-brown hover:text-amber-600 transition-colors"
+              >
+                Contacto
+              </button>
+              <div className="w-px h-4 bg-amber-800/50"></div>
+
+              <Link
+                href="/recipe-calculator"
+                className="text-warm-brown hover:text-amber-600 transition-colors"
+              >
+                Calculadora
+              </Link>
+            </div>
           </div>
+
 
         </div>
 

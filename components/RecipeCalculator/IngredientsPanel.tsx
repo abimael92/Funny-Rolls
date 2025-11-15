@@ -231,6 +231,7 @@ export function IngredientsPanel({
                             >
                                 {editingIngredientId === ingredient.id ? (
                                     <EditableIngredientRow
+                                        key='EditableIngredientRow'
                                         ingredient={ingredient}
                                         onSave={saveEditedIngredient}
                                         onCancel={() => setEditingIngredientId(null)}
