@@ -8,6 +8,7 @@ import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
 import { UnitConverter } from '../../lib/unit-conversion';
 import { EditableIngredientRow } from './EditableIngredientRow'
+import { CustomNumberInput } from './CustomNumberInput';
 
 interface IngredientsPanelProps {
     ingredients: Ingredient[]
@@ -60,7 +61,7 @@ export function IngredientsPanel({
             id: Date.now().toString()
         }
         setIngredients([...ingredients, ingredient])
-        setNewIngredient({ name: '', price: 0, unit: '', amount: 1, minAmount: 0 })
+        setNewIngredient({ name: '', price: 0, unit: '', amount: 0, minAmount: 0 })
     }
 
     // Remove ingredient
@@ -126,7 +127,7 @@ export function IngredientsPanel({
                 )}
 
                 {/* Add New Ingredient */}
-                <div className="mb-4">
+                <div className="mb-4 overflow-hidden">
                     <div
                         onClick={() => setShowAddSection(!showAddSection)}
                         className={`w-full bg-amber-600 hover:bg-amber-700 text-white text-base py-2 px-4 cursor-pointer flex items-center justify-center transition-all duration-300 ease-out relative ${showAddSection ? 'rounded-t-lg' : 'rounded-lg'
@@ -138,9 +139,10 @@ export function IngredientsPanel({
                         <ChevronDown className={`h-6 w-6 absolute right-4 transition-transform duration-300 ease-out ${showAddSection ? '-rotate-180' : ''}`} />
                     </div>
 
-                    {showAddSection && (
-                        <div className="p-4 bg-amber-50 rounded-b-lg border border-amber-300 border-t-0 animate-in slide-in-from-top-1 duration-300 ease-out">
-                            <h3 className="font-semibold text-lg text-amber-800 text-center">Agregar Ingrediente</h3>
+                    <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                        }`}>
+                        <div className="p-4 bg-amber-50 rounded-b-lg border border-amber-300 border-t-0">
+                            <h3 className="font-semibold text-lg text-amber-800 text-center mb-4">Agregar Ingrediente</h3>
                             <div className="space-y-3">
                                 <input
                                     type="text"
@@ -153,15 +155,14 @@ export function IngredientsPanel({
                                     className="w-full px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                 />
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0.01"
+                                    <CustomNumberInput
+                                        value={newIngredient.amount || 0}
+                                        onChange={(value) => setNewIngredient({ ...newIngredient, amount: value })}
+                                        min={0}
+                                        max={10000}
                                         placeholder="Cantidad"
-                                        value={newIngredient.amount === 1 ? '' : newIngredient.amount}
-                                        onChange={(e) => setNewIngredient({ ...newIngredient, amount: Math.max(0.01, Number(e.target.value) || 1) })}
-                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                     />
+
                                     <select
                                         value={newIngredient.unit}
                                         onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
@@ -186,25 +187,23 @@ export function IngredientsPanel({
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <input
                                         type="number"
-                                        step="0.01"
-                                        min="0.01"
+                                        step="1"
+                                        min="0"
                                         placeholder="Precio $"
                                         value={newIngredient.price === 0 ? '' : newIngredient.price}
                                         className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                        onChange={(e) => setNewIngredient({ ...newIngredient, price: Math.max(0.01, Number(e.target.value) || 0) })}
+                                        onChange={(e) => setNewIngredient({ ...newIngredient, price: Math.max(1, Number(e.target.value) || 0) })}
                                         onBlur={(e) => {
                                             const value = Number(e.target.value)
                                             if (value <= 0) setNewIngredient({ ...newIngredient, price: 0.01 })
                                         }}
                                     />
-                                    <input
-                                        type="number"
-                                        step="0.01"
+                                    <CustomNumberInput
+                                        value={newIngredient.minAmount || 0}
+                                        onChange={(value) => setNewIngredient({ ...newIngredient, minAmount: value })}
                                         min={0}
+                                        max={10000}
                                         placeholder="Minimo"
-                                        value={newIngredient.minAmount === 0 ? '' : newIngredient.minAmount}
-                                        onChange={(e) => setNewIngredient({ ...newIngredient, minAmount: Math.max(0, Number(e.target.value) || 0) })}
-                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                     />
                                 </div>
                             </div>
@@ -213,8 +212,9 @@ export function IngredientsPanel({
                                 Agregar Ingrediente
                             </Button>
                         </div>
-                    )}
+                    </div>
                 </div>
+
 
 
                 {/* Divider */}
