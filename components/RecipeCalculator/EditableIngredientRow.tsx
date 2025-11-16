@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Save } from "lucide-react"
 import { Ingredient } from '@/lib/types'
+import { CustomNumberInput } from './CustomNumberInput';
 
 interface EditableIngredientRowProps {
     ingredient: Ingredient
@@ -39,15 +40,23 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                 {/* Amount Field */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad  </label>
-                    <input
+                    <CustomNumberInput
+                        value={localIngredient.amount ?? ''}
+                        onChange={(value) => setLocalIngredient({ ...localIngredient, amount: value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        min={0}
+                        max={10000}
+                        placeholder="Cantidad"
+                    />
+                    {/* <input
                         type="number"
                         step="0.01"
                         min="0.01"
                         value={localIngredient.amount}
                         onChange={(e) => setLocalIngredient(prev => ({ ...prev, amount: Number(e.target.value) || 1 }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      
                         placeholder="1.00"
-                    />
+                    /> */}
                 </div>
 
                 {/* Price Field */}
@@ -89,14 +98,18 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                     </select>
                 </div>
 
-
-
-
-
                 {/* Minimum Stock Field */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Stock mínimo</label>
-                    <input
+                    <CustomNumberInput
+                        value={localIngredient.minAmount || 0}
+                        onChange={(value) => setLocalIngredient({ ...localIngredient, minAmount: value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        min={0}
+                        max={10000}
+                        placeholder="Stock mínimo"
+                    />
+                    {/* <input
                         type="number"
                         step="0.01"
                         min="0"
@@ -104,7 +117,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                         onChange={(e) => setLocalIngredient(prev => ({ ...prev, minAmount: Number(e.target.value) || 0 }))}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="0.00"
-                    />
+                    /> */}
                 </div>
             </div>
 
