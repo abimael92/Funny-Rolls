@@ -41,8 +41,9 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad  </label>
                     <CustomNumberInput
-                        value={localIngredient.amount || 0}
+                        value={localIngredient.amount ?? ''}
                         onChange={(value) => setLocalIngredient({ ...localIngredient, amount: value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         min={0}
                         max={10000}
                         placeholder="Cantidad"
@@ -53,7 +54,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                         min="0.01"
                         value={localIngredient.amount}
                         onChange={(e) => setLocalIngredient(prev => ({ ...prev, amount: Number(e.target.value) || 1 }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      
                         placeholder="1.00"
                     /> */}
                 </div>
@@ -103,6 +104,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                     <CustomNumberInput
                         value={localIngredient.minAmount || 0}
                         onChange={(value) => setLocalIngredient({ ...localIngredient, minAmount: value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         min={0}
                         max={10000}
                         placeholder="Stock mínimo"
