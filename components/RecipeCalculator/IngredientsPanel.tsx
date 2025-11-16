@@ -9,6 +9,7 @@ import { getIngredientCostPerUnit } from '@/lib/utils'
 import { UnitConverter } from '../../lib/unit-conversion';
 import { EditableIngredientRow } from './EditableIngredientRow'
 import { CustomNumberInput } from './CustomNumberInput';
+import { CustomSelect } from './CustomSelect';
 
 interface IngredientsPanelProps {
     ingredients: Ingredient[]
@@ -28,7 +29,7 @@ export function IngredientsPanel({
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
     const [showAddSection, setShowAddSection] = useState(false);
     const [newIngredient, setNewIngredient] = useState<Omit<Ingredient, 'id'>>({
-        name: '', price: 0, unit: '', amount: 1, minAmount: 0
+        name: '', price: 0, unit: '', amount: 0, minAmount: 0
     });
 
     // Add new ingredient
@@ -158,31 +159,18 @@ export function IngredientsPanel({
                                     <CustomNumberInput
                                         value={newIngredient.amount || 0}
                                         onChange={(value) => setNewIngredient({ ...newIngredient, amount: value })}
+                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                         min={0}
                                         max={10000}
                                         placeholder="Cantidad"
+
                                     />
 
-                                    <select
+                                    <CustomSelect
                                         value={newIngredient.unit}
-                                        onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
-                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-gray-900"
-                                    >
-                                        <option value="" className="text-base">Seleccionar unidad</option>
-                                        <option value="kg">kg</option>
-                                        <option value="g">g</option>
-                                        <option value="lb">lb</option>
-                                        <option value="oz">oz</option>
-                                        <option value="l">l</option>
-                                        <option value="ml">ml</option>
-                                        <option value="cup">cup</option>
-                                        <option value="tbsp">tbsp</option>
-                                        <option value="tsp">tsp</option>
-                                        <option value="unidad">unidad</option>
-                                        <option value="docena">docena</option>
-                                        <option value="paquete">paquete</option>
-                                        <option value="sobre">sobre</option>
-                                    </select>
+                                        onChange={(value) => setNewIngredient({ ...newIngredient, unit: value })}
+                                    />
+
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <input
@@ -201,6 +189,7 @@ export function IngredientsPanel({
                                     <CustomNumberInput
                                         value={newIngredient.minAmount || 0}
                                         onChange={(value) => setNewIngredient({ ...newIngredient, minAmount: value })}
+                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                         min={0}
                                         max={10000}
                                         placeholder="Minimo"
