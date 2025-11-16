@@ -20,7 +20,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
     }
 
     return (
-        <div className="flex-1 min-w-0 space-y-4">
+        <div className="flex-1 min-w-0 space-y-3 sm:space-y-4">
             {/* Name Field */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
@@ -35,28 +35,18 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
             </div>
 
             {/* Grid for other fields */}
-            <div className="grid grid-cols-2 gap-4">
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {/* Amount Field */}
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad  </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
                     <CustomNumberInput
                         value={localIngredient.amount ?? ''}
                         onChange={(value) => setLocalIngredient({ ...localIngredient, amount: value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full"
                         min={0}
                         max={10000}
                         placeholder="Cantidad"
                     />
-                    {/* <input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        value={localIngredient.amount}
-                        onChange={(e) => setLocalIngredient(prev => ({ ...prev, amount: Number(e.target.value) || 1 }))}
-                      
-                        placeholder="1.00"
-                    /> */}
                 </div>
 
                 {/* Price Field */}
@@ -104,20 +94,11 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                     <CustomNumberInput
                         value={localIngredient.minAmount || 0}
                         onChange={(value) => setLocalIngredient({ ...localIngredient, minAmount: value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full"
                         min={0}
                         max={10000}
                         placeholder="Stock mínimo"
                     />
-                    {/* <input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={localIngredient.minAmount}
-                        onChange={(e) => setLocalIngredient(prev => ({ ...prev, minAmount: Number(e.target.value) || 0 }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="0.00"
-                    /> */}
                 </div>
             </div>
 
@@ -126,7 +107,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                 <Button
                     onClick={handleSave}
                     size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white"
+                    className="bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none"
                 >
                     <Save className="h-4 w-4 mr-1" />
                     Guardar
@@ -135,6 +116,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                     onClick={onCancel}
                     variant="outline"
                     size="sm"
+                    className="flex-1 sm:flex-none"
                 >
                     Cancelar
                 </Button>

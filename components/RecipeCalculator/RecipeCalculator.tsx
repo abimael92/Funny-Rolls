@@ -183,22 +183,22 @@ export function RecipeCalculator() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-0">
             {/* Header */}
             <div className="text-center">
-                <h1 className="font-cursive text-3xl md:text-4xl lg:text-5xl text-[#C48A6A] mb-3">
+                <h1 className="font-cursive text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#C48A6A] mb-2 sm:mb-3">
                     Calculadora de Costos
                 </h1>
-                <p className="text-base text-gray-600 max-w-2xl mx-auto px-4">
+                <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-2 sm:px-4">
                     Calcula los costos de tus recetas y optimiza tus ganancias
                 </p>
             </div>
 
             {/* Error Display */}
             {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mx-4 lg:mx-0">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded mx-2 sm:mx-4 lg:mx-0">
                     <div className="flex justify-between items-center">
-                        <span>{error}</span>
+                        <span className="text-sm sm:text-base">{error}</span>
                         <button
                             onClick={() => setError(null)}
                             className="text-red-700 hover:text-red-900 font-bold"
@@ -216,7 +216,7 @@ export function RecipeCalculator() {
             />
 
             {/* Content */}
-            <div className="lg:grid lg:grid-cols-3 lg:gap-8 space-y-8 lg:space-y-0">
+            <div className="lg:grid lg:grid-cols-3 lg:gap-6 xl:gap-8 space-y-6 lg:space-y-0">
                 {/* Ingredients Panel - Hidden on mobile unless selected */}
                 <div className={`${mobileView === 'ingredients' ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
                     <IngredientsPanel

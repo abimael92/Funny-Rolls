@@ -23,7 +23,7 @@ interface RecipeCalculatorPanelProps {
     recipes: Recipe[]
     setRecipes: (recipes: Recipe[]) => void
     ingredients: Ingredient[]
-    recordProduction: (recipeId: string, batchCount: number) => void // ✅ ADDED THIS PROP
+    recordProduction: (recipeId: string, batchCount: number) => void
 }
 
 export function RecipeCalculatorPanel({
@@ -32,7 +32,7 @@ export function RecipeCalculatorPanel({
     recipes,
     setRecipes,
     ingredients,
-    recordProduction // ✅ ADDED THIS PROP
+    recordProduction
 }: RecipeCalculatorPanelProps) {
     const [newStep, setNewStep] = useState('')
     const [isEditingSteps, setIsEditingSteps] = useState(false)
@@ -40,6 +40,13 @@ export function RecipeCalculatorPanel({
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
     const [productionBatchCount, setProductionBatchCount] = useState(1)
+    const [showCostModal, setShowCostModal] = useState(false);
+    const [showUnitCostModal, setShowUnitCostModal] = useState(false);
+    const [showProfitModal, setShowProfitModal] = useState(false);
+    const [showMarginModal, setShowMarginModal] = useState(false);
+    const [showTotalIngredientsModal, setShowTotalIngredientsModal] = useState(false);
+    const [showLotesModal, setShowLotesModal] = useState(false);
+
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -182,6 +189,16 @@ export function RecipeCalculatorPanel({
     const totalRecipeCost = calculateRecipeCost(selectedRecipe, ingredients)
     const profit = calculateProfit(selectedRecipe, ingredients)
     const profitPercentage = calculateProfitPercentage(selectedRecipe, ingredients)
+
+    // Calculate total cost of ONLY ingredients used in this recipe
+    const totalRecipeIngredientsCost = selectedRecipe.ingredients.reduce((total, recipeIngredient) => {
+        const ingredient = ingredients.find(ing => ing.id === recipeIngredient.ingredientId);
+        return ingredient ? total + ingredient.price : total;
+    }, 0);
+
+    // Calculate batches needed
+    const earningsPerLot = selectedRecipe.sellingPrice * selectedRecipe.batchSize;
+    const metaLotes = Math.ceil(totalRecipeIngredientsCost / earningsPerLot);
 
     return (
         <Card className="w-full">
@@ -647,7 +664,8 @@ export function RecipeCalculatorPanel({
                                                 <div className="flex items-center gap-3 mb-2">
                                                     <div className="font-semibold text-gray-900 text-lg">{ingredient.name}</div>
                                                     <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                                                        ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
+                                                        {/* ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit} */}
+                                                        ${getIngredientCostPerUnit(ingredient)}/{ingredient.unit}
                                                     </div>
                                                 </div>
 
@@ -704,25 +722,273 @@ export function RecipeCalculatorPanel({
 
                         {/* Quick Stats */}
                         <div className="grid grid-cols-2 gap-4 mt-10 lg:grid-cols-4">
-                            <div className="bg-white border-2 border-red-200 rounded-xl p-3 text-center">
+                            <div
+                                className="bg-white border-2 border-red-200 rounded-xl p-3 text-center cursor-pointer hover:bg-red-50 transition-colors"
+                                onClick={() => setShowUnitCostModal(true)}
+                            >
                                 <div className="text-sm text-gray-600">Costo/Unidad</div>
                                 <div className="text-lg font-bold text-red-700">${costPerItem.toFixed(2)}</div>
                             </div>
 
-                            <div className="bg-white border-2 border-green-200 rounded-xl p-3 text-center">
+                            <div className="bg-white border-2 border-green-200 rounded-xl p-3 text-center cursor-pointer hover:bg-green-50 transition-colors"
+                                onClick={() => setShowProfitModal(true)}>
                                 <div className="text-sm text-gray-600">Ganancia/Unidad</div>
                                 <div className="text-lg font-bold text-green-600">${profit.toFixed(2)}</div>
                             </div>
 
-                            <div className="bg-white border-2 border-blue-200 rounded-xl p-3 text-center">
+                            <div className="bg-white border-2 border-blue-200 rounded-xl p-3 text-center cursor-pointer hover:bg-blue-50 transition-colors"
+                                onClick={() => setShowMarginModal(true)}>
                                 <div className="text-sm text-gray-600">Margen %</div>
                                 <div className="text-lg font-bold text-blue-600">{profitPercentage.toFixed(1)}%</div>
                             </div>
 
-                            <div className="bg-white border-2 border-purple-200 rounded-xl p-3 text-center">
+                            {/* Clickable Cost Card */}
+                            <div
+                                className="bg-white border-2 border-purple-200 rounded-xl p-3 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-300 transition-all duration-200"
+                                onClick={() => setShowCostModal(true)}
+                            >
                                 <div className="text-sm text-gray-600">Costo Total</div>
                                 <div className="text-lg font-bold text-purple-700">${totalRecipeCost.toFixed(2)}</div>
                             </div>
+
+                            {/* Cost Breakdown Modal */}
+                            {showCostModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                    <div className="bg-white rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden">
+                                        <div className="p-4 border-b">
+                                            <h3 className="text-lg font-semibold text-purple-800">Desglose de Costos</h3>
+                                        </div>
+
+                                        <div className="p-4 overflow-y-auto max-h-64">
+                                            {selectedRecipe.ingredients.map((recipeIngredient) => {
+                                                const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
+                                                if (!ingredient) return null;
+
+                                                const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount;
+                                                const percentage = (cost / totalRecipeCost) * 100;
+
+                                                return (
+                                                    <div key={recipeIngredient.ingredientId} className="flex justify-between items-center py-2 border-b">
+                                                        <div className="flex-1">
+                                                            <div className="font-medium">{ingredient.name}</div>
+                                                            <div className="text-sm text-gray-500">
+                                                                {recipeIngredient.amount} {ingredient.unit} × ${getIngredientCostPerUnit(ingredient).toFixed(2)}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="font-bold">${cost.toFixed(2)}</div>
+                                                            <div className="text-sm text-gray-500">{percentage.toFixed(1)}%</div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <div className="p-4 border-t bg-gray-50">
+                                            <div className="flex justify-between items-center font-bold text-lg">
+                                                <span>Total:</span>
+                                                <span className="text-purple-700">${totalRecipeCost.toFixed(2)}</span>
+                                            </div>
+                                            <button
+                                                onClick={() => setShowCostModal(false)}
+                                                className="w-full mt-3 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                                            >
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Unit Cost Breakdown Modal */}
+                            {showUnitCostModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                    <div className="bg-white rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden">
+                                        <div className="p-4 border-b">
+                                            <h3 className="text-lg font-semibold text-red-800">Desglose por Unidad</h3>
+                                        </div>
+
+                                        <div className="p-4 overflow-y-auto max-h-64">
+                                            {selectedRecipe.ingredients.map((recipeIngredient) => {
+                                                const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
+                                                if (!ingredient) return null;
+
+                                                const unitCost = (getIngredientCostPerUnit(ingredient) * recipeIngredient.amount) / selectedRecipe.batchSize;
+                                                const percentage = (unitCost / costPerItem) * 100;
+
+                                                return (
+                                                    <div key={recipeIngredient.ingredientId} className="flex justify-between items-center py-2 border-b">
+                                                        <div className="flex-1">
+                                                            <div className="font-medium">{ingredient.name}</div>
+                                                            <div className="text-sm text-gray-500">
+                                                                {recipeIngredient.amount} {ingredient.unit} ÷ {selectedRecipe.batchSize} unidades
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="font-bold">${unitCost.toFixed(4)}</div>
+                                                            <div className="text-sm text-gray-500">{percentage.toFixed(1)}%</div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <div className="p-4 border-t bg-gray-50">
+                                            <div className="flex justify-between items-center font-bold text-lg">
+                                                <span>Costo por Unidad:</span>
+                                                <span className="text-red-700">${costPerItem.toFixed(2)}</span>
+                                            </div>
+                                            <div className="text-sm text-gray-600 mt-1">
+                                                {selectedRecipe.batchSize} unidades por lote
+                                            </div>
+                                            <button
+                                                onClick={() => setShowUnitCostModal(false)}
+                                                className="w-full mt-3 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
+                                            >
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Profit Breakdown Modal */}
+                            {showProfitModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                    <div className="bg-white rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden">
+                                        <div className="p-4 border-b">
+                                            <h3 className="text-lg font-semibold text-green-800">Análisis de Ganancia</h3>
+                                        </div>
+
+                                        <div className="p-4 space-y-4">
+                                            <div className="grid grid-cols-2 gap-4 text-center">
+                                                <div className="bg-red-50 p-3 rounded-lg">
+                                                    <div className="text-sm text-gray-600">Costo/Unidad</div>
+                                                    <div className="text-lg font-bold text-red-700">${costPerItem.toFixed(2)}</div>
+                                                </div>
+                                                <div className="bg-blue-50 p-3 rounded-lg">
+                                                    <div className="text-sm text-gray-600">Precio Venta</div>
+                                                    <div className="text-lg font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-green-50 p-4 rounded-lg">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="font-medium">Ganancia por Unidad:</span>
+                                                    <span className="text-lg font-bold text-green-700">${profit.toFixed(2)}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-medium">Margen de Ganancia:</span>
+                                                    <span className="text-lg font-bold text-green-700">{profitPercentage.toFixed(1)}%</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-amber-50 p-3 rounded-lg">
+                                                <div className="text-sm text-gray-600 mb-1">Ganancia Total por Lote</div>
+                                                <div className="text-lg font-bold text-amber-700">
+                                                    ${(profit * selectedRecipe.batchSize).toFixed(2)}
+                                                </div>
+                                                <div className="text-xs text-gray-500">
+                                                    {selectedRecipe.batchSize} unidades × ${profit.toFixed(2)}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 border-t bg-gray-50">
+                                            <button
+                                                onClick={() => setShowProfitModal(false)}
+                                                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                            >
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+
+
+
+
+                            {/* Margin Analysis Modal */}
+                            {showMarginModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                    <div className="bg-white rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden">
+                                        <div className="p-4 border-b">
+                                            <h3 className="text-lg font-semibold text-blue-800">Análisis de Margen</h3>
+                                        </div>
+
+                                        <div className="p-4 space-y-4">
+                                            {/* Profitability Indicator */}
+                                            <div className="text-center">
+                                                <div className={`text-lg font-bold ${profitPercentage >= 50 ? 'text-green-600' :
+                                                    profitPercentage >= 30 ? 'text-yellow-600' : 'text-red-600'
+                                                    }`}>
+                                                    {profitPercentage >= 50 ? '🟢 Excelente' :
+                                                        profitPercentage >= 30 ? '🟡 Buena' : '🔴 Baja'} Rentabilidad
+                                                </div>
+                                            </div>
+
+                                            {/* Progress Bar */}
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between text-sm">
+                                                    <span>0%</span>
+                                                    <span>Margen Actual: {profitPercentage.toFixed(1)}%</span>
+                                                    <span>100%</span>
+                                                </div>
+                                                <div className="w-full bg-gray-200 rounded-full h-4">
+                                                    <div
+                                                        className={`h-4 rounded-full transition-all duration-300 ${profitPercentage >= 50 ? 'bg-green-500' :
+                                                            profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
+                                                            }`}
+                                                        style={{ width: `${Math.min(profitPercentage, 100)}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+
+                                            {/* Key Metrics */}
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div className="bg-red-50 p-3 rounded-lg">
+                                                    <div className="text-xs text-gray-600">Costo</div>
+                                                    <div className="font-bold text-red-700">${costPerItem.toFixed(2)}</div>
+                                                </div>
+                                                <div className="bg-green-50 p-3 rounded-lg">
+                                                    <div className="text-xs text-gray-600">Ganancia</div>
+                                                    <div className="font-bold text-green-700">${profit.toFixed(2)}</div>
+                                                </div>
+                                                <div className="bg-blue-50 p-3 rounded-lg">
+                                                    <div className="text-xs text-gray-600">Precio Venta</div>
+                                                    <div className="font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
+                                                </div>
+                                                <div className="bg-purple-50 p-3 rounded-lg">
+                                                    <div className="text-xs text-gray-600">Por cada $1</div>
+                                                    <div className="font-bold text-purple-700">${(profitPercentage / 100).toFixed(2)}</div>
+                                                </div>
+                                            </div>
+
+                                            {/* Recommendation */}
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                <div className="text-sm font-medium text-gray-700 mb-1">Recomendación:</div>
+                                                <div className="text-xs text-gray-600">
+                                                    {profitPercentage >= 50 ? '✅ Margen saludable. Mantén este precio.' :
+                                                        profitPercentage >= 30 ? '⚠️  Margen aceptable. Considera optimizar costos.' :
+                                                            '❌ Margen bajo. Revisa costos o aumenta precio.'}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 border-t bg-gray-50">
+                                            <button
+                                                onClick={() => setShowMarginModal(false)}
+                                                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                                            >
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                         </div>
                     </div>
 
@@ -768,23 +1034,21 @@ export function RecipeCalculatorPanel({
 
                                 {/* Centered Total Ingredients and Meta */}
                                 <div className="grid grid-cols-2 gap-4 mt-16 text-center">
-                                    <div className="bg-white border-2 border-red-200 rounded-xl p-4">
+                                    <div
+                                        className="bg-white border-2 border-red-200 rounded-xl p-4 cursor-pointer hover:bg-red-50 transition-colors"
+                                        onClick={() => setShowTotalIngredientsModal(true)}
+                                    >
                                         <div className="text-sm text-gray-600 mb-2">Costo Total Ingredientes</div>
                                         <div className="text-xl font-bold text-red-700">
-                                            ${ingredients
-                                                .reduce((total, ing) => total + ing.price, 0)
-                                                .toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                                            }
+                                            ${totalRecipeIngredientsCost.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                         </div>
                                     </div>
 
-                                    <div className="bg-white border-2 border-blue-300 rounded-xl p-4">
+                                    <div className="bg-white border-2 border-blue-300 rounded-xl p-4 cursor-pointer hover:bg-blue-50 transition-colors"
+                                        onClick={() => setShowLotesModal(true)}>
                                         <div className="text-sm text-gray-600 mb-2">Meta de Lotes</div>
                                         <div className="text-xl font-bold text-blue-700">
-                                            {Math.ceil(
-                                                ingredients.reduce((total, ing) => total + ing.price, 0) /
-                                                selectedRecipe.sellingPrice
-                                            )}
+                                            {metaLotes}
                                         </div>
                                     </div>
                                 </div>
@@ -795,17 +1059,128 @@ export function RecipeCalculatorPanel({
                                     <div className="flex items-center justify-center gap-2">
                                         <span className="text-green-600 text-2xl  font-bold">$</span>
                                         <span className=" text-2xl font-bold text-center font-bold text-green-600">
-                                            {(
-                                                Math.ceil(
-                                                    ingredients.reduce((total, ing) => total + ing.price, 0) /
-                                                    selectedRecipe.sellingPrice
-                                                ) *
-                                                (selectedRecipe.sellingPrice * selectedRecipe.batchSize)
-                                            ).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                            {(((selectedRecipe.sellingPrice * selectedRecipe.batchSize)) * (metaLotes) - totalRecipeIngredientsCost).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                                         </span>
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Modal showing only recipe ingredients */}
+                            {showTotalIngredientsModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                    <div className="bg-white rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden">
+                                        <div className="p-4 border-b">
+                                            <h3 className="text-lg font-semibold text-red-800">Ingredientes en Receta</h3>
+                                        </div>
+
+                                        <div className="p-4 overflow-y-auto max-h-64">
+                                            {selectedRecipe.ingredients.map((recipeIngredient) => {
+                                                const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
+                                                if (!ingredient) return null;
+
+                                                return (
+                                                    <div key={recipeIngredient.ingredientId} className="flex justify-between items-center py-2 border-b">
+                                                        <div className="flex-1">
+                                                            <div className="font-medium">{ingredient.name}</div>
+                                                            <div className="text-sm text-gray-500">
+                                                                {recipeIngredient.amount} {ingredient.unit}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="font-bold text-red-700">${ingredient.price.toFixed(2)}</div>
+                                                            <div className="text-sm text-gray-500">
+                                                                ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        <div className="p-4 border-t bg-gray-50">
+                                            <div className="flex justify-between items-center font-bold text-lg mb-2">
+                                                <span>Total Receta:</span>
+                                                <span className="text-red-700">${totalRecipeIngredientsCost.toFixed(2)}</span>
+                                            </div>
+                                            <div className="text-sm text-gray-600 mb-3">
+                                                {selectedRecipe.ingredients.length} ingrediente{selectedRecipe.ingredients.length !== 1 ? 's' : ''} en esta receta
+                                            </div>
+                                            <button
+                                                onClick={() => setShowTotalIngredientsModal(false)}
+                                                className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
+                                            >
+                                                Cerrar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Lotes Explanation Modal */}
+                            {showLotesModal && (
+                                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                    <div className="bg-white rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden">
+                                        <div className="p-4 border-b">
+                                            <h3 className="text-lg font-semibold text-blue-800">¿Por qué esta meta de lotes?</h3>
+                                        </div>
+
+                                        <div className="p-4 space-y-4">
+                                            <div className="bg-blue-50 p-4 rounded-lg">
+                                                <div className="text-sm font-medium text-blue-800 mb-2">Objetivo:</div>
+                                                <div className="text-sm text-blue-700">
+                                                    Vender suficientes lotes para cubrir el costo total de los ingredientes de esta receta.
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm text-gray-600">Costo ingredientes:</span>
+                                                    <span className="font-bold text-red-600">${totalRecipeIngredientsCost.toFixed(2)}</span>
+                                                </div>
+
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm text-gray-600">Precio por lote:</span>
+                                                    <span className="font-bold text-green-600">
+                                                        ${(selectedRecipe.sellingPrice * selectedRecipe.batchSize).toFixed(2)}
+                                                    </span>
+                                                </div>
+
+                                                <div className="border-t pt-2">
+                                                    <div className="flex justify-between items-center font-bold">
+                                                        <span className="text-blue-700">Lotes necesarios:</span>
+                                                        <span className="text-blue-700">{metaLotes}</span>
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {totalRecipeIngredientsCost.toFixed(2)} ÷ {(selectedRecipe.sellingPrice * selectedRecipe.batchSize).toFixed(2)} = {(totalRecipeIngredientsCost / (selectedRecipe.sellingPrice * selectedRecipe.batchSize)).toFixed(2)} lotes
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-green-50 p-3 rounded-lg">
+                                                <div className="text-sm font-medium text-green-800 mb-1">Ejemplo:</div>
+                                                <div className="text-xs text-green-700">
+                                                    Si vendes <strong>{metaLotes} lotes</strong> de {selectedRecipe.name}, cubrirás el costo de <strong>${totalRecipeIngredientsCost.toFixed(2)}</strong> en ingredientes. Cada lote adicional será <strong>ganancia pura</strong>.
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-amber-50 p-3 rounded-lg">
+                                                <div className="text-xs text-amber-700">
+                                                    <strong>Nota:</strong> Esto solo cubre el costo de ingredientes. No incluye otros gastos como mano de obra, empaque, o servicios.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 border-t bg-gray-50">
+                                            <button
+                                                onClick={() => setShowLotesModal(false)}
+                                                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                                            >
+                                                Entendido
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
