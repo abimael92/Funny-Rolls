@@ -27,26 +27,21 @@ export function CustomNumberInput({
     const inputRef = useRef<HTMLInputElement>(null)
     const displayRef = useRef<HTMLDivElement>(null)
 
-    // Increment/decrement the digit at cursor position
     const modifyDigitAtPosition = (str: string, pos: number, increment: number): string => {
         if (!str || pos < 0 || pos >= str.length) return str
 
         const chars = str.split('')
         const currentChar = chars[pos]
 
-        // Skip decimal point
         if (currentChar === '.') {
             return modifyDigitAtPosition(str, pos + increment > 0 ? pos + 1 : pos - 1, increment)
         }
 
-        // Handle digits
         if (/\d/.test(currentChar)) {
             const newDigit = parseInt(currentChar) + increment
 
-            // Handle carry-over
             if (newDigit > 9) {
                 chars[pos] = '0'
-                // Recursively handle carry to left
                 if (pos > 0) {
                     const leftPart = chars.slice(0, pos).join('')
                     const rightPart = chars.slice(pos).join('')
@@ -56,7 +51,6 @@ export function CustomNumberInput({
                 }
             } else if (newDigit < 0) {
                 chars[pos] = '9'
-                // Recursively handle borrow from left
                 if (pos > 0) {
                     const leftPart = chars.slice(0, pos).join('')
                     const rightPart = chars.slice(pos).join('')
@@ -96,11 +90,9 @@ export function CustomNumberInput({
             setDisplayValue(clampedNum.toString())
             onChange(clampedNum)
 
-            // FIX: Use requestAnimationFrame to ensure focus is maintained after state update
             requestAnimationFrame(() => {
                 if (inputRef.current) {
                     inputRef.current.setSelectionRange(cursorPosition, cursorPosition)
-                    // Ensure focus is maintained
                     inputRef.current.focus()
                 }
             })
@@ -128,11 +120,6 @@ export function CustomNumberInput({
 
     const handleFocus = () => {
         setIsFocused(true)
-        // If no value, set display to '0' temporarily
-        // if (!displayValue && !value) {
-        //     setDisplayValue('0')
-        // }
-        // Only set cursor to position 0 if there's no existing selection/cursor position
         if (cursorPosition === 0 && inputRef.current) {
             inputRef.current.setSelectionRange(0, 0)
         }
@@ -147,12 +134,10 @@ export function CustomNumberInput({
         setCursorPosition(newPosition)
     }
 
-    // Handle click on visual display
     const handleDisplayClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (inputRef.current) {
             inputRef.current.focus()
 
-            // Calculate cursor position based on click
             const rect = displayRef.current?.getBoundingClientRect()
             if (rect) {
                 const clickX = e.clientX - rect.left
@@ -165,7 +150,6 @@ export function CustomNumberInput({
 
                 setCursorPosition(clickedPosition)
 
-                // FIX: Use requestAnimationFrame to ensure the cursor position is set after focus
                 requestAnimationFrame(() => {
                     if (inputRef.current) {
                         inputRef.current.setSelectionRange(clickedPosition, clickedPosition)
@@ -175,7 +159,6 @@ export function CustomNumberInput({
         }
     }
 
-    // Create the display value with underlined digit
     const renderDisplayValue = () => {
         const valueToRender = displayValue || (isFocused ? '0' : '')
         if (!valueToRender) return ''
@@ -198,11 +181,10 @@ export function CustomNumberInput({
     }, [value])
 
     return (
-        <div className={`flex items-center ${className || ''}`}>
-            {/* Decrement Button */}
+        <div className={`flex items-center w-full ${className || ''}`}>
             <button
                 type="button"
-                className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                className="w-6 h-8 sm:w-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
                 onClick={(e) => {
                     e.preventDefault();
                     const currentStr = displayValue || '0';
@@ -212,7 +194,6 @@ export function CustomNumberInput({
                     setDisplayValue(clampedNum.toString());
                     onChange(clampedNum);
 
-                    // Maintain focus and cursor position
                     requestAnimationFrame(() => {
                         if (inputRef.current) {
                             inputRef.current.focus();
@@ -221,14 +202,12 @@ export function CustomNumberInput({
                     });
                 }}
             >
-                <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                 </svg>
             </button>
 
-            {/* Input Container - This needs to be relative for the absolute input */}
-            <div className="relative flex-1 h-8" onClick={handleDisplayClick}>
-                {/* Hidden input for actual functionality */}
+            <div className="relative flex-1 h-8 min-w-0" onClick={handleDisplayClick}>
                 <input
                     ref={inputRef}
                     type="text"
@@ -243,26 +222,24 @@ export function CustomNumberInput({
                     className="absolute inset-0 w-full h-full opacity-0 cursor-text z-10"
                 />
 
-                {/* Visual display with underlined digit */}
                 <div
                     ref={displayRef}
                     onClick={handleDisplayClick}
-                    className="w-full h-full flex items-center justify-center px-2 py-1"
+                    className="w-full h-full flex items-center justify-center px-2 py-1 overflow-hidden"
                 >
                     {displayValue || (isFocused && '0') ? (
-                        <span className="font-mono text-gray-900 select-none pointer-events-none">
+                        <span className="font-mono text-gray-900 select-none pointer-events-none text-sm sm:text-base truncate">
                             {renderDisplayValue()}
                         </span>
                     ) : (
-                        <span className="text-gray-400 select-none pointer-events-none">{placeholder}</span>
+                        <span className="text-gray-400 select-none pointer-events-none text-sm sm:text-base truncate">{placeholder}</span>
                     )}
                 </div>
             </div>
 
-            {/* Increment Button */}
             <button
                 type="button"
-                className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                className="w-6 h-8 sm:w-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
                 onClick={(e) => {
                     e.preventDefault();
                     const currentStr = displayValue || '0';
@@ -272,7 +249,6 @@ export function CustomNumberInput({
                     setDisplayValue(clampedNum.toString());
                     onChange(clampedNum);
 
-                    // Maintain focus and cursor position
                     requestAnimationFrame(() => {
                         if (inputRef.current) {
                             inputRef.current.focus();
@@ -281,7 +257,7 @@ export function CustomNumberInput({
                     });
                 }}
             >
-                <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
             </button>
