@@ -31,6 +31,7 @@ export function IngredientsPanel({
     const [newIngredient, setNewIngredient] = useState<Omit<Ingredient, 'id'>>({
         name: '', price: 0, unit: '', amount: 0, minAmount: 0
     });
+    const [showTotalCostModal, setShowTotalCostModal] = useState(false);
 
     // Add new ingredient
     const addIngredient = () => {
@@ -140,7 +141,7 @@ export function IngredientsPanel({
                         <ChevronDown className={`h-6 w-6 absolute right-4 transition-transform duration-300 ease-out ${showAddSection ? '-rotate-180' : ''}`} />
                     </div>
 
-                    <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-106 opacity-100' : 'max-h-0 opacity-0'
                         }`}>
                         <div className="p-4 bg-amber-50 rounded-b-lg border border-amber-300 border-t-0">
                             <h3 className="font-semibold text-lg text-amber-800 text-center mb-4">Agregar Ingrediente</h3>
@@ -153,17 +154,16 @@ export function IngredientsPanel({
                                     onChange={(e) => setNewIngredient({
                                         ...newIngredient, name: e.target.value.slice(0, 50)
                                     })}
-                                    className="w-full px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                 />
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <CustomNumberInput
                                         value={newIngredient.amount || 0}
                                         onChange={(value) => setNewIngredient({ ...newIngredient, amount: value })}
-                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                         min={0}
                                         max={10000}
                                         placeholder="Cantidad"
-
                                     />
 
                                     <CustomSelect
@@ -179,7 +179,7 @@ export function IngredientsPanel({
                                         min="0"
                                         placeholder="Precio $"
                                         value={newIngredient.price === 0 ? '' : newIngredient.price}
-                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                         onChange={(e) => setNewIngredient({ ...newIngredient, price: Math.max(1, Number(e.target.value) || 0) })}
                                         onBlur={(e) => {
                                             const value = Number(e.target.value)
@@ -189,15 +189,15 @@ export function IngredientsPanel({
                                     <CustomNumberInput
                                         value={newIngredient.minAmount || 0}
                                         onChange={(value) => setNewIngredient({ ...newIngredient, minAmount: value })}
-                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                         min={0}
                                         max={10000}
                                         placeholder="Minimo"
                                     />
                                 </div>
                             </div>
-                            <Button onClick={addIngredient} className="w-full bg-amber-600 hover:bg-amber-700 text-base py-3 mt-2">
-                                <Plus className="h-5 w-5 mr-2" />
+                            <Button onClick={addIngredient} className="w-full bg-amber-600 hover:bg-amber-700 text-sm sm:text-base py-2 sm:py-3 mt-2">
+                                <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                                 Agregar Ingrediente
                             </Button>
                         </div>
@@ -209,7 +209,7 @@ export function IngredientsPanel({
                 {/* Divider */}
                 <div className="relative flex items-center my-6">
                     <div className="flex-grow border-t border-amber-300"></div>
-                    <span className="mx-3 text-amber-600 text-lg font-medium">Lista de Ingredientes</span>
+                    <span className="mx-3 text-amber-600 text-base sm:text-lg font-medium">Lista de Ingredientes</span>
                     <div className="flex-grow border-t border-amber-300"></div>
                 </div>
 
@@ -224,7 +224,7 @@ export function IngredientsPanel({
                         return (
                             <div
                                 key={ingredient.id}
-                                className={`group relative border-2 rounded-xl p-4 transition-all duration-300 hover:shadow-lg ${isLowStock
+                                className={`group relative border-2 rounded-xl p-3 sm:p-4 transition-all duration-300 hover:shadow-lg ${isLowStock
                                     ? 'bg-red-50 border-red-200 hover:border-red-400'
                                     : 'bg-amber-50 border-amber-200 hover:border-amber-400'
                                     }`}
@@ -242,39 +242,63 @@ export function IngredientsPanel({
                                         <div className="flex items-start justify-between">
                                             {/* Ingredient Info */}
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
-                                                    <div className="font-semibold text-gray-900 text-xl">{ingredient.name}</div>
-                                                    <div className="text-sm text-amber-600 bg-amber-100 px-3 py-1 rounded-full font-medium">
-                                                        {ingredient.unit}
+                                                <div className="flex items-center justify-between gap-2 mb-3">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="font-semibold text-gray-900 text-lg sm:text-xl truncate">{ingredient.name}</div>
+                                                            <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm:px-3 py-1 rounded-full font-medium">
+                                                                {ingredient.unit}
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                    {/* Action Buttons - Always visible on mobile */}
+                                                    <div className="flex items-center gap-1 flex-shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+                                                        <button
+                                                            onClick={() => setEditingIngredientId(ingredient.id)}
+                                                            className="p-1 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                            title="Editar ingrediente"
+                                                        >
+                                                            <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => removeIngredient(ingredient.id)}
+                                                            className="p-1 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                            title="Eliminar ingrediente"
+                                                        >
+                                                            <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                                                        </button>
                                                     </div>
                                                 </div>
 
                                                 {/* Pricing Information */}
                                                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                                                     <div className="flex items-center gap-2">
-                                                        <div className="text-md text-amber-700">Costo por unidad:</div>
-                                                        <div className="text-md font-bold text-amber-800">
+                                                        <div className="text-sm sm:text-md text-amber-700">Costo por unidad:</div>
+                                                        <div className="text-sm sm:text-md font-bold text-amber-800">
                                                             ${getIngredientCostPerUnit(ingredient).toFixed(2)} / {ingredient.unit}
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Inventory Information */}
-                                                <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">                                                <div className="flex items-center justify-between text-md">
-                                                    <span className="text-md text-gray-800">Stock actual:</span>
+                                                <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">                                                <div className="flex items-center justify-between text-sm sm:text-md">
+                                                    <span className="text-sm sm:text-md text-gray-800">Stock actual:</span>
 
-                                                    <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-2 py-1 ml-4 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm">
+                                                    <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-1 sm:px-2 py-1 ml-2 sm:ml-4 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm">
 
                                                         {/* Custom Decrement Button */}
                                                         <button
                                                             type="button"
-                                                            className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                                                            className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
                                                             onClick={() => {
                                                                 const newValue = Math.max(0, (currentStock - 1) || 0);
                                                                 updateInventory(ingredient.id, newValue);
                                                             }}
                                                         >
-                                                            <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                                                             </svg>
                                                         </button>
@@ -285,7 +309,7 @@ export function IngredientsPanel({
                                                             step="0.01"
                                                             min="0"
                                                             value={currentStock}
-                                                            className="w-10 bg-transparent border-none text-center text-sm font-bold text-amber-900 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                            className="w-8 sm:w-10 bg-transparent border-none text-center text-xs sm:text-sm font-bold text-amber-900 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                             onChange={(e) => {
                                                                 const value = Math.max(0, Number(e.target.value) || 0)
                                                                 updateInventory(ingredient.id, value)
@@ -295,28 +319,28 @@ export function IngredientsPanel({
                                                         {/* Custom Increment Button */}
                                                         <button
                                                             type="button"
-                                                            className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                                                            className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
                                                             onClick={() => {
                                                                 const newValue = (currentStock + 1) || 1;
                                                                 updateInventory(ingredient.id, newValue);
                                                             }}
                                                         >
-                                                            <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                                             </svg>
                                                         </button>
 
-                                                        <span className="text-md text-amber-700 font-semibold ml-2 whitespace-nowrap">
+                                                        <span className="text-sm sm:text-md text-amber-700 font-semibold ml-1 sm:ml-2 whitespace-nowrap">
                                                             {ingredient.unit}
                                                         </span>
                                                     </div>
                                                 </div>
                                                     {isLowStock && inventoryItem && (
                                                         <div className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded mt-2">
-                                                            <div className="flex items-center gap-2 font-semibold text-sm mb-1">
+                                                            <div className="flex items-center gap-2 font-semibold text-xs sm:text-sm mb-1">
                                                                 Stock bajo
                                                             </div>
-                                                            <div className="flex items-center p-2 text-xs">
+                                                            <div className="flex items-center p-1 sm:p-2 text-xs">
                                                                 <span className="font-medium">Faltan:</span>
                                                                 <span className="font-bold ml-1 text-red-700">
                                                                     {convertToReadableUnit(Number((ingredient.minAmount - currentStock).toFixed(2)), ingredient.unit)}
@@ -332,23 +356,7 @@ export function IngredientsPanel({
                                                 </div>
                                             </div>
 
-                                            {/* Action Buttons - Always visible on mobile */}
-                                            <div className="flex items-center gap-1 flex-shrink-0 ml-4 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
-                                                <button
-                                                    onClick={() => setEditingIngredientId(ingredient.id)}
-                                                    className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                    title="Editar ingrediente"
-                                                >
-                                                    <Edit className="h-5 w-5" />
-                                                </button>
-                                                <button
-                                                    onClick={() => removeIngredient(ingredient.id)}
-                                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                    title="Eliminar ingrediente"
-                                                >
-                                                    <Trash2 className="h-5 w-5" />
-                                                </button>
-                                            </div>
+
                                         </div>
                                     </>
                                 )}
@@ -358,12 +366,12 @@ export function IngredientsPanel({
 
                     {/* Empty State */}
                     {ingredients.length === 0 && (
-                        <div className="text-center py-12 bg-gradient-to-br from-gray-50 to-blue-50 border-2 border-dashed border-gray-300 rounded-xl">
-                            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Calculator className="h-10 w-10 text-gray-400" />
+                        <div className="text-center py-8 sm:py-12 bg-gradient-to-br from-gray-50 to-blue-50 border-2 border-dashed border-gray-300 rounded-xl">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                <Calculator className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
                             </div>
-                            <div className="text-gray-500 text-lg mb-2">No hay ingredientes registrados</div>
-                            <div className="text-gray-400 text-sm">Agrega tu primer ingrediente usando el formulario de arriba</div>
+                            <div className="text-gray-500 text-base sm:text-lg mb-2">No hay ingredientes registrados</div>
+                            <div className="text-gray-400 text-xs sm:text-sm">Agrega tu primer ingrediente usando el formulario de arriba</div>
                         </div>
                     )}
                 </div>
@@ -371,22 +379,74 @@ export function IngredientsPanel({
 
             <CardContent>
                 {/* Mobile Quick Actions */}
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4">
-                    <h4 className="font-semibold text-green-800 text-center text-xl mb-3">Resumen</h4>
-                    <div className="grid grid-cols-2 gap-4 text-center">
-                        <div className="bg-white border border-green-500 rounded-lg p-3">
-                            <div className="text-sm text-gray-600">Costo Total</div>
-                            <div className="text-lg font-bold text-green-700">
-                                ${ingredients.reduce((total, ing) => total + ing.price, 0).toFixed(2)}
+                <div className="bg-gradient-to-br from-blue-50 to-emerald-50 border-2 border-blue-300 rounded-2xl p-3 sm:p-4">
+                    <h4 className="font-semibold text-blue-800 text-center text-lg sm:text-xl mb-2 sm:mb-3">Resumen</h4>
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
+                        <div
+                            className="bg-white border border-red-500 rounded-lg p-2 sm:p-3 cursor-pointer hover:bg-red-50 transition-colors"
+                            onClick={() => setShowTotalCostModal(true)}
+                        >
+                            <div className="text-xs sm:text-sm text-gray-600">Costo Total</div>
+                            <div className="text-base sm:text-lg font-bold text-red-700">
+                                ${ingredients.reduce((total, ing) => total + ing.price, 0)
+                                    .toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                                }
                             </div>
                         </div>
-                        <div className="bg-white border border-green-500 rounded-lg p-3">
-                            <div className="text-sm text-gray-600">Ingredientes</div>
-                            <div className="text-lg font-bold text-green-700">{ingredients.length}</div>
+                        <div className="bg-white border border-green-500 rounded-lg p-2 sm:p-3">
+                            <div className="text-xs sm:text-sm text-gray-600">Ingredientes</div>
+                            <div className="text-base sm:text-lg font-bold text-green-700">{ingredients.length}</div>
                         </div>
                     </div>
                 </div>
             </CardContent>
-        </Card >
+            {/* Total Cost Breakdown Modal */}
+            {showTotalCostModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden">
+                        <div className="p-4 border-b">
+                            <h3 className="text-lg font-semibold text-red-800">Costo Total de Ingredientes</h3>
+                        </div>
+
+                        <div className="p-4 overflow-y-auto max-h-64">
+                            {ingredients.map((ingredient) => (
+                                <div key={ingredient.id} className="flex justify-between items-center py-2 border-b">
+                                    <div className="flex-1">
+                                        <div className="font-medium">{ingredient.name}</div>
+                                        <div className="text-sm text-gray-500">
+                                            {ingredient.amount} {ingredient.unit}
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="font-bold text-red-700">${ingredient.price.toFixed(2)}</div>
+                                        <div className="text-sm text-gray-500">
+                                            ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="p-4 border-t bg-gray-50">
+                            <div className="flex justify-between items-center font-bold text-lg mb-2">
+                                <span>Total:</span>
+                                <span className="text-red-700">
+                                    ${ingredients.reduce((total, ing) => total + ing.price, 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                </span>
+                            </div>
+                            <div className="text-sm text-gray-600 mb-3">
+                                {ingredients.length} ingrediente{ingredients.length !== 1 ? 's' : ''}
+                            </div>
+                            <button
+                                onClick={() => setShowTotalCostModal(false)}
+                                className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </Card>
     )
 }

@@ -24,7 +24,7 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
     }
 
     return (
-        <div className="lg:hidden flex border border-amber-300 bg-white sticky top-0 z-10 mb-6 rounded-xl shadow-lg mt-4 mx-auto w-[95%] overflow-hidden"
+        <div className="lg:hidden flex border border-amber-300 bg-white sticky top-0 z-10 mb-4 sm:mb-6 rounded-lg sm:rounded-xl shadow-lg mt-4 mx-auto w-[95%] max-w-md overflow-hidden"
             role="tablist"
             aria-label="Mobile navigation tabs">
 
@@ -35,17 +35,17 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
                 aria-selected={mobileView === 'calculator'}
                 aria-label={getAriaLabel('Calculator', mobileView === 'calculator')}
                 tabIndex={mobileView === 'calculator' ? 0 : -1}
-                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-medium 
+                className={`flex-1 flex flex-col items-center justify-center py-1.5 sm:py-3 px-0.5 sm:px-0 text-xs sm:text-sm font-medium
                     transition-all duration-200 ${mobileView === 'calculator'
                         ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
                         : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25 active:bg-amber-100'
                     }`}
             >
-                <ChefHat className="h-4 w-4" aria-hidden="true" />
-                <span>Calculadora</span>
+                <ChefHat className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                <span className="mt-0.5 sm:mt-1">Calculadora</span>
             </button>
 
-            <div className="flex-shrink-0 w-px bg-amber-300 my-2"></div>
+            <div className="flex-shrink-0 w-px bg-amber-300 my-1 sm:my-2"></div>
 
             <button
                 role="tab"
@@ -54,17 +54,17 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
                 aria-selected={mobileView === 'ingredients'}
                 aria-label={getAriaLabel('Ingredients', mobileView === 'ingredients')}
                 tabIndex={mobileView === 'ingredients' ? 0 : -1}
-                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-medium
+                className={`flex-1 flex flex-col items-center justify-center py-2 sm:py-3 px-1 sm:px-2 text-xs sm:text-sm font-medium
                     transition-all duration-200 ${mobileView === 'ingredients'
                         ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
                         : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25'
                     }`}
             >
-                <Calculator className="h-4 w-4" aria-hidden="true" />
-                <span>Ingredientes</span>
+                <Calculator className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                <span className="mt-0.5 sm:mt-1">Ingredientes</span>
             </button>
 
-            <div className="flex-shrink-0 w-px bg-amber-300 my-2"></div>
+            <div className="flex-shrink-0 w-px bg-amber-300 my-1 sm:my-2"></div>
 
             <button
                 role="tab"
@@ -73,14 +73,14 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
                 aria-selected={mobileView === 'production'}
                 aria-label={getAriaLabel('Production', mobileView === 'production')}
                 tabIndex={mobileView === 'production' ? 0 : -1}
-                className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-sm font-medium
+                className={`flex-1 flex flex-col items-center justify-center py-2 sm:py-3 px-1 sm:px-2 text-xs sm:text-sm font-medium
                     transition-all duration-200 ${mobileView === 'production'
                         ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
                         : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25'
                     }`}
             >
-                <BarChart3 className="h-4 w-4" aria-hidden="true" />
-                <span>Producción</span>
+                <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                <span className="mt-0.5 sm:mt-1">Producción</span>
             </button>
         </div>
     )
