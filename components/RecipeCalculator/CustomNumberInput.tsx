@@ -8,6 +8,7 @@ interface CustomNumberInputProps {
     min?: number
     max?: number
     placeholder?: string
+    className?: string
 }
 
 export function CustomNumberInput({
@@ -15,9 +16,12 @@ export function CustomNumberInput({
     onChange,
     min = 0,
     max = 10000,
-    placeholder
+    placeholder,
+    className
 }: CustomNumberInputProps) {
-    const [displayValue, setDisplayValue] = useState(value?.toString() || '')
+    const [displayValue, setDisplayValue] = useState(
+        value && value !== 0 ? value.toString() : ''
+    )
     const [cursorPosition, setCursorPosition] = useState(0)
     const [isFocused, setIsFocused] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
@@ -125,9 +129,9 @@ export function CustomNumberInput({
     const handleFocus = () => {
         setIsFocused(true)
         // If no value, set display to '0' temporarily
-        if (!displayValue) {
-            setDisplayValue('0')
-        }
+        // if (!displayValue && !value) {
+        //     setDisplayValue('0')
+        // }
         // Only set cursor to position 0 if there's no existing selection/cursor position
         if (cursorPosition === 0 && inputRef.current) {
             inputRef.current.setSelectionRange(0, 0)
@@ -190,43 +194,97 @@ export function CustomNumberInput({
     }
 
     useEffect(() => {
-        setDisplayValue(value === 0 ? '' : value.toString())
+        setDisplayValue(value && value !== 0 ? value.toString() : '')
     }, [value])
 
     return (
-        <div className="relative" onClick={handleDisplayClick}>
-            {/* Hidden input for actual functionality */}
-            <input
-                ref={inputRef}
-                type="text"
-                inputMode="decimal"
-                placeholder={placeholder}
-                value={displayValue}
-                onChange={handleChange}
-                onKeyDown={handleKeyDown}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                onSelect={handleSelect}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-text z-10"
-            />
+        <div className={`flex items-center ${className || ''}`}>
+            {/* Decrement Button */}
+            <button
+                type="button"
+                className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                onClick={(e) => {
+                    e.preventDefault();
+                    const currentStr = displayValue || '0';
+                    const newStr = modifyDigitAtPosition(currentStr, cursorPosition, -1);
+                    const newNum = newStr ? parseFloat(newStr) : 0;
+                    const clampedNum = Math.max(min, Math.min(max, newNum));
+                    setDisplayValue(clampedNum.toString());
+                    onChange(clampedNum);
 
-            {/* Visual display with underlined digit */}
-            <div
-                ref={displayRef}
-                onClick={handleDisplayClick}
-                className={`px-4 py-3 border-2 rounded-lg text-base min-h-[3.5rem] flex items-center transition-colors duration-200 ${isFocused
-                    ? 'border-amber-500 bg-amber-50 ring-2 ring-amber-200'
-                    : 'border-amber-300 bg-white'
-                    }`}
+                    // Maintain focus and cursor position
+                    requestAnimationFrame(() => {
+                        if (inputRef.current) {
+                            inputRef.current.focus();
+                            inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+                        }
+                    });
+                }}
             >
-                {displayValue || (isFocused && '0') ? (
-                    <span className="font-mono text-gray-900 select-none pointer-events-none">
-                        {renderDisplayValue()}
-                    </span>
-                ) : (
-                    <span className="text-gray-400 select-none pointer-events-none">{placeholder}</span>
-                )}
+                <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                </svg>
+            </button>
+
+            {/* Input Container - This needs to be relative for the absolute input */}
+            <div className="relative flex-1 h-8" onClick={handleDisplayClick}>
+                {/* Hidden input for actual functionality */}
+                <input
+                    ref={inputRef}
+                    type="text"
+                    inputMode="decimal"
+                    placeholder={placeholder}
+                    value={displayValue}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyDown}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    onSelect={handleSelect}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-text z-10"
+                />
+
+                {/* Visual display with underlined digit */}
+                <div
+                    ref={displayRef}
+                    onClick={handleDisplayClick}
+                    className="w-full h-full flex items-center justify-center px-2 py-1"
+                >
+                    {displayValue || (isFocused && '0') ? (
+                        <span className="font-mono text-gray-900 select-none pointer-events-none">
+                            {renderDisplayValue()}
+                        </span>
+                    ) : (
+                        <span className="text-gray-400 select-none pointer-events-none">{placeholder}</span>
+                    )}
+                </div>
             </div>
+
+            {/* Increment Button */}
+            <button
+                type="button"
+                className="w-8 h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                onClick={(e) => {
+                    e.preventDefault();
+                    const currentStr = displayValue || '0';
+                    const newStr = modifyDigitAtPosition(currentStr, cursorPosition, 1);
+                    const newNum = newStr ? parseFloat(newStr) : 0;
+                    const clampedNum = Math.max(min, Math.min(max, newNum));
+                    setDisplayValue(clampedNum.toString());
+                    onChange(clampedNum);
+
+                    // Maintain focus and cursor position
+                    requestAnimationFrame(() => {
+                        if (inputRef.current) {
+                            inputRef.current.focus();
+                            inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+                        }
+                    });
+                }}
+            >
+                <svg className="w-4 h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+            </button>
         </div>
     )
 }
