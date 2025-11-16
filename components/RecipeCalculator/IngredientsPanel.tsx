@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calculator, Plus, Trash2, Edit } from "lucide-react"
+import { Calculator, ChevronDown, Plus, Trash2, Edit } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
 import { UnitConverter } from '../../lib/unit-conversion';
@@ -25,6 +25,7 @@ export function IngredientsPanel({
 }: IngredientsPanelProps) {
     const [error, setError] = useState<string | null>(null)
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
+    const [showAddSection, setShowAddSection] = useState(false);
     const [newIngredient, setNewIngredient] = useState<Omit<Ingredient, 'id'>>({
         name: '', price: 0, unit: '', amount: 1, minAmount: 0
     });
@@ -125,86 +126,96 @@ export function IngredientsPanel({
                 )}
 
                 {/* Add New Ingredient */}
-                <div className="space-y-3 p-4 bg-amber-50 rounded-lg border border-amber-300 mb-8">
-                    <h3 className="font-semibold text-lg text-amber-800 text-center">Agregar Ingrediente</h3>
-                    <div className="space-y-3">
-                        <input
-                            type="text"
-                            maxLength={50}
-                            placeholder="Nombre del ingrediente"
-                            value={newIngredient.name}
-                            onChange={(e) => setNewIngredient({
-                                ...newIngredient, name: e.target.value.slice(0, 50)
-                            })}
-                            className="w-full px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                        />
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                placeholder="Cantidad"
-                                value={newIngredient.amount === 1 ? '' : newIngredient.amount}
-                                onChange={(e) => setNewIngredient({ ...newIngredient, amount: Math.max(0.01, Number(e.target.value) || 1) })}
-                                className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                            />
-                            {/* Unit Selector in Add Form */}
-                            {/* <label className="text-sm text-gray-600 mb-1">Unidad</label> */}
-                            <select
-                                value={newIngredient.unit}
-                                onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
-                                className="px-4 py-3 border-2 border-amber-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-gray-900"
-                            >
-                                <option value="" className="text-base">Seleccionar unidad</option>
-                                <option value="kg">kg</option>
-                                <option value="g">g</option>
-                                <option value="lb">lb</option>
-                                <option value="oz">oz</option>
-                                <option value="l">l</option>
-                                <option value="ml">ml</option>
-                                <option value="cup">cup</option>
-                                <option value="tbsp">tbsp</option>
-                                <option value="tsp">tsp</option>
-                                <option value="unidad">unidad</option>
-                                <option value="docena">docena</option>
-                                <option value="paquete">paquete</option>
-                                <option value="sobre">sobre</option>
-                            </select>
-
-
+                <div className="mb-4">
+                    <div
+                        onClick={() => setShowAddSection(!showAddSection)}
+                        className={`w-full bg-amber-600 hover:bg-amber-700 text-white text-base py-2 px-4 cursor-pointer flex items-center justify-center transition-all duration-300 ease-out relative ${showAddSection ? 'rounded-t-lg' : 'rounded-lg'
+                            }`}
+                    >
+                        <div className="flex items-center">
+                            {showAddSection ? 'Cancelar' : 'Agregar Ingrediente'}
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                placeholder="Precio $"
-                                value={newIngredient.price === 0 ? '' : newIngredient.price}
-                                className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                onChange={(e) => setNewIngredient({ ...newIngredient, price: Math.max(0.01, Number(e.target.value) || 0) })}
-                                onBlur={(e) => {
-                                    const value = Number(e.target.value)
-                                    if (value <= 0) setNewIngredient({ ...newIngredient, price: 0.01 })
-                                }}
-                            />
-
-                            <input
-                                type="number"
-                                step="0.01"
-                                min={0}
-                                placeholder="Minimo"
-                                value={newIngredient.minAmount === 0 ? '' : newIngredient.minAmount}
-                                onChange={(e) => setNewIngredient({ ...newIngredient, minAmount: Math.max(0, Number(e.target.value) || 0) })}
-                                className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                            />
-                        </div>
+                        <ChevronDown className={`h-6 w-6 absolute right-4 transition-transform duration-300 ease-out ${showAddSection ? '-rotate-180' : ''}`} />
                     </div>
-                    <Button onClick={addIngredient} className="w-full bg-amber-600 hover:bg-amber-700 text-base py-3 mt-2">
-                        <Plus className="h-5 w-5 mr-2" />
-                        Agregar Ingrediente
-                    </Button>
+
+                    {showAddSection && (
+                        <div className="p-4 bg-amber-50 rounded-b-lg border border-amber-300 border-t-0 animate-in slide-in-from-top-1 duration-300 ease-out">
+                            <h3 className="font-semibold text-lg text-amber-800 text-center">Agregar Ingrediente</h3>
+                            <div className="space-y-3">
+                                <input
+                                    type="text"
+                                    maxLength={50}
+                                    placeholder="Nombre del ingrediente"
+                                    value={newIngredient.name}
+                                    onChange={(e) => setNewIngredient({
+                                        ...newIngredient, name: e.target.value.slice(0, 50)
+                                    })}
+                                    className="w-full px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0.01"
+                                        placeholder="Cantidad"
+                                        value={newIngredient.amount === 1 ? '' : newIngredient.amount}
+                                        onChange={(e) => setNewIngredient({ ...newIngredient, amount: Math.max(0.01, Number(e.target.value) || 1) })}
+                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                    />
+                                    <select
+                                        value={newIngredient.unit}
+                                        onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
+                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-gray-900"
+                                    >
+                                        <option value="" className="text-base">Seleccionar unidad</option>
+                                        <option value="kg">kg</option>
+                                        <option value="g">g</option>
+                                        <option value="lb">lb</option>
+                                        <option value="oz">oz</option>
+                                        <option value="l">l</option>
+                                        <option value="ml">ml</option>
+                                        <option value="cup">cup</option>
+                                        <option value="tbsp">tbsp</option>
+                                        <option value="tsp">tsp</option>
+                                        <option value="unidad">unidad</option>
+                                        <option value="docena">docena</option>
+                                        <option value="paquete">paquete</option>
+                                        <option value="sobre">sobre</option>
+                                    </select>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0.01"
+                                        placeholder="Precio $"
+                                        value={newIngredient.price === 0 ? '' : newIngredient.price}
+                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                        onChange={(e) => setNewIngredient({ ...newIngredient, price: Math.max(0.01, Number(e.target.value) || 0) })}
+                                        onBlur={(e) => {
+                                            const value = Number(e.target.value)
+                                            if (value <= 0) setNewIngredient({ ...newIngredient, price: 0.01 })
+                                        }}
+                                    />
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min={0}
+                                        placeholder="Minimo"
+                                        value={newIngredient.minAmount === 0 ? '' : newIngredient.minAmount}
+                                        onChange={(e) => setNewIngredient({ ...newIngredient, minAmount: Math.max(0, Number(e.target.value) || 0) })}
+                                        className="px-4 py-3 border-2 border-amber-300 rounded-lg text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                    />
+                                </div>
+                            </div>
+                            <Button onClick={addIngredient} className="w-full bg-amber-600 hover:bg-amber-700 text-base py-3 mt-2">
+                                <Plus className="h-5 w-5 mr-2" />
+                                Agregar Ingrediente
+                            </Button>
+                        </div>
+                    )}
                 </div>
+
 
                 {/* Divider */}
                 <div className="relative flex items-center my-6">
