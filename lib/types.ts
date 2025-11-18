@@ -90,6 +90,15 @@ export interface InventoryItem {
 	supplier?: string;
 }
 
+export interface Tool {
+	id: string;
+	name: string;
+	type: 'utility' | 'utensil' | 'enhancer';
+	cost?: number;
+	description?: string;
+	category: string;
+}
+
 export interface UnitInfo {
 	unit: string;
 	category: 'weight' | 'volume' | 'count' | 'other';

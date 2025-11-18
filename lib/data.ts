@@ -1,5 +1,5 @@
 // lib/data.ts
-import { Product, Ingredient } from './types';
+import { Product, Ingredient, Tool } from './types';
 
 export const defaultIngredients: Ingredient[] = [
 	{ id: '1', name: 'Harina', price: 25, unit: 'kg', amount: 1, minAmount: 0.8 },
@@ -359,3 +359,165 @@ export const products: Product[] = [
 		},
 	},
 ];
+
+export const defaultTools: Tool[] = [
+	// UTILITIES
+	{
+		id: 'util-1',
+		name: 'Horno ',
+		type: 'utility',
+		category: 'energy',
+		cost: 15,
+		description: 'Consumo eléctrico por horneado (180°C por 25-30 min)',
+	},
+	{
+		id: 'util-2',
+		name: 'Estufa',
+		type: 'utility',
+		category: 'energy',
+		cost: 5,
+		description: 'Consumo de gas para preparaciones en estufa',
+	},
+	{
+		id: 'util-3',
+		name: 'Mezcladora',
+		type: 'utility',
+		category: 'equipment',
+		cost: 8,
+		description: 'Consumo eléctrico por batch de masa',
+	},
+	{
+		id: 'util-4',
+		name: 'Refrigeración',
+		type: 'utility',
+		category: 'energy',
+		cost: 3,
+		description: 'Costo de refrigeración para ingredientes',
+	},
+
+	// UTENSILS
+	{
+		id: 'uten-1',
+		name: 'Juego de Medidores',
+		type: 'utensil',
+		category: 'measuring',
+		description: 'Tazas y cucharas medidoras para ingredientes',
+	},
+	{
+		id: 'uten-2',
+		name: 'Báscula Digital',
+		type: 'utensil',
+		category: 'measuring',
+		description: 'Para mediciones precisas en gramos',
+	},
+	{
+		id: 'uten-3',
+		name: 'Bowls Mezcladores',
+		type: 'utensil',
+		category: 'mixing',
+		description: 'Set de bowls de diferentes tamaños',
+	},
+	{
+		id: 'uten-4',
+		name: 'Batidor de Alambre',
+		type: 'utensil',
+		category: 'mixing',
+		description: 'Para incorporar aire en mezclas',
+	},
+	{
+		id: 'uten-5',
+		name: 'Espátula de Goma',
+		type: 'utensil',
+		category: 'mixing',
+		description: 'Para raspar bowls y mezclar suavemente',
+	},
+	{
+		id: 'uten-6',
+		name: 'Rodillo para Masa',
+		type: 'utensil',
+		category: 'shaping',
+		description: 'Para extender masa uniformemente',
+	},
+	{
+		id: 'uten-7',
+		name: 'Moldes para Hornear',
+		type: 'utensil',
+		category: 'baking',
+		description: 'Charolas para hornear rolls',
+	},
+	{
+		id: 'uten-8',
+		name: 'Cuchillo de Sierra',
+		type: 'utensil',
+		category: 'cutting',
+		description: 'Para cortar rolls sin aplastar',
+	},
+	{
+		id: 'uten-9',
+		name: 'Termómetro Digital',
+		type: 'utensil',
+		category: 'measuring',
+		description: 'Para temperatura interna perfecta',
+	},
+
+	// ENHANCERS
+	{
+		id: 'enh-1',
+		name: 'Mezcladora Planetaria',
+		type: 'enhancer',
+		category: 'equipment',
+		cost: 25,
+		description: 'Mezclado profesional para consistencia perfecta',
+	},
+	{
+		id: 'enh-2',
+		name: 'Proveedora de Masa',
+		type: 'enhancer',
+		category: 'equipment',
+		cost: 12,
+		description: 'Control de temperatura para fermentación óptima',
+	},
+	{
+		id: 'enh-3',
+		name: 'Soplete Culinario',
+		type: 'enhancer',
+		category: 'finishing',
+		cost: 8,
+		description: 'Para acabados caramelizados y decoraciones',
+	},
+	{
+		id: 'enh-4',
+		name: 'Manga Pastelera',
+		type: 'enhancer',
+		category: 'decorating',
+		description: 'Para decoraciones precisas con glaseados',
+	},
+	{
+		id: 'enh-5',
+		name: 'Kit de Medición Avanzado',
+		type: 'enhancer',
+		category: 'measuring',
+		cost: 15,
+		description: 'Medidores de precisión para profesionales',
+	},
+];
+
+export const toolCategories = {
+	utility: [
+		{ value: 'energy', label: 'Energía' },
+		{ value: 'equipment', label: 'Equipo Eléctrico' },
+	],
+	utensil: [
+		{ value: 'measuring', label: 'Medición' },
+		{ value: 'mixing', label: 'Mezclado' },
+		{ value: 'shaping', label: 'Formado' },
+		{ value: 'baking', label: 'Horneado' },
+		{ value: 'cutting', label: 'Corte' },
+	],
+	enhancer: [
+		{ value: 'equipment', label: 'Equipo Profesional' },
+		{ value: 'finishing', label: 'Acabados' },
+		{ value: 'decorating', label: 'Decoración' },
+		{ value: 'measuring', label: 'Precisión' },
+	],
+};
