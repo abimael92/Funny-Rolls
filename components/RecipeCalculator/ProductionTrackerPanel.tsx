@@ -29,7 +29,6 @@ export function ProductionTrackerPanel({
     inventory,
     ingredients,
     recipes,
-    updateInventory,
     updateProductionStatus
 }: ProductionTrackerPanelProps) {
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -229,10 +228,9 @@ export function ProductionTrackerPanel({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="lg:grid lg:grid-cols-3 lg:gap-6 xl:gap-8 space-y-6 lg:space-y-0">
                     {/* Production History */}
-                    {/* Production History */}
-                    <Card>
+                    <Card className="lg:col-span-2">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <TrendingUp className="h-5 w-5" />
@@ -313,7 +311,7 @@ export function ProductionTrackerPanel({
                     </Card>
 
                     {/* Inventory Management */}
-                    <Card>
+                    <Card className="lg:col-span-1">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Package className="h-5 w-5" />
@@ -344,19 +342,15 @@ export function ProductionTrackerPanel({
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="flex items-center justify-between">
-                                                <div className="text-sm text-gray-800">
-                                                    Stock actual: {item.currentStock.toFixed(2)} {item.unit}
+                                            <div className="flex items-center gap-2">
+                                                <div className="text-sm text-gray-800 whitespace-nowrap">
+                                                    Stock actual:
                                                 </div>
-                                                <div className="flex items-center gap-2 bg-white border-2 border-amber-300 rounded-lg ml-4 px-3 py-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
-                                                    <input
-                                                        type="number"
-                                                        step="0.01"
-                                                        value={item.currentStock}
-                                                        onChange={(e) => updateInventory(item.ingredientId, Number(e.target.value) || 0)}
-                                                        className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
-                                                    />
-                                                    <span className="text-md text-amber-700 font-semibold">{item.unit}</span>
+                                                <div className="flex items-center gap-2 bg-grey-100 border-2 border-amber-300/60 rounded-lg px-3 py-2 w-[90px] cursor-not-allowed opacity-90">
+                                                    <span className="w-20 text-center text-base font-bold text-amber-900">
+                                                        {item.currentStock.toFixed(2)}
+                                                    </span>
+                                                    <span className="text-base text-amber-700 font-semibold">{item.unit}</span>
                                                 </div>
                                             </div>
                                             <div className="text-xs text-red-800  font-medium px-3 py-2 rounded-lg mt-1">
