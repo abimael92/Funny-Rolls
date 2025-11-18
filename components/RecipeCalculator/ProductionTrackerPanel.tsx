@@ -29,7 +29,6 @@ export function ProductionTrackerPanel({
     inventory,
     ingredients,
     recipes,
-    updateInventory,
     updateProductionStatus
 }: ProductionTrackerPanelProps) {
     const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -194,6 +193,15 @@ export function ProductionTrackerPanel({
 
     console.log(" LOW STOCK ITEMS:", lowStockItems)
 
+    // Helper to get combined items for a record
+    const getCombinedRecordItems = (recordId: string) => {
+        const record = productionHistory.find(r => r.id === recordId);
+        const recordItems = record?.items || [];
+        const currentItems = currentProductionItems[recordId] || [];
+        return [...recordItems, ...currentItems];
+    };
+
+
     return (
         <Card className="w-full">
             <CardHeader className="pb-4">
@@ -220,9 +228,9 @@ export function ProductionTrackerPanel({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="lg:grid lg:grid-cols-3 lg:gap-6 xl:gap-8 space-y-6 lg:space-y-0">
                     {/* Production History */}
-                    <Card>
+                    <Card className="lg:col-span-2">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <TrendingUp className="h-5 w-5" />
@@ -248,29 +256,62 @@ export function ProductionTrackerPanel({
                                         No hay producción registrada para esta fecha
                                     </div>
                                 ) : (
-                                    todayProduction.map(record => (
-                                        <div
-                                            key={record.id}
-                                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
-                                        >
-                                            <div>
-                                                <div className="font-semibold">{record.recipeName}</div>
-                                                <div className="text-sm text-gray-600">
-                                                    {record.batchCount} lote(s) - {record.totalProduced} unidades
+                                    todayProduction.map(record => {
+                                        // Calculate status counts for display
+                                        const recordItems = getCombinedRecordItems(record.id);
+                                        const totalItems = recordItems.reduce((sum, item) => sum + item.quantity, 0);
+
+                                        // Count items by status
+                                        const statusCounts = {
+                                            good: recordItems.filter(item => item.status === 'good').reduce((sum, item) => sum + item.quantity, 0),
+                                            sold: recordItems.filter(item => item.status === 'sold').reduce((sum, item) => sum + item.quantity, 0),
+                                            bad: recordItems.filter(item => item.status === 'bad' || item.status === 'burned' || item.status === 'damaged').reduce((sum, item) => sum + item.quantity, 0)
+                                        };
+
+                                        return (
+                                            <div
+                                                key={record.id}
+                                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+                                            >
+                                                <div className="flex-1">
+                                                    <div className="font-semibold">{record.recipeName}</div>
+                                                    <div className="text-sm text-gray-600">
+                                                        {record.batchCount} lote(s) - {record.totalProduced} unidades
+                                                    </div>
+                                                    {/* Show status summary */}
+                                                    {totalItems > 0 && (
+                                                        <div className="flex gap-2 mt-1 text-xs">
+                                                            {statusCounts.good > 0 && (
+                                                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                                                    Bueno: {statusCounts.good}
+                                                                </span>
+                                                            )}
+                                                            {statusCounts.sold > 0 && (
+                                                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                                                    Vendido: {statusCounts.sold}
+                                                                </span>
+                                                            )}
+                                                            {statusCounts.bad > 0 && (
+                                                                <span className="bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                                                                    Defectuoso: {statusCounts.bad}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-gray-500">
+                                                    {new Date(record.date).toLocaleTimeString()}
                                                 </div>
                                             </div>
-                                            <div className="text-sm text-gray-500">
-                                                {new Date(record.date).toLocaleTimeString()}
-                                            </div>
-                                        </div>
-                                    ))
+                                        )
+                                    })
                                 )}
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* Inventory Management */}
-                    <Card>
+                    <Card className="lg:col-span-1">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Package className="h-5 w-5" />
@@ -301,19 +342,15 @@ export function ProductionTrackerPanel({
                                                     </div>
                                                 )}
                                             </div>
-                                            <div className="flex items-center justify-between">
-                                                <div className="text-sm text-gray-800">
-                                                    Stock actual: {item.currentStock.toFixed(2)} {item.unit}
+                                            <div className="flex items-center gap-2">
+                                                <div className="text-sm text-gray-800 whitespace-nowrap">
+                                                    Stock actual:
                                                 </div>
-                                                <div className="flex items-center gap-2 bg-white border-2 border-amber-300 rounded-lg ml-4 px-3 py-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
-                                                    <input
-                                                        type="number"
-                                                        step="0.01"
-                                                        value={item.currentStock}
-                                                        onChange={(e) => updateInventory(item.ingredientId, Number(e.target.value) || 0)}
-                                                        className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
-                                                    />
-                                                    <span className="text-md text-amber-700 font-semibold">{item.unit}</span>
+                                                <div className="flex items-center gap-2 bg-grey-100 border-2 border-amber-300/60 rounded-lg px-3 py-2 w-[90px] cursor-not-allowed opacity-90">
+                                                    <span className="w-20 text-center text-base font-bold text-amber-900">
+                                                        {item.currentStock.toFixed(2)}
+                                                    </span>
+                                                    <span className="text-base text-amber-700 font-semibold">{item.unit}</span>
                                                 </div>
                                             </div>
                                             <div className="text-xs text-red-800  font-medium px-3 py-2 rounded-lg mt-1">

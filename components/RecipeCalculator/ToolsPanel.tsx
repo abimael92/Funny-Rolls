@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+// import { Card, CardContent } from "@/components/ui/card"
 import { ChevronDown, Plus, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
 import { Tool } from '@/lib/types';
 import { defaultTools, toolCategories } from '@/lib/data';
@@ -57,9 +57,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     }
 
     // Add default tool
-    const addDefaultTool = (tool: Tool) => {
-        setTools([...tools, { ...tool, id: Date.now().toString() }])
-    }
+    // const addDefaultTool = (tool: Tool) => {
+    //     setTools([...tools, { ...tool, id: Date.now().toString() }])
+    // }
 
     // Save edited tool
     const saveEditedTool = (updatedTool: Tool) => {
@@ -105,9 +105,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     }
 
     // Filter default tools by what's not already added
-    const availableDefaultTools = defaultTools.filter(defaultTool =>
-        !tools.some(tool => tool.name === defaultTool.name)
-    )
+    // const availableDefaultTools = defaultTools.filter(defaultTool =>
+    //     !tools.some(tool => tool.name === defaultTool.name)
+    // )
 
     return (
         <div className="space-y-6">
