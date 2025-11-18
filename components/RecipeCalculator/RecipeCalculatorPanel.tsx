@@ -309,27 +309,84 @@ export function RecipeCalculatorPanel({
                         <div className="space-y-3">
                             <div className="flex justify-between items-center py-2 border-b border-blue-200">
                                 <span className="text-lg font-semibold text-blue-700">Lote (unidades)</span>
-                                <input
-                                    type="number"
-                                    value={selectedRecipe.batchSize}
-                                    onChange={(e) => updateRecipeBatchSize(Number(e.target.value) || 1)}
-                                    className="w-20 px-3 py-2 border-2 border-blue-300 rounded-lg text-lg font-bold text-center"
-                                    min="1"
-                                />
+                                <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm">
+                                    <button
+                                        type="button"
+                                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                                        onClick={() => {
+                                            const newValue = Math.max(0, (selectedRecipe.batchSize - 1) || 0);
+                                            updateRecipeBatchSize(newValue);
+                                        }}
+                                    >
+                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                        </svg>
+                                    </button>
+                                    <input
+                                        type="number"
+                                        value={selectedRecipe.batchSize}
+                                        onChange={(e) => {
+                                            const value = Math.max(1, Math.min(1000, Number(e.target.value) || 1))
+                                            updateRecipeBatchSize(value)
+                                        }}
+                                        className="w-8 sm:w-10 md:w-12 lg:w-14 px-1 sm:px-2 py-1 text-xs sm:text-sm md:text-base text-center font-bold flip-card-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        min="1"
+                                        max="1000"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                                        onClick={() => {
+                                            const newValue = (selectedRecipe.batchSize + 1) || 1;
+                                            updateRecipeBatchSize(newValue);
+                                        }}
+                                    >
+                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="flex justify-between items-center py-2 border-b border-blue-200">
                                 <span className="text-lg font-semibold text-blue-700">Precio de venta</span>
-                                <div className="flex items-center gap-1">
-                                    <span className="text-green-600 text-lg">$</span>
+                                <div className="flex items-center bg-white border-2 border-green-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-green-400 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-200 transition-all duration-200 shadow-sm">
+                                    <button
+                                        type="button"
+                                        className="w-4 h-6 sm:w-5 sm:h-7 md:w-6 md:h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-l-md border-r border-green-200 hover:bg-green-100 active:bg-green-200 transition-colors duration-150 group"
+                                        onClick={() => {
+                                            const newValue = Math.max(0, (selectedRecipe.sellingPrice - 1) || 0);
+                                            updateRecipeSellingPrice(newValue);
+                                        }}
+                                    >
+                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                        </svg>
+                                    </button>
                                     <input
                                         type="number"
                                         value={selectedRecipe.sellingPrice}
-                                        onChange={(e) => updateRecipeSellingPrice(Number(e.target.value) || 0)}
-                                        className="w-24 px-3 py-2 border-2 border-blue-300 rounded-lg text-lg font-bold text-center"
+                                        onChange={(e) => {
+                                            const value = Math.max(0, Math.min(10000, Number(e.target.value) || 0))
+                                            updateRecipeSellingPrice(value)
+                                        }}
+                                        className="w-12 sm:w-14 md:w-16 p-1 text-xs sm:text-sm md:text-base text-center text-green-600 font-bold flip-card-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         min="0"
+                                        max="10000"
                                         step="0.01"
                                     />
+                                    <button
+                                        type="button"
+                                        className="w-4 h-6 sm:w-5 sm:h-7 md:w-6 md:h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-r-md border-l border-green-200 hover:bg-green-100 active:bg-green-200 transition-colors duration-150 group"
+                                        onClick={() => {
+                                            const newValue = (selectedRecipe.sellingPrice + 1) || 1;
+                                            updateRecipeSellingPrice(newValue);
+                                        }}
+                                    >
+                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
 
