@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Calculator, ChevronDown, Plus, Trash2, Edit } from "lucide-react"
+import { ArrowLeftRight, Calculator, ChevronDown, CookingPot, Plus, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
 import { UnitConverter } from '../../lib/unit-conversion';
@@ -13,6 +13,7 @@ import { CustomSelect } from './CustomSelect';
 import { ToolsPanel } from './ToolsPanel';
 import { Tool } from '@/lib/types';
 
+// List,
 interface IngredientsPanelProps {
     ingredients: Ingredient[]
     setIngredients: (ingredients: Ingredient[]) => void
@@ -113,18 +114,38 @@ export function IngredientsPanel({
             <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2 text-lg">
-                        <Calculator className="h-5 w-5" />
+                        {showTools ? (
+                            <CookingPot className="h-5 w-5" />
+                        ) : (
+                            <UtensilsCrossed className="h-5 w-5" />
+                        )}
                         {showTools ? 'Herramientas' : 'Ingredientes'}
                     </CardTitle>
+
+
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setShowTools(!showTools)}
                         className="flex items-center gap-2"
                     >
-                        <span>{showTools ? 'Ver Ingredientes' : 'Ver Herramientas'}</span>
-                        <ChevronDown className={`h-4 w-4 transition-transform ${showTools ? 'rotate-180' : ''}`} />
+                        {showTools ? (
+                            <>
+                                <Utensils className="h-4 w-4" />
+                            </>
+                        ) : (
+                            <>
+                                <Wrench className="h-4 w-4" />
+                            </>
+                        )}
+
+                        <ArrowLeftRight
+                            className={`h-4 w-4 transition-transform duration-300 ${showTools ? 'rotate-180' : 'rotate-0'
+                                }`}
+                        />
                     </Button>
+
+
                 </div>
             </CardHeader>
 
