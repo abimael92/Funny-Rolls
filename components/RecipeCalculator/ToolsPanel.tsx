@@ -202,7 +202,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             </div>
 
             {/* Quick Add Default Tools */}
-            {availableDefaultTools.length > 0 && (
+            {/* {availableDefaultTools.length > 0 && (
                 <Card>
                     <CardContent className="p-4">
                         <h3 className="font-semibold text-lg text-gray-800 mb-3">Herramientas Predefinidas</h3>
@@ -220,7 +220,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                         </div>
                     </CardContent>
                 </Card>
-            )}
+            )} */}
 
             {/* Divider */}
             <div className="relative flex items-center my-6">
