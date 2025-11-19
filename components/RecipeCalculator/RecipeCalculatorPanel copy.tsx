@@ -12,8 +12,6 @@ import {
     calculateProfit,
     calculateProfitPercentage,
     getIngredientCostPerUnit,
-    exportRecipeData,
-    importRecipeData
 } from '@/lib/utils'
 import { FlipCard } from './FlipCard'
 
