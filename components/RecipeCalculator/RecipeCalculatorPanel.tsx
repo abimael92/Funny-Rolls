@@ -1326,7 +1326,7 @@ export function RecipeCalculatorPanel({
                         className="fixed inset-0"
                         onClick={() => setShowLotesModal(false)}
                     />
-                    <div className="bg-white rounded-t-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
                         {/* Swipe indicator for mobile */}
                         <div className="lg:hidden flex justify-center pt-3 pb-1">
                             <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
