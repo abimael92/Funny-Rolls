@@ -421,29 +421,32 @@ export function IngredientsPanel({
                 )}
             </CardContent>
 
-            <CardContent>
-                {/* Mobile Quick Actions */}
-                <div className="bg-gradient-to-br from-blue-50 to-emerald-50 border-2 border-blue-300 rounded-2xl p-3 sm:p-4">
-                    <h4 className="font-semibold text-blue-800 text-center text-lg sm:text-xl mb-2 sm:mb-3">Resumen</h4>
-                    <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
-                        <div
-                            className="bg-white border border-red-500 rounded-lg p-2 sm:p-3 cursor-pointer hover:bg-red-50 transition-colors"
-                            onClick={() => setShowTotalCostModal(true)}
-                        >
-                            <div className="text-xs sm:text-sm text-gray-600">Costo Total</div>
-                            <div className="text-base sm:text-lg font-bold text-red-700">
-                                ${ingredients.reduce((total, ing) => total + ing.price, 0)
-                                    .toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                                }
+            {!showTools && (
+                <CardContent>
+                    {/* Mobile Quick Actions */}
+                    <div className="bg-gradient-to-br from-blue-50 to-emerald-50 border-2 border-blue-300 rounded-2xl p-3 sm:p-4">
+                        <h4 className="font-semibold text-blue-800 text-center text-lg sm:text-xl mb-2 sm:mb-3">Resumen</h4>
+                        <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
+                            <div
+                                className="bg-white border border-red-500 rounded-lg p-2 sm:p-3 cursor-pointer hover:bg-red-50 transition-colors"
+                                onClick={() => setShowTotalCostModal(true)}
+                            >
+                                <div className="text-xs sm:text-sm text-gray-600">Costo Total</div>
+                                <div className="text-base sm:text-lg font-bold text-red-700">
+                                    ${ingredients.reduce((total, ing) => total + ing.price, 0)
+                                        .toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                                    }
+                                </div>
+                            </div>
+                            <div className="bg-white border border-green-500 rounded-lg p-2 sm:p-3">
+                                <div className="text-xs sm:text-sm text-gray-600">Ingredientes</div>
+                                <div className="text-base sm:text-lg font-bold text-green-700">{ingredients.length}</div>
                             </div>
                         </div>
-                        <div className="bg-white border border-green-500 rounded-lg p-2 sm:p-3">
-                            <div className="text-xs sm:text-sm text-gray-600">Ingredientes</div>
-                            <div className="text-base sm:text-lg font-bold text-green-700">{ingredients.length}</div>
-                        </div>
                     </div>
-                </div>
-            </CardContent>
+                </CardContent>
+            )}
+
             {/* Total Cost Breakdown Modal */}
             {showTotalCostModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

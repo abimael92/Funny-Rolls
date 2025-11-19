@@ -147,6 +147,8 @@ export function RecipeCalculatorPanel({
 
 
 
+
+
     const handleRecordProduction = () => {
         if (productionBatchCount > 0) {
             recordProduction(selectedRecipe.id, productionBatchCount) // ✅ NOW THIS WILL WORK
@@ -718,49 +720,14 @@ export function RecipeCalculatorPanel({
                                     ></div>
                                 </div>
 
-                                {/* Centered Total Ingredients and Meta */}
-                                <div className="grid grid-cols-2 gap-4 mt-16 text-center">
-                                    <div className="bg-white border-2 border-red-200 rounded-xl p-4">
-                                        <div className="text-sm text-gray-600 mb-2">Costo Total Ingredientes</div>
-                                        <div className="text-xl font-bold text-red-700">
-                                            ${ingredients
-                                                .reduce((total, ing) => total + ing.price, 0)
-                                                .toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                                            }
-                                        </div>
-                                    </div>
 
-                                    <div className="bg-white border-2 border-blue-400 rounded-xl p-4">
-                                        <div className="text-sm text-gray-600 mb-2">Meta de Lotes</div>
-                                        <div className="text-xl font-bold text-blue-700">
-                                            {Math.ceil(
-                                                ingredients.reduce((total, ing) => total + ing.price, 0) /
-                                                selectedRecipe.sellingPrice
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
 
-                                {/* Profit Goal Input */}
-                                <div className="mt-4 bg-white border-2 border-green-200 rounded-xl p-4 text-center">
-                                    <div className="text-sm text-gray-600 mb-2">Ganancia Aproximada</div>
-                                    <div className="flex items-center justify-center gap-2">
-                                        <span className="text-green-600 text-2xl  font-bold">$</span>
-                                        <span className=" text-2xl font-bold text-center font-bold text-green-600">
-                                            {(
-                                                Math.ceil(
-                                                    ingredients.reduce((total, ing) => total + ing.price, 0) /
-                                                    selectedRecipe.sellingPrice
-                                                ) *
-                                                (selectedRecipe.sellingPrice * selectedRecipe.batchSize)
-                                            ).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                        </span>
-                                    </div>
-                                </div>
+
                             </div>
                         </CardContent>
                     </Card>
 
+                    {/* Action Buttons */}
 
                 </div>
 
