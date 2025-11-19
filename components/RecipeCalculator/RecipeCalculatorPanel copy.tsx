@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, Download, Upload } from "lucide-react"
+import { Plus, Trash2, } from "lucide-react"
 import { products } from "@/lib/data"
 import { Ingredient, Recipe } from '@/lib/types'
 import {
@@ -147,26 +147,7 @@ export function RecipeCalculatorPanel({
         setIsEditingSteps(false)
     }
 
-    // Backup/Restore functions
-    const handleExportData = () => {
-        exportRecipeData(ingredients, recipes)
-    }
 
-    const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (!file) return
-
-        importRecipeData(file)
-            .then((data) => {
-                // This would need to be handled in the parent component
-                alert(`Datos importados correctamente! here is your ${data}`)
-            })
-            .catch((error) => {
-                alert(error.message)
-            })
-
-        event.target.value = ''
-    }
 
     const handleRecordProduction = () => {
         if (productionBatchCount > 0) {
@@ -782,24 +763,7 @@ export function RecipeCalculatorPanel({
                         </CardContent>
                     </Card>
 
-                    {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        <Button onClick={handleExportData} variant="outline" className="bg-amber-500 hover:bg-amber-600 text-white flex-1 text-lg py-2 shadow-sm  transition-colors">
-                            <Download className="h-4 w-4 mr-2" />
-                            Exportar
-                        </Button>
-                        <Button variant="outline" className="bg-gray-300 hover:bg-gray-200 text-gray-80 flex-1 text-lg py-2 shadow-sm transition-colors" onClick={() => document.getElementById('import-file-mobile')?.click()}>
-                            <Upload className="h-4 w-4 mr-2" />
-                            Importar
-                        </Button>
-                        <input
-                            id="import-file"
-                            type="file"
-                            accept=".json"
-                            onChange={handleImportData}
-                            className="hidden"
-                        />
-                    </div>
+
                 </div>
 
 
