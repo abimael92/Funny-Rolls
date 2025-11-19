@@ -367,7 +367,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                         className="fixed inset-0"
                         onClick={() => setShowTotalToolsModal(false)}
                     />
-                    <div className="bg-white rounded-t-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
                         {/* Header */}
                         <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50">
@@ -446,7 +446,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                         className="fixed inset-0"
                         onClick={() => setShowToolsCostModal(false)}
                     />
-                    <div className="bg-white rounded-t-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
                         {/* Header */}
                         <div className="p-6 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
