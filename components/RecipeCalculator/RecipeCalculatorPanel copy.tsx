@@ -231,13 +231,7 @@ export function RecipeCalculatorPanel({
                         )}
                     </div>
 
-                    {/* Close dropdown when clicking outside (backdrop) */}
-                    {isMobileDropdownOpen && (
-                        <div
-                            className="fixed inset-0 bg-black bg-opacity-10 z-40 lg:hidden"
-                            onClick={() => setIsMobileDropdownOpen(false)}
-                        />
-                    )}
+
                 </div>
 
                 {/* Flip Card - Desktop Only */}
