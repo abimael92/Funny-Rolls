@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, Download, Upload } from "lucide-react"
+import { Plus, Trash2, } from "lucide-react"
 import { products } from "@/lib/data"
 import { Ingredient, Recipe } from '@/lib/types'
 import {
@@ -12,8 +12,7 @@ import {
     calculateProfit,
     calculateProfitPercentage,
     getIngredientCostPerUnit,
-    exportRecipeData,
-    importRecipeData
+
 } from '@/lib/utils'
 import { FlipCard } from './FlipCard'
 
@@ -147,26 +146,9 @@ export function RecipeCalculatorPanel({
         setIsEditingSteps(false)
     }
 
-    // Backup/Restore functions
-    const handleExportData = () => {
-        exportRecipeData(ingredients, recipes)
-    }
 
-    const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        if (!file) return
 
-        importRecipeData(file)
-            .then((data) => {
-                // This would need to be handled in the parent component
-                alert(`Datos importados correctamente! here is your ${data}`)
-            })
-            .catch((error) => {
-                alert(error.message)
-            })
 
-        event.target.value = ''
-    }
 
     const handleRecordProduction = () => {
         if (productionBatchCount > 0) {
