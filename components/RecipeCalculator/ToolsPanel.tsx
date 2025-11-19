@@ -321,7 +321,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                 })}
 
                 {/* Empty State */}
-                {tools.length === 0 && (
+                {/* {tools.length === 0 && (
                     <div className="text-center py-8 sm:py-12 bg-gradient-to-br from-gray-50 to-blue-50 border-2 border-dashed border-gray-300 rounded-xl">
                         <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                             <Utensils className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
@@ -329,7 +329,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                         <div className="text-gray-500 text-base sm:text-lg mb-2">No hay herramientas registradas</div>
                         <div className="text-gray-400 text-xs sm:text-sm">Agrega tu primera herramienta usando el formulario de arriba</div>
                     </div>
-                )}
+                )} */}
             </div>
 
             {/* End of Tools List */}
