@@ -11,6 +11,7 @@ import { EditableIngredientRow } from './EditableIngredientRow'
 import { CustomNumberInput } from './CustomNumberInput';
 import { CustomSelect } from './CustomSelect';
 import { ToolsPanel } from './ToolsPanel';
+import { CloseButton, ActionButton } from './ModalHelpers';
 import { Tool } from '@/lib/types';
 
 // List,
@@ -37,6 +38,8 @@ export function IngredientsPanel({
     const [showTotalCostModal, setShowTotalCostModal] = useState(false);
     const [tools, setTools] = useState<Tool[]>([]);
     const [showTools, setShowTools] = useState(false);
+    const [showIngredientsModal, setShowIngredientsModal] = useState(false);
+
 
     // Add new ingredient
     const addIngredient = () => {
@@ -438,7 +441,10 @@ export function IngredientsPanel({
                                     }
                                 </div>
                             </div>
-                            <div className="bg-white border border-green-500 rounded-lg p-2 sm:p-3">
+                            <div
+                                className="bg-white border border-green-500 rounded-lg p-2 sm:p-3 cursor-pointer hover:bg-green-50 transition-colors"
+                                onClick={() => setShowIngredientsModal(true)}
+                            >
                                 <div className="text-xs sm:text-sm text-gray-600">Ingredientes</div>
                                 <div className="text-base sm:text-lg font-bold text-green-700">{ingredients.length}</div>
                             </div>
@@ -493,6 +499,93 @@ export function IngredientsPanel({
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Ingredients Count Modal */}
+            {showIngredientsModal && (
+
+                <>
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowIngredientsModal(false)}
+                        />
+                        <div className="bg-white rounded-t-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+
+                            {/* Header */}
+                            <div className="p-6 border-b border-green-100 bg-gradient-to-r from-green-50 to-emerald-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                            <span className="text-lg">📋</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-green-800">Todos los Ingredientes</h3>
+                                            <p className="text-sm text-green-600">Inventario completo ({ingredients.length} ingredientes)</p>
+                                        </div>
+                                    </div>
+                                    <CloseButton onClose={() => setShowIngredientsModal(false)} />
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 overflow-y-auto max-h-96">
+                                <div className="space-y-3">
+                                    {ingredients.map((ingredient) => {
+                                        const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id);
+                                        const currentStock = inventoryItem?.currentStock || 0;
+                                        const isLowStock = currentStock <= ingredient.minAmount;
+
+                                        return (
+                                            <div key={ingredient.id} className={`flex justify-between items-center p-3 rounded-lg ${isLowStock ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}>
+                                                <div className="flex-1">
+                                                    <div className="font-semibold text-gray-900">{ingredient.name}</div>
+                                                    <div className="text-sm text-gray-600 mt-1">
+                                                        ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        Stock: {currentStock} {ingredient.unit}
+                                                        {isLowStock && (
+                                                            <span className="text-red-600 font-semibold ml-2">• Stock bajo</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="text-sm font-medium text-green-700">
+                                                        ${ingredient.price.toFixed(2)}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        Total
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="p-6 border-t bg-gray-50">
+
+                                <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
+                                    <span className="font-bold text-gray-900">Valor Total Inventario:</span>
+                                    <span className="text-xl font-bold text-green-700">
+                                        ${ingredients.reduce((total, ing) => total + ing.price, 0).toFixed(2)}
+                                    </span>
+                                </div>
+
+                                <ActionButton
+                                    onClick={() => setShowIngredientsModal(false)}
+                                    color="green"
+                                    fullWidth
+                                >
+                                    Cerrar
+                                </ActionButton>
+                            </div>
+                        </div>
+                    </div>
+                </>
+
             )}
         </Card>
     )
