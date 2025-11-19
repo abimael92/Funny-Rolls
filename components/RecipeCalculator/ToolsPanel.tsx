@@ -333,6 +333,24 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             </div>
 
             {/* End of Tools List */}
+            {/* Tools Summary Section */}
+            <div className="bg-gradient-to-br from-blue-50 to-emerald-50 border-2 border-blue-300 rounded-2xl p-3 sm:p-4 mb-6">
+                <h4 className="font-semibold text-blue-800 text-center text-lg sm:text-xl mb-2 sm:mb-3">Resumen de Herramientas</h4>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
+                    <div className="bg-white border border-purple-500 rounded-lg p-2 sm:p-3">
+                        <div className="text-xs sm:text-sm text-gray-600">Total Herramientas</div>
+                        <div className="text-base sm:text-lg font-bold text-purple-700">{defaultTools.length}</div>
+                    </div>
+                    <div className="bg-white border border-orange-500 rounded-lg p-2 sm:p-3">
+                        <div className="text-xs sm:text-sm text-gray-600">Costo Total</div>
+                        <div className="text-base sm:text-lg font-bold text-orange-700">
+                            ${defaultTools.reduce((total, tool) => total + (tool.cost || 0), 0)
+                                .toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }
