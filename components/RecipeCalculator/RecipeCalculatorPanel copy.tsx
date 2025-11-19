@@ -783,23 +783,7 @@ export function RecipeCalculatorPanel({
                     </Card>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        <Button onClick={handleExportData} variant="outline" className="bg-amber-500 hover:bg-amber-600 text-white flex-1 text-lg py-2 shadow-sm  transition-colors">
-                            <Download className="h-4 w-4 mr-2" />
-                            Exportar
-                        </Button>
-                        <Button variant="outline" className="bg-gray-300 hover:bg-gray-200 text-gray-80 flex-1 text-lg py-2 shadow-sm transition-colors" onClick={() => document.getElementById('import-file-mobile')?.click()}>
-                            <Upload className="h-4 w-4 mr-2" />
-                            Importar
-                        </Button>
-                        <input
-                            id="import-file"
-                            type="file"
-                            accept=".json"
-                            onChange={handleImportData}
-                            className="hidden"
-                        />
-                    </div>
+
                 </div>
 
 
