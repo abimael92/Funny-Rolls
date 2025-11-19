@@ -714,17 +714,10 @@ export function RecipeCalculatorPanel({
                                     ></div>
                                 </div>
 
-
-
-
                             </div>
                         </CardContent>
                     </Card>
-
-                    {/* Action Buttons */}
-
                 </div>
-
 
             </CardContent>
         </Card >
