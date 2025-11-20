@@ -32,7 +32,7 @@ export function EditableToolRow({ tool, onSave, onCancel }: EditableToolRowProps
                 <select
                     value={editedTool.type}
                     onChange={(e) => {
-                        const newType = e.target.value as 'utility' | 'utensil' | 'enhancer'
+                        const newType = e.target.value as 'consumible' | 'herramienta' | 'equipo' | 'especializado'
                         const defaultCategory = toolCategories[newType]?.[0]?.value || 'measuring'
                         setEditedTool({
                             ...editedTool,
@@ -42,9 +42,10 @@ export function EditableToolRow({ tool, onSave, onCancel }: EditableToolRowProps
                     }}
                     className="px-3 py-2 border-2 border-blue-300 rounded-lg"
                 >
-                    <option value="utility">Utility</option>
-                    <option value="utensil">Utensilio</option>
-                    <option value="enhancer">Enhancer</option>
+                    <option value="consumible">consumible</option>
+                    <option value="herramienta">herramientaio</option>
+                    <option value="equipo">equipo</option>
+                    <option value="especializado">especializado</option>
                 </select>
 
                 <select
