@@ -193,37 +193,7 @@ export function RecipeCalculatorPanel({
                                     </svg>
                                 </button>
 
-                                {/* Dropdown menu */}
-                                {isMobileDropdownOpen && (
-                                    <div className="absolute top-full left-0 right-0 bg-white border-2 border-amber-500 rounded-xl mt-2 max-h-80 overflow-y-auto z-50 shadow-xl custom-dropdown">
-                                        {products
-                                            .filter(product => product.available)
-                                            .map(product => (
-                                                <button
-                                                    key={product.recipe.id}
-                                                    onClick={() => {
-                                                        setSelectedRecipe(product.recipe)
-                                                        setIsMobileDropdownOpen(false)
-                                                        setIsCardFlipped(false)
-                                                        setIsEditingSteps(false)
-                                                    }}
-                                                    className={`w-full px-4 py-4 text-left text-lg border-b border-amber-100 last:border-b-0 hover:bg-amber-50 active:bg-amber-100 transition-colors ${selectedRecipe.id === product.recipe.id
-                                                        ? 'bg-amber-100 text-amber-800 font-semibold'
-                                                        : 'text-gray-800'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center justify-between">
-                                                        <span>{product.recipe.name}</span>
-                                                        {selectedRecipe.id === product.recipe.id && (
-                                                            <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                            </svg>
-                                                        )}
-                                                    </div>
-                                                </button>
-                                            ))}
-                                    </div>
-                                )}
+
                             </div>
                         )}
                     </div>
