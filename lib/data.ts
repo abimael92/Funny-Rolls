@@ -132,6 +132,16 @@ export const products: Product[] = [
 				{ ingredientId: '14', amount: 0.02 },
 				{ ingredientId: '15', amount: 0.01 },
 			],
+			tools: [
+				{ toolId: 'util-1', usage: 'full' }, // Horno
+				{ toolId: 'util-3', usage: 'full' }, // Mezcladora
+				{ toolId: 'uten-1', usage: 'full' }, // Juego de Medidores
+				{ toolId: 'uten-2', usage: 'full' }, // Báscula Digital
+				{ toolId: 'uten-3', usage: 'full' }, // Bowls Mezcladores
+				{ toolId: 'uten-6', usage: 'full' }, // Rodillo para Masa
+				{ toolId: 'uten-7', usage: 'full' }, // Moldes para Hornear
+				{ toolId: 'uten-8', usage: 'full' }, // Cuchillo de Sierra
+			],
 			steps: [
 				'Mezclar harina, azúcar, levadura y sal en un bowl grande',
 				'Agregar mantequilla derretida y huevos batidos',
@@ -174,6 +184,17 @@ export const products: Product[] = [
 				{ ingredientId: '14', amount: 0.02 },
 				{ ingredientId: '15', amount: 0.01 },
 			],
+			tools: [
+				{ toolId: 'util-1', usage: 'full' }, // Horno
+				{ toolId: 'util-2', usage: 'partial' }, // Estufa (para chocolate)
+				{ toolId: 'util-3', usage: 'full' }, // Mezcladora
+				{ toolId: 'uten-1', usage: 'full' }, // Juego de Medidores
+				{ toolId: 'uten-2', usage: 'full' }, // Báscula Digital
+				{ toolId: 'uten-3', usage: 'full' }, // Bowls Mezcladores
+				{ toolId: 'uten-6', usage: 'full' }, // Rodillo para Masa
+				{ toolId: 'uten-7', usage: 'full' }, // Moldes para Hornear
+				{ toolId: 'enh-4', usage: 'full' }, // Manga Pastelera (para chocolate)
+			],
 			steps: [
 				'Mezclar harina, cacao en polvo, azúcar y levadura',
 				'Agregar mantequilla, huevos y esencia de vainilla',
@@ -214,6 +235,18 @@ export const products: Product[] = [
 				{ ingredientId: '7', amount: 0.5 },
 				{ ingredientId: '13', amount: 0.15 },
 				{ ingredientId: '14', amount: 0.02 },
+			],
+			tools: [
+				{ toolId: 'util-1', usage: 'full' }, // Horno
+				{ toolId: 'util-3', usage: 'full' }, // Mezcladora
+				{ toolId: 'uten-1', usage: 'full' }, // Juego de Medidores
+				{ toolId: 'uten-2', usage: 'full' }, // Báscula Digital
+				{ toolId: 'uten-3', usage: 'full' }, // Bowls Mezcladores
+				{ toolId: 'uten-4', usage: 'partial' }, // Batidor (para queso crema)
+				{ toolId: 'uten-6', usage: 'full' }, // Rodillo para Masa
+				{ toolId: 'uten-7', usage: 'full' }, // Moldes para Hornear
+				{ toolId: 'uten-8', usage: 'full' }, // Cuchillo de Sierra
+				{ toolId: 'enh-4', usage: 'full' }, // Manga Pastelera (para glaseado rosa)
 			],
 			steps: [
 				'Preparar puré de fresas frescas',
@@ -257,6 +290,18 @@ export const products: Product[] = [
 				{ ingredientId: '14', amount: 0.02 },
 				{ ingredientId: '4', amount: 0.03 },
 			],
+			tools: [
+				{ toolId: 'util-1', usage: 'full' }, // Horno
+				{ toolId: 'util-3', usage: 'full' }, // Mezcladora
+				{ toolId: 'uten-1', usage: 'full' }, // Juego de Medidores
+				{ toolId: 'uten-2', usage: 'full' }, // Báscula Digital
+				{ toolId: 'uten-3', usage: 'full' }, // Bowls Mezcladores
+				{ toolId: 'uten-4', usage: 'partial' }, // Batidor (para queso crema)
+				{ toolId: 'uten-6', usage: 'full' }, // Rodillo para Masa
+				{ toolId: 'uten-7', usage: 'full' }, // Moldes para Hornear
+				{ toolId: 'uten-8', usage: 'full' }, // Cuchillo de Sierra
+				{ toolId: 'enh-4', usage: 'full' }, // Manga Pastelera
+			],
 			steps: [
 				'Mezclar harina, azúcar, levadura y canela',
 				'Agregar mantequilla, huevos y leche tibia',
@@ -298,6 +343,17 @@ export const products: Product[] = [
 				{ ingredientId: '7', amount: 0.45 },
 				{ ingredientId: '8', amount: 0.25 },
 				{ ingredientId: '14', amount: 0.015 },
+			],
+			tools: [
+				{ toolId: 'util-1', usage: 'full' }, // Horno
+				{ toolId: 'util-3', usage: 'full' }, // Mezcladora
+				{ toolId: 'uten-1', usage: 'full' }, // Juego de Medidores
+				{ toolId: 'uten-2', usage: 'full' }, // Báscula Digital
+				{ toolId: 'uten-3', usage: 'full' }, // Bowls Mezcladores
+				{ toolId: 'uten-5', usage: 'partial' }, // Espátula (para glaseado)
+				{ toolId: 'uten-6', usage: 'full' }, // Rodillo para Masa
+				{ toolId: 'uten-7', usage: 'full' }, // Moldes para Hornear
+				{ toolId: 'uten-8', usage: 'full' }, // Cuchillo de Sierra
 			],
 			steps: [
 				'Combinar harina, azúcar, levadura y sal',
@@ -342,6 +398,18 @@ export const products: Product[] = [
 				{ ingredientId: '13', amount: 0.18 },
 				{ ingredientId: '14', amount: 0.02 },
 			],
+			tools: [
+				{ toolId: 'util-1', usage: 'full' }, // Horno
+				{ toolId: 'util-2', usage: 'partial' }, // Estufa (para caramelo)
+				{ toolId: 'util-3', usage: 'full' }, // Mezcladora
+				{ toolId: 'uten-1', usage: 'full' }, // Juego de Medidores
+				{ toolId: 'uten-2', usage: 'full' }, // Báscula Digital
+				{ toolId: 'uten-3', usage: 'full' }, // Bowls Mezcladores
+				{ toolId: 'uten-6', usage: 'full' }, // Rodillo para Masa
+				{ toolId: 'uten-7', usage: 'full' }, // Moldes para Hornear
+				{ toolId: 'enh-3', usage: 'partial' }, // Soplete (para acabado caramelizado)
+				{ toolId: 'enh-4', usage: 'full' }, // Manga Pastelera
+			],
 			steps: [
 				'Preparar base con harina, azúcar y levadura',
 				'Agregar mantequilla, huevos y leche',
@@ -361,163 +429,206 @@ export const products: Product[] = [
 ];
 
 export const defaultTools: Tool[] = [
-	// UTILITIES
+	// UTILITIES (operational costs - direct pass-through)
 	{
 		id: 'util-1',
-		name: 'Horno ',
-		type: 'utility',
+		name: 'Horno',
+		type: 'consumible',
 		category: 'energy',
-		cost: 15,
+		cost: 2.5, // $2.50 MXN por lote
 		description: 'Consumo eléctrico por horneado (180°C por 25-30 min)',
+		lifetime: 'Operational',
+		recoveryValue: 0,
 	},
 	{
 		id: 'util-2',
 		name: 'Estufa',
-		type: 'utility',
+		type: 'consumible',
 		category: 'energy',
-		cost: 5,
+		cost: 0.8, // $0.80 MXN por lote
 		description: 'Consumo de gas para preparaciones en estufa',
+		lifetime: 'Operational',
+		recoveryValue: 0,
 	},
 	{
 		id: 'util-3',
 		name: 'Mezcladora',
-		type: 'utility',
+		type: 'consumible',
 		category: 'equipment',
-		cost: 8,
+		cost: 1.2, // $1.20 MXN por lote
 		description: 'Consumo eléctrico por batch de masa',
-	},
-	{
-		id: 'util-4',
-		name: 'Refrigeración',
-		type: 'utility',
-		category: 'energy',
-		cost: 3,
-		description: 'Costo de refrigeración para ingredientes',
+		lifetime: 'Operational',
+		recoveryValue: 0,
 	},
 
-	// UTENSILS
+	// herramientaS (amortized costs - portion per batch)
 	{
 		id: 'uten-1',
 		name: 'Juego de Medidores',
-		type: 'utensil',
+		type: 'herramienta',
 		category: 'measuring',
+		cost: 0.5, // $0.50 MXN por lote
 		description: 'Tazas y cucharas medidoras para ingredientes',
+		lifetime: '2 años',
+		recoveryValue: 15, // $15 MXN valor de reventa
 	},
 	{
 		id: 'uten-2',
 		name: 'Báscula Digital',
-		type: 'utensil',
+		type: 'herramienta',
 		category: 'measuring',
+		cost: 0.8, // $0.80 MXN por lote
 		description: 'Para mediciones precisas en gramos',
+		lifetime: '3 años',
+		recoveryValue: 25, // $25 MXN valor de reventa
 	},
 	{
 		id: 'uten-3',
 		name: 'Bowls Mezcladores',
-		type: 'utensil',
+		type: 'herramienta',
 		category: 'mixing',
+		cost: 0.4, // $0.40 MXN por lote
 		description: 'Set de bowls de diferentes tamaños',
+		lifetime: '2 años',
+		recoveryValue: 10, // $10 MXN valor de reventa
 	},
 	{
 		id: 'uten-4',
 		name: 'Batidor de Alambre',
-		type: 'utensil',
+		type: 'herramienta',
 		category: 'mixing',
+		cost: 0.25, // $0.25 MXN por lote
 		description: 'Para incorporar aire en mezclas',
+		lifetime: '1.5 años',
+		recoveryValue: 5, // $5 MXN valor de reventa
 	},
 	{
 		id: 'uten-5',
 		name: 'Espátula de Goma',
-		type: 'utensil',
+		type: 'herramienta',
 		category: 'mixing',
+		cost: 0.2, // $0.20 MXN por lote
 		description: 'Para raspar bowls y mezclar suavemente',
+		lifetime: '1 año',
+		recoveryValue: 2, // $2 MXN valor de reventa
 	},
 	{
 		id: 'uten-6',
 		name: 'Rodillo para Masa',
-		type: 'utensil',
+		type: 'herramienta',
 		category: 'shaping',
+		cost: 0.6, // $0.60 MXN por lote
 		description: 'Para extender masa uniformemente',
+		lifetime: '2 años',
+		recoveryValue: 20, // $20 MXN valor de reventa
 	},
 	{
 		id: 'uten-7',
 		name: 'Moldes para Hornear',
-		type: 'utensil',
+		type: 'herramienta',
 		category: 'baking',
+		cost: 1.0, // $1.00 MXN por lote
 		description: 'Charolas para hornear rolls',
+		lifetime: '3 años',
+		recoveryValue: 30, // $30 MXN valor de reventa
 	},
 	{
 		id: 'uten-8',
 		name: 'Cuchillo de Sierra',
-		type: 'utensil',
+		type: 'herramienta',
 		category: 'cutting',
+		cost: 0.3, // $0.30 MXN por lote
 		description: 'Para cortar rolls sin aplastar',
+		lifetime: '2 años',
+		recoveryValue: 8, // $8 MXN valor de reventa
 	},
 	{
 		id: 'uten-9',
 		name: 'Termómetro Digital',
-		type: 'utensil',
+		type: 'herramienta',
 		category: 'measuring',
+		cost: 0.45, // $0.45 MXN por lote
 		description: 'Para temperatura interna perfecta',
+		lifetime: '3 años',
+		recoveryValue: 12, // $12 MXN valor de reventa
 	},
 
-	// ENHANCERS
+	// especializadoS (premium equipment - higher amortization)
 	{
 		id: 'enh-1',
 		name: 'Mezcladora Planetaria',
-		type: 'enhancer',
+		type: 'especializado',
 		category: 'equipment',
-		cost: 25,
+		cost: 3.5, // $3.50 MXN por lote
 		description: 'Mezclado profesional para consistencia perfecta',
+		lifetime: '5 años',
+		recoveryValue: 200, // $200 MXN valor de reventa
 	},
 	{
 		id: 'enh-2',
 		name: 'Proveedora de Masa',
-		type: 'enhancer',
+		type: 'especializado',
 		category: 'equipment',
-		cost: 12,
+		cost: 2.0, // $2.00 MXN por lote
 		description: 'Control de temperatura para fermentación óptima',
+		lifetime: '4 años',
+		recoveryValue: 80, // $80 MXN valor de reventa
 	},
 	{
 		id: 'enh-3',
 		name: 'Soplete Culinario',
-		type: 'enhancer',
+		type: 'especializado',
 		category: 'finishing',
-		cost: 8,
+		cost: 1.5, // $1.50 MXN por lote
 		description: 'Para acabados caramelizados y decoraciones',
+		lifetime: '3 años',
+		recoveryValue: 40, // $40 MXN valor de reventa
 	},
 	{
 		id: 'enh-4',
 		name: 'Manga Pastelera',
-		type: 'enhancer',
+		type: 'especializado',
 		category: 'decorating',
+		cost: 0.35, // $0.35 MXN por lote
 		description: 'Para decoraciones precisas con glaseados',
+		lifetime: '1 año',
+		recoveryValue: 3, // $3 MXN valor de reventa
 	},
 	{
 		id: 'enh-5',
 		name: 'Kit de Medición Avanzado',
-		type: 'enhancer',
+		type: 'especializado',
 		category: 'measuring',
-		cost: 15,
+		cost: 1.2, // $1.20 MXN por lote
 		description: 'Medidores de precisión para profesionales',
+		lifetime: '4 años',
+		recoveryValue: 60, // $60 MXN valor de reventa
 	},
 ];
 
 export const toolCategories = {
-	utility: [
-		{ value: 'energy', label: 'Energía' },
-		{ value: 'equipment', label: 'Equipo Eléctrico' },
+	consumible: [
+		{ value: 'general', label: 'General' },
+		{ value: 'empaque', label: 'Empaque' },
+		{ value: 'limpieza', label: 'Limpieza' },
+		// Add more categories as needed
 	],
-	utensil: [
-		{ value: 'measuring', label: 'Medición' },
-		{ value: 'mixing', label: 'Mezclado' },
-		{ value: 'shaping', label: 'Formado' },
-		{ value: 'baking', label: 'Horneado' },
-		{ value: 'cutting', label: 'Corte' },
+	herramienta: [
+		{ value: 'general', label: 'General' },
+		{ value: 'cocina', label: 'Cocina' },
+		{ value: 'medicion', label: 'Medición' },
+		// Add more categories as needed
 	],
-	enhancer: [
-		{ value: 'equipment', label: 'Equipo Profesional' },
-		{ value: 'finishing', label: 'Acabados' },
-		{ value: 'decorating', label: 'Decoración' },
-		{ value: 'measuring', label: 'Precisión' },
+	equipo: [
+		{ value: 'general', label: 'General' },
+		{ value: 'electrodomestico', label: 'Electrodoméstico' },
+		{ value: 'utensilio', label: 'Utensilio' },
+		// Add more categories as needed
+	],
+	especializado: [
+		// Add this
+		{ value: 'general', label: 'General' },
+		{ value: 'profesional', label: 'Profesional' },
+		{ value: 'tecnicocientifico', label: 'Técnico-Científico' },
 	],
 };
