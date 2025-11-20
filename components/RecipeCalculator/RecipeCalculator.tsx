@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { products, defaultIngredients } from "@/lib/data"
-import { Ingredient, InventoryItem, Recipe, ProductionRecord } from '@/lib/types'
+import { products, defaultIngredients, defaultTools } from "@/lib/data";
+import { Ingredient, InventoryItem, Recipe, ProductionRecord, Tool } from '@/lib/types';
 import { MobileViewSwitcher } from './MobileViewSwitcher'
 import { IngredientsPanel } from './IngredientsPanel'
 import { RecipeCalculatorPanel } from './RecipeCalculatorPanel'
@@ -10,7 +10,8 @@ import { ProductionTrackerPanel } from './ProductionTrackerPanel'
 
 export function RecipeCalculator() {
     // Ingredients management
-    const [ingredients, setIngredients] = useState<Ingredient[]>(defaultIngredients)
+    const [ingredients, setIngredients] = useState<Ingredient[]>(defaultIngredients);
+    const [tools, setTools] = useState<Tool[]>(defaultTools);
     const [recipes, setRecipes] = useState<Recipe[]>(products.map(p => p.recipe))
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe>(recipes[0])
     const [mobileView, setMobileView] = useState<'ingredients' | 'calculator' | 'production'>('calculator')
@@ -53,16 +54,33 @@ export function RecipeCalculator() {
         const savedIngredients = safeGetLocalStorage('recipe-calculator-ingredients', defaultIngredients)
         const savedRecipes = safeGetLocalStorage('recipe-calculator-recipes', products.map(p => p.recipe))
         const savedProductionHistory = safeGetLocalStorage('recipe-calculator-production-history', [])
-        const savedInventory = safeGetLocalStorage('recipe-calculator-inventory', [])
+        const savedInventory = safeGetLocalStorage('recipe-calculator-inventory', []);
+        const savedTools = safeGetLocalStorage('recipe-calculator-tools', defaultTools);
 
-        setIngredients(savedIngredients)
+        setIngredients(savedIngredients);
+        setTools(savedTools);
 
-        const recipesWithSteps = savedRecipes.map((recipe: Recipe) => ({
-            ...recipe,
-            steps: recipe.steps || []
-        }))
-        setRecipes(recipesWithSteps)
-        setSelectedRecipe(recipesWithSteps[0])
+        // FIX: Add missing tools to saved recipes
+        const recipesWithTools = savedRecipes.map((savedRecipe: Recipe) => {
+            const defaultRecipe = products.find(p => p.recipe.id === savedRecipe.id)?.recipe;
+
+            // If saved recipe doesn't have tools, add them from default
+            if (!savedRecipe.tools && defaultRecipe?.tools) {
+                return {
+                    ...savedRecipe,
+                    tools: defaultRecipe.tools,
+                    steps: savedRecipe.steps || defaultRecipe?.steps || []
+                };
+            }
+
+            return {
+                ...savedRecipe,
+                steps: savedRecipe.steps || []
+            };
+        });
+
+        setRecipes(recipesWithTools)
+        setSelectedRecipe(recipesWithTools[0])
 
         setProductionHistory(savedProductionHistory)
 
@@ -95,7 +113,11 @@ export function RecipeCalculator() {
 
     useEffect(() => {
         safeSetLocalStorage('recipe-calculator-inventory', inventory)
-    }, [inventory])
+    }, [inventory]);
+
+    useEffect(() => {
+        safeSetLocalStorage('recipe-calculator-tools', tools)
+    }, [tools])
 
     // Enhanced record production with validation
     const recordProduction = (recipeId: string, batchCount: number, date: Date = new Date()) => {
@@ -182,6 +204,7 @@ export function RecipeCalculator() {
         setInventory(prev => [...prev, newInventoryItem])
     }
 
+
     return (
         <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-0">
             {/* Header */}
@@ -235,6 +258,7 @@ export function RecipeCalculator() {
                         recipes={recipes}
                         setRecipes={setRecipes}
                         ingredients={ingredients}
+                        tools={tools}
                         recordProduction={recordProduction}
                     />
                 </div>
