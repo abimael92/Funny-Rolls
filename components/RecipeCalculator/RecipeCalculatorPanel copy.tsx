@@ -146,9 +146,6 @@ export function RecipeCalculatorPanel({
     }
 
 
-
-
-
     const handleRecordProduction = () => {
         if (productionBatchCount > 0) {
             recordProduction(selectedRecipe.id, productionBatchCount) // ✅ NOW THIS WILL WORK

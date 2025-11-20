@@ -25,6 +25,7 @@ export interface Recipe {
 	id: string;
 	name: string;
 	ingredients: RecipeIngredient[];
+	tools?: RecipeTool[];
 	batchSize: number;
 	sellingPrice: number;
 	profitMargin: number;
@@ -90,13 +91,22 @@ export interface InventoryItem {
 	supplier?: string;
 }
 
+// In your lib/types.ts
 export interface Tool {
 	id: string;
 	name: string;
-	type: 'utility' | 'utensil' | 'enhancer';
-	cost?: number;
+	type: 'consumible' | 'herramienta' | 'equipo' | 'especializado';
+	cost: number; // Costo que se carga al cliente por lote
 	description?: string;
 	category: string;
+	lifetime?: string; // Tiempo de vida útil estimado
+	recoveryValue?: number; // Valor de reventa/rescate en MXN
+}
+
+// In your lib/types.ts
+interface RecipeTool {
+	toolId: string;
+	usage?: 'full' | 'partial' | 'amortized'; // You can customize this
 }
 
 export interface UnitInfo {

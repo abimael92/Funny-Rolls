@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Trash2, Download, Upload } from "lucide-react"
-import { products } from "@/lib/data"
-import { Ingredient, Recipe } from '@/lib/types'
+import { products, toolCategories } from '@/lib/data'
+import { Ingredient, Recipe, Tool } from '@/lib/types'
 import {
     calculateRecipeCost,
     calculateCostPerItem,
@@ -13,7 +13,7 @@ import {
     calculateProfitPercentage,
     getIngredientCostPerUnit,
     exportRecipeData,
-    importRecipeData
+    importRecipeData,
 } from '@/lib/utils'
 import { FlipCard } from './FlipCard';
 import { CloseButton, ActionButton } from './ModalHelpers';
@@ -23,7 +23,8 @@ interface RecipeCalculatorPanelProps {
     setSelectedRecipe: (recipe: Recipe) => void
     recipes: Recipe[]
     setRecipes: (recipes: Recipe[]) => void
-    ingredients: Ingredient[]
+    ingredients: Ingredient[];
+    tools: Tool[];
     recordProduction: (recipeId: string, batchCount: number) => void
 }
 
@@ -33,6 +34,7 @@ export function RecipeCalculatorPanel({
     recipes,
     setRecipes,
     ingredients,
+    tools,
     recordProduction
 }: RecipeCalculatorPanelProps) {
     const [newStep, setNewStep] = useState('')
@@ -48,6 +50,9 @@ export function RecipeCalculatorPanel({
     const [showTotalIngredientsModal, setShowTotalIngredientsModal] = useState(false);
     const [showLotesModal, setShowLotesModal] = useState(false);
     const [showProfitGoalModal, setShowProfitGoalModal] = useState(false);
+
+    console.log('selecter recipe: ', selectedRecipe);
+
 
 
     // Close dropdown when clicking outside
@@ -98,6 +103,28 @@ export function RecipeCalculatorPanel({
         setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
     }
 
+    // Add tool to recipe
+    const addToolToRecipe = (toolId: string) => {
+        if (!selectedRecipe.tools?.find(rt => rt.toolId === toolId)) {
+            const updatedRecipe = {
+                ...selectedRecipe,
+                tools: [...(selectedRecipe.tools || []), { toolId, usage: 'full' as const }]
+            }
+            setSelectedRecipe(updatedRecipe)
+            setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+        }
+    }
+
+    // Remove tool from recipe
+    const removeToolFromRecipe = (toolId: string) => {
+        const updatedRecipe = {
+            ...selectedRecipe,
+            tools: selectedRecipe.tools?.filter(rt => rt.toolId !== toolId) || []
+        }
+        setSelectedRecipe(updatedRecipe)
+        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+    }
+
     // Update recipe selling price
     const updateRecipeSellingPrice = (price: number) => {
         const updatedRecipe = {
@@ -108,6 +135,8 @@ export function RecipeCalculatorPanel({
         setSelectedRecipe(updatedRecipe)
         setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
     }
+
+
 
     // Update recipe batch size
     const updateRecipeBatchSize = (size: number) => {
@@ -640,6 +669,141 @@ export function RecipeCalculatorPanel({
                                     Registrar
                                 </Button>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Add Tools Section - Desktop */}
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-semibold text-blue-800 text-lg flex items-center gap-2">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Agregar Herramientas
+                            </h3>
+                            <div className="text-sm text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+                                {tools.filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id)).length} disponibles
+                            </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                            {tools
+                                .filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id))
+                                .map(tool => (
+                                    <button
+                                        key={tool.id}
+                                        onClick={() => addToolToRecipe(tool.id)}
+                                        className="group relative overflow-hidden bg-white hover:bg-green-50 border border-blue-300 hover:border-blue-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Plus className="h-5 w-5 text-blue-600 group-hover:text-blue-700 transition-colors" />
+                                            <span className="text-base font-medium text-blue-800 group-hover:text-blue-900">
+                                                {tool.name}
+                                            </span>
+                                            {tool.cost > 0 && (
+                                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                                    ${tool.cost.toFixed(2)}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </button>
+                                ))}
+
+                            {tools.filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id)).length === 0 && (
+                                <div className="w-full text-center py-2">
+                                    <div className="text-green-600 text-base">Todas las herramientas agregadas</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Recipe Tools */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+                        <div className="flex items-center mb-4">
+                            <h3 className="w-full font-semibold text-blue-800 text-xl flex items-center justify-between">
+                                <span>Herramientas de la Receta</span>
+                                <span className="text-sm text-blue-700 bg-blue-100 px-2 py-1 rounded-full font-normal">
+                                    {selectedRecipe.tools?.length || 0} herramientas
+                                </span>
+                            </h3>
+                        </div>
+
+                        <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+                            {selectedRecipe.tools?.map((recipeTool) => {
+                                const tool = tools.find(t => t.id === recipeTool.toolId)
+                                if (!tool) return null
+
+                                const cost = tool.cost || 0
+                                const costPercentage = (cost / totalRecipeCost) * 100
+
+                                return (
+                                    <div
+                                        key={recipeTool.toolId}
+                                        className="group relative bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md"
+                                    >
+                                        {/* Cost percentage bar */}
+                                        <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-t-xl"
+                                            style={{ width: `${Math.min(costPercentage, 100)}%` }}></div>
+
+                                        <div className="flex items-center justify-between">
+                                            {/* Tool Info */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <div className="font-semibold text-gray-900 text-lg">{tool.name}</div>
+                                                    <div className={`text-xs px-2 py-1 rounded-full font-medium ${tool.type === 'consumible' ? 'bg-blue-100 text-blue-800' :
+                                                        tool.type === 'herramienta' ? 'bg-green-100 text-green-800' :
+                                                            'bg-purple-100 text-purple-800'
+                                                        }`}>
+                                                        {tool.type}
+                                                    </div>
+                                                </div>
+
+                                                {/* Tool Details */}
+                                                <div className="flex items-center justify-between gap-4">
+                                                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                        <span>{toolCategories[tool.type]?.find(cat => cat.value === tool.category)?.label || 'General'}</span>
+                                                        {tool.description && (
+                                                            <span className="text-xs text-gray-500">• {tool.description}</span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Cost Display */}
+                                                    {cost > 0 && (
+                                                        <div className="text-lg font-bold text-blue-700 bg-blue-50 border-2 border-blue-200 rounded-lg px-4 py-2 min-w-[80px] text-center shadow-sm">
+                                                            ${cost.toFixed(2)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Remove Button */}
+                                            <button
+                                                onClick={() => removeToolFromRecipe(recipeTool.toolId)}
+                                                className="opacity-0 group-hover:opacity-100 ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                title="Eliminar herramienta"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+
+                                        {/* Cost percentage indicator */}
+                                        {cost > 0 && (
+                                            <div className="mt-2 flex items-center justify-between text-xs">
+                                                <span className="text-gray-500">Porcentaje del costo total:</span>
+                                                <span className="font-medium text-blue-700">{costPercentage.toFixed(1)}%</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+
+                            {(!selectedRecipe.tools || selectedRecipe.tools.length === 0) && (
+                                <div className="text-center py-8">
+                                    <div className="text-blue-500 text-sm mb-2">No hay herramientas en esta receta</div>
+                                    <div className="text-blue-400 text-xs">Agrega herramientas usando la sección de arriba</div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
