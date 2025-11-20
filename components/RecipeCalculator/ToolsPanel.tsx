@@ -23,7 +23,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
 
     const [newTool, setNewTool] = useState<Omit<Tool, 'id'>>({
         name: '',
-        type: 'utensil',
+        type: 'herramienta',
         category: 'measuring',
         cost: 0,
         description: ''
@@ -45,7 +45,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         setTools([...tools, tool])
         setNewTool({
             name: '',
-            type: 'utensil',
+            type: 'herramienta',
             category: 'measuring',
             cost: 0,
             description: ''
@@ -81,9 +81,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     // Get tool color based on type
     const getToolColor = (type: string) => {
         switch (type) {
-            case 'utility': return 'bg-blue-50 border-blue-200 hover:border-blue-400'
-            case 'utensil': return 'bg-green-50 border-green-200 hover:border-green-400'
-            case 'enhancer': return 'bg-purple-50 border-purple-200 hover:border-purple-400'
+            case 'consumible': return 'bg-blue-50 border-blue-200 hover:border-blue-400'
+            case 'herramienta': return 'bg-green-50 border-green-200 hover:border-green-400'
+            case 'especializado': return 'bg-purple-50 border-purple-200 hover:border-purple-400'
             default: return 'bg-gray-50 border-gray-200 hover:border-gray-400'
         }
     }
@@ -91,9 +91,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     // Get tool icon based on type
     const getToolIcon = (type: string) => {
         switch (type) {
-            case 'utility': return <Zap className="h-4 w-4 text-blue-600" />
+            case 'consumible': return <Zap className="h-4 w-4 text-blue-600" />
             case 'utensil': return <Utensils className="h-4 w-4 text-green-600" />
-            case 'enhancer': return <Star className="h-4 w-4 text-purple-600" />
+            case 'especializado': return <Star className="h-4 w-4 text-purple-600" />
             default: return <Utensils className="h-4 w-4 text-gray-600" />
         }
     }
@@ -101,9 +101,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     // Get badge color based on type
     const getBadgeColor = (type: string) => {
         switch (type) {
-            case 'utility': return 'bg-blue-100 text-blue-800'
-            case 'utensil': return 'bg-green-100 text-green-800'
-            case 'enhancer': return 'bg-purple-100 text-purple-800'
+            case 'consumible': return 'bg-blue-100 text-blue-800'
+            case 'herramienta': return 'bg-green-100 text-green-800'
+            case 'especializado': return 'bg-purple-100 text-purple-800'
             default: return 'bg-gray-100 text-gray-800'
         }
     }
@@ -150,7 +150,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <select
                                     value={newTool.type}
                                     onChange={(e) => {
-                                        const newType = e.target.value as 'utility' | 'utensil' | 'enhancer'
+                                        const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado'
                                         const defaultCategory = toolCategories[newType]?.[0]?.value || 'measuring'
                                         setNewTool({
                                             ...newTool,
@@ -160,9 +160,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     }}
                                     className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 >
-                                    <option value="utility">Utility</option>
-                                    <option value="utensil">Utensilio</option>
-                                    <option value="enhancer">Enhancer</option>
+                                    <option value="consumible">consumible</option>
+                                    <option value="herramienta">Utensilio</option>
+                                    <option value="especializado">especializado</option>
                                 </select>
 
                                 <select
