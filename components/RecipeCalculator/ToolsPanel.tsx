@@ -26,8 +26,19 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         type: 'herramienta',
         category: 'measuring',
         cost: 0,
-        description: ''
-    })
+        description: '',
+        lifetime: '2 años',
+        recoveryValue: 0,
+        totalInvestment: 0
+    });
+
+
+    // Total Investment = Recovery Value × 10
+    // Actual Cost = Total Investment - Recovery Value  
+    // Batches per Year = 52
+    // Total Batches = Years × 52
+    //     Cost / Batch = Actual Cost ÷ Total Batches
+
 
     // Add new tool
     const addTool = () => {
@@ -107,6 +118,28 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             default: return 'bg-gray-100 text-gray-800'
         }
     }
+
+    // const getCostExplanation2 = (tool: Tool) => {
+    //     switch (tool.type) {
+    //         case 'consumible':
+    //             return 'Costo operacional directo por lote (energía, gas, etc.)';
+    //         case 'herramienta':
+    //             return `Amortizado: ${tool.lifetime} • Valor residual: $${tool.recoveryValue}`;
+    //         case 'especializado':
+    //             return `Equipo premium: ${tool.lifetime} • Valor residual: $${tool.recoveryValue}`;
+    //         default:
+    //             return 'Costo calculado por uso en producción';
+    //     }
+    // };
+
+    const getCostExplanation = (tool: Tool) => {
+        if (tool.lifetime === 'Operational') {
+            return `Costo operacional: \n$${tool.cost.toFixed(2)} MXN/lote\n${tool.description}`;
+        }
+
+        // Use the actual calculation that was used to determine the cost
+        return `Costo amortizado: \n$${tool.cost.toFixed(2)} MXN/lote\nInversión: $${tool.totalInvestment} MXN\nVida útil: ${tool.lifetime}`;
+    };
 
     // Filter default tools by what's not already added
     // const availableDefaultTools = defaultTools.filter(defaultTool =>
@@ -259,12 +292,17 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                             <div className="flex items-center justify-between gap-2 mb-3">
                                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
 
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="font-semibold text-gray-900 text-lg sm:text-xl truncate">{tool.name}</div>
-                                                        <div className={`text-xs sm:text-sm ${getBadgeColor(tool.type)} px-2 sm:px-3 py-1 rounded-full font-medium`}>
+                                                    <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[70%]">
+                                                        {/* Name container with max width and wrapping */}
+                                                        <div className="font-semibold text-gray-900 text-lg sm:text-xl break-words ">
+                                                            {tool.name}
+                                                        </div>
+
+                                                        <div className={`text-xs sm:text-sm ${getBadgeColor(tool.type)} px-2 sm:px-3 py-1 rounded-full font-medium flex-shrink-0`}>
                                                             {categoryLabel}
                                                         </div>
                                                     </div>
+
 
                                                 </div>
 
@@ -288,20 +326,33 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                             </div>
 
                                             {/* Tool Details */}
-                                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                                <div className="flex items-center gap-2">
-                                                    {getToolIcon(tool.type)}
-                                                    <div className="text-sm sm:text-md text-gray-700">Tipo:</div>
-                                                    <div className="text-sm sm:text-md font-medium capitalize text-gray-900">
+                                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6 max-w-full">
+                                                {/* Type */}
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-2">
+                                                        {getToolIcon(tool.type)}
+                                                        <div className="text-sm text-gray-700">Tipo:</div>
+                                                    </div>
+                                                    <div className="text-sm font-medium capitalize text-gray-900 break-words pl-6">
                                                         {tool.type}
                                                     </div>
                                                 </div>
 
+                                                {/* Cost */}
                                                 {tool.cost && tool.cost > 0 && (
-                                                    <div className="flex items-center gap-2">
-                                                        <DollarSign className="h-4 w-4 text-green-600" />
-                                                        <div className="text-sm sm:text-md text-gray-700">Costo adicional:</div>
-                                                        <div className="text-sm sm:text-md font-bold text-green-700">
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="relative group">
+                                                                <DollarSign className="h-4 w-4 text-green-600 cursor-help" />
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-pre-line z-10 min-w-[200px] text-left">
+                                                                    {getCostExplanation(tool)}
+                                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="text-sm text-gray-700">Costo adicional:</div>
+                                                        </div>
+                                                        <div className="text-sm font-bold text-green-700 break-words pl-6">
                                                             ${tool.cost.toFixed(2)}
                                                         </div>
                                                     </div>
@@ -319,7 +370,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         </div>
                                     </div>
                                 </>
-                            )}
+                            )
+                            }
                         </div>
                     )
                 })}
@@ -361,158 +413,161 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
 
 
             {/* Total Tools Count Modal */}
-            {showTotalToolsModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowTotalToolsModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+            {
+                showTotalToolsModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowTotalToolsModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
-                        {/* Header */}
-                        <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                        <span className="text-lg">🛠️</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-purple-800">Todas las Herramientas</h3>
-                                        <p className="text-sm text-purple-600">Inventario completo ({defaultTools.length} herramientas)</p>
-                                    </div>
-                                </div>
-                                <CloseButton onClose={() => setShowTotalToolsModal(false)} />
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-6 overflow-y-auto max-h-96">
-                            <div className="space-y-3">
-                                {defaultTools.map((tool) => {
-                                    const categoryLabel = toolCategories[tool.type]?.find(cat => cat.value === tool.category)?.label || 'General';
-
-                                    return (
-                                        <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-gray-900">{tool.name}</div>
-                                                <div className="text-sm text-gray-600 mt-1 capitalize">
-                                                    {tool.type} • {categoryLabel}
-                                                </div>
-                                                {tool.description && (
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        {tool.description}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="text-right">
-                                                {tool.cost > 0 && (
-                                                    <div className="text-sm font-bold text-purple-700">
-                                                        ${tool.cost.toFixed(2)}
-                                                    </div>
-                                                )}
-                                                <div className="text-xs text-gray-500 capitalize">
-                                                    {tool.type}
-                                                </div>
-                                            </div>
+                            {/* Header */}
+                            <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                            <span className="text-lg">🛠️</span>
                                         </div>
-                                    );
-                                })}
+                                        <div>
+                                            <h3 className="text-xl font-bold text-purple-800">Todas las Herramientas</h3>
+                                            <p className="text-sm text-purple-600">Inventario completo ({defaultTools.length} herramientas)</p>
+                                        </div>
+                                    </div>
+                                    <CloseButton onClose={() => setShowTotalToolsModal(false)} />
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Footer */}
-                        <div className="p-6 border-t bg-gray-50">
-                            <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
-                                <span className="font-bold text-gray-900">Total de Herramientas:</span>
-                                <span className="text-xl font-bold text-purple-700">{defaultTools.length}</span>
+                            {/* Content */}
+                            <div className="p-6 overflow-y-auto max-h-96">
+                                <div className="space-y-3">
+                                    {defaultTools.map((tool) => {
+                                        const categoryLabel = toolCategories[tool.type]?.find(cat => cat.value === tool.category)?.label || 'General';
+
+                                        return (
+                                            <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                <div className="flex-1">
+                                                    <div className="font-semibold text-gray-900">{tool.name}</div>
+                                                    <div className="text-sm text-gray-600 mt-1 capitalize">
+                                                        {tool.type} • {categoryLabel}
+                                                    </div>
+                                                    {tool.description && (
+                                                        <div className="text-xs text-gray-500 mt-1">
+                                                            {tool.description}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="text-right">
+                                                    {tool.cost > 0 && (
+                                                        <div className="text-sm font-bold text-purple-700">
+                                                            ${tool.cost.toFixed(2)}
+                                                        </div>
+                                                    )}
+                                                    <div className="text-xs text-gray-500 capitalize">
+                                                        {tool.type}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                            <ActionButton
-                                onClick={() => setShowTotalToolsModal(false)}
-                                color="purple"
-                                fullWidth
-                            >
-                                Cerrar
-                            </ActionButton>
+
+                            {/* Footer */}
+                            <div className="p-6 border-t bg-gray-50">
+                                <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
+                                    <span className="font-bold text-gray-900">Total de Herramientas:</span>
+                                    <span className="text-xl font-bold text-purple-700">{defaultTools.length}</span>
+                                </div>
+                                <ActionButton
+                                    onClick={() => setShowTotalToolsModal(false)}
+                                    color="purple"
+                                    fullWidth
+                                >
+                                    Cerrar
+                                </ActionButton>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )
+                )
             }
 
             {/* Tools Cost Breakdown Modal */}
-            {showToolsCostModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowToolsCostModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+            {
+                showToolsCostModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowToolsCostModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
-                        {/* Header */}
-                        <div className="p-6 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                        <span className="text-lg">💰</span>
+                            {/* Header */}
+                            <div className="p-6 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                            <span className="text-lg">💰</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-orange-800">Costo de Herramientas</h3>
+                                            <p className="text-sm text-orange-600">Desglose de inversión en herramientas</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-orange-800">Costo de Herramientas</h3>
-                                        <p className="text-sm text-orange-600">Desglose de inversión en herramientas</p>
-                                    </div>
+                                    <CloseButton onClose={() => setShowToolsCostModal(false)} />
                                 </div>
-                                <CloseButton onClose={() => setShowToolsCostModal(false)} />
                             </div>
-                        </div>
 
-                        {/* Content */}
-                        <div className="p-6 overflow-y-auto max-h-96">
-                            <div className="space-y-3">
-                                {defaultTools
-                                    .filter(tool => tool.cost > 0)
-                                    .map((tool) => (
-                                        <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-gray-900">{tool.name}</div>
-                                                <div className="text-sm text-gray-600 mt-1 capitalize">
-                                                    {tool.type} • {toolCategories[tool.type]?.find(cat => cat.value === tool.category)?.label || 'General'}
+                            {/* Content */}
+                            <div className="p-6 overflow-y-auto max-h-96">
+                                <div className="space-y-3">
+                                    {defaultTools
+                                        .filter(tool => tool.cost > 0)
+                                        .map((tool) => (
+                                            <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                <div className="flex-1">
+                                                    <div className="font-semibold text-gray-900">{tool.name}</div>
+                                                    <div className="text-sm text-gray-600 mt-1 capitalize">
+                                                        {tool.type} • {toolCategories[tool.type]?.find(cat => cat.value === tool.category)?.label || 'General'}
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-bold text-orange-700">${tool.cost.toFixed(2)}</div>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <div className="font-bold text-orange-700">${tool.cost.toFixed(2)}</div>
+                                        ))
+                                    }
+
+                                    {defaultTools.filter(tool => tool.cost > 0).length === 0 && (
+                                        <div className="text-center py-8 text-gray-500">
+                                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                <DollarSign className="h-6 w-6 text-gray-400" />
                                             </div>
+                                            <div>No hay herramientas con costo adicional</div>
                                         </div>
-                                    ))
-                                }
+                                    )}
+                                </div>
+                            </div>
 
-                                {defaultTools.filter(tool => tool.cost > 0).length === 0 && (
-                                    <div className="text-center py-8 text-gray-500">
-                                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <DollarSign className="h-6 w-6 text-gray-400" />
-                                        </div>
-                                        <div>No hay herramientas con costo adicional</div>
-                                    </div>
-                                )}
+                            {/* Footer */}
+                            <div className="p-6 border-t bg-gray-50">
+                                <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
+                                    <span className="font-bold text-gray-900">Costo Total:</span>
+                                    <span className="text-xl font-bold text-orange-700">
+                                        ${defaultTools.reduce((total, tool) => total + (tool.cost || 0), 0).toFixed(2)}
+                                    </span>
+                                </div>
+                                <ActionButton
+                                    onClick={() => setShowToolsCostModal(false)}
+                                    color="red"
+                                    fullWidth
+                                >
+                                    Cerrar
+                                </ActionButton>
                             </div>
                         </div>
-
-                        {/* Footer */}
-                        <div className="p-6 border-t bg-gray-50">
-                            <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
-                                <span className="font-bold text-gray-900">Costo Total:</span>
-                                <span className="text-xl font-bold text-orange-700">
-                                    ${defaultTools.reduce((total, tool) => total + (tool.cost || 0), 0).toFixed(2)}
-                                </span>
-                            </div>
-                            <ActionButton
-                                onClick={() => setShowToolsCostModal(false)}
-                                color="red"
-                                fullWidth
-                            >
-                                Cerrar
-                            </ActionButton>
-                        </div>
-                    </div>
-                </div>)}
-        </div>
+                    </div>)
+            }
+        </div >
     )
 }

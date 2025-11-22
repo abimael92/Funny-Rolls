@@ -439,6 +439,7 @@ export const defaultTools: Tool[] = [
 		description: 'Consumo eléctrico por horneado (180°C por 25-30 min)',
 		lifetime: 'Operational',
 		recoveryValue: 0,
+		totalInvestment: 0, // Operational cost, no investment
 	},
 	{
 		id: 'util-2',
@@ -449,6 +450,7 @@ export const defaultTools: Tool[] = [
 		description: 'Consumo de gas para preparaciones en estufa',
 		lifetime: 'Operational',
 		recoveryValue: 0,
+		totalInvestment: 0,
 	},
 	{
 		id: 'util-3',
@@ -459,9 +461,10 @@ export const defaultTools: Tool[] = [
 		description: 'Consumo eléctrico por batch de masa',
 		lifetime: 'Operational',
 		recoveryValue: 0,
+		totalInvestment: 0,
 	},
 
-	// herramientaS (amortized costs - portion per batch)
+	// HERRAMIENTAS (amortized costs - portion per batch)
 	{
 		id: 'uten-1',
 		name: 'Juego de Medidores',
@@ -471,6 +474,7 @@ export const defaultTools: Tool[] = [
 		description: 'Tazas y cucharas medidoras para ingredientes',
 		lifetime: '2 años',
 		recoveryValue: 15, // $15 MXN valor de reventa
+		totalInvestment: 150, // $150 MXN inversión total
 	},
 	{
 		id: 'uten-2',
@@ -481,6 +485,7 @@ export const defaultTools: Tool[] = [
 		description: 'Para mediciones precisas en gramos',
 		lifetime: '3 años',
 		recoveryValue: 25, // $25 MXN valor de reventa
+		totalInvestment: 250, // $250 MXN inversión total
 	},
 	{
 		id: 'uten-3',
@@ -491,6 +496,7 @@ export const defaultTools: Tool[] = [
 		description: 'Set de bowls de diferentes tamaños',
 		lifetime: '2 años',
 		recoveryValue: 10, // $10 MXN valor de reventa
+		totalInvestment: 100, // $100 MXN inversión total
 	},
 	{
 		id: 'uten-4',
@@ -501,6 +507,7 @@ export const defaultTools: Tool[] = [
 		description: 'Para incorporar aire en mezclas',
 		lifetime: '1.5 años',
 		recoveryValue: 5, // $5 MXN valor de reventa
+		totalInvestment: 50, // $50 MXN inversión total
 	},
 	{
 		id: 'uten-5',
@@ -511,6 +518,7 @@ export const defaultTools: Tool[] = [
 		description: 'Para raspar bowls y mezclar suavemente',
 		lifetime: '1 año',
 		recoveryValue: 2, // $2 MXN valor de reventa
+		totalInvestment: 20, // $20 MXN inversión total
 	},
 	{
 		id: 'uten-6',
@@ -521,6 +529,7 @@ export const defaultTools: Tool[] = [
 		description: 'Para extender masa uniformemente',
 		lifetime: '2 años',
 		recoveryValue: 20, // $20 MXN valor de reventa
+		totalInvestment: 200, // $200 MXN inversión total
 	},
 	{
 		id: 'uten-7',
@@ -531,6 +540,7 @@ export const defaultTools: Tool[] = [
 		description: 'Charolas para hornear rolls',
 		lifetime: '3 años',
 		recoveryValue: 30, // $30 MXN valor de reventa
+		totalInvestment: 300, // $300 MXN inversión total
 	},
 	{
 		id: 'uten-8',
@@ -541,6 +551,7 @@ export const defaultTools: Tool[] = [
 		description: 'Para cortar rolls sin aplastar',
 		lifetime: '2 años',
 		recoveryValue: 8, // $8 MXN valor de reventa
+		totalInvestment: 80, // $80 MXN inversión total
 	},
 	{
 		id: 'uten-9',
@@ -551,9 +562,10 @@ export const defaultTools: Tool[] = [
 		description: 'Para temperatura interna perfecta',
 		lifetime: '3 años',
 		recoveryValue: 12, // $12 MXN valor de reventa
+		totalInvestment: 120, // $120 MXN inversión total
 	},
 
-	// especializadoS (premium equipment - higher amortization)
+	// ESPECIALIZADOS (premium equipment - higher amortization)
 	{
 		id: 'enh-1',
 		name: 'Mezcladora Planetaria',
@@ -563,6 +575,7 @@ export const defaultTools: Tool[] = [
 		description: 'Mezclado profesional para consistencia perfecta',
 		lifetime: '5 años',
 		recoveryValue: 200, // $200 MXN valor de reventa
+		totalInvestment: 2000, // $2,000 MXN inversión total
 	},
 	{
 		id: 'enh-2',
@@ -573,6 +586,7 @@ export const defaultTools: Tool[] = [
 		description: 'Control de temperatura para fermentación óptima',
 		lifetime: '4 años',
 		recoveryValue: 80, // $80 MXN valor de reventa
+		totalInvestment: 800, // $800 MXN inversión total
 	},
 	{
 		id: 'enh-3',
@@ -583,6 +597,7 @@ export const defaultTools: Tool[] = [
 		description: 'Para acabados caramelizados y decoraciones',
 		lifetime: '3 años',
 		recoveryValue: 40, // $40 MXN valor de reventa
+		totalInvestment: 400, // $400 MXN inversión total
 	},
 	{
 		id: 'enh-4',
@@ -593,6 +608,7 @@ export const defaultTools: Tool[] = [
 		description: 'Para decoraciones precisas con glaseados',
 		lifetime: '1 año',
 		recoveryValue: 3, // $3 MXN valor de reventa
+		totalInvestment: 30, // $30 MXN inversión total
 	},
 	{
 		id: 'enh-5',
@@ -603,6 +619,7 @@ export const defaultTools: Tool[] = [
 		description: 'Medidores de precisión para profesionales',
 		lifetime: '4 años',
 		recoveryValue: 60, // $60 MXN valor de reventa
+		totalInvestment: 600, // $600 MXN inversión total
 	},
 ];
 
