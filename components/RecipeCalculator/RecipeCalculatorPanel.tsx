@@ -541,26 +541,24 @@ export function RecipeCalculatorPanel({
                                     </div>
                                 </div>
 
-                                <div className="flex flex-wrap gap-3">
+                                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2">
                                     {tools
                                         .filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id))
                                         .map(tool => (
                                             <button
                                                 key={tool.id}
                                                 onClick={() => addToolToRecipe(tool.id)}
-                                                className="group relative overflow-hidden bg-white hover:bg-green-50 border-2 border-blue-300 hover:border-blue-400 rounded-xl px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95 flex-1 min-w-[140px]"
+                                                className="group bg-white hover:bg-blue-50 border-2 border-blue-300 hover:border-blue-400 rounded-lg px-3 py-2 transition-all duration-200 hover:scale-102 active:scale-95 flex items-center gap-2"
                                             >
-                                                <div className="flex flex-col items-center text-center gap-2">
-                                                    <Plus className="h-5 w-5 text-blue-600 group-hover:text-blue-700 transition-colors" />
-                                                    <span className="text-base font-medium text-blue-800 group-hover:text-blue-900 line-clamp-2">
-                                                        {tool.name}
+                                                <Plus className="h-4 w-4 text-blue-600 group-hover:text-blue-700 transition-colors" />
+                                                <span className="text-sm font-medium text-blue-800 group-hover:text-blue-900">
+                                                    {tool.name}
+                                                </span>
+                                                {tool.cost > 0 && (
+                                                    <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium ml-1">
+                                                        ${tool.cost.toFixed(2)}
                                                     </span>
-                                                    {tool.cost > 0 && (
-                                                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
-                                                            ${tool.cost.toFixed(2)}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                )}
                                             </button>
                                         ))}
 
