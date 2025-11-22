@@ -526,39 +526,54 @@ export function RecipeCalculatorPanel({
                         )} */}
                     </div>
 
-                    {/* Tools Section - Show when toggled */}
+                    {/* Herramientas Section */}
                     {showAddTools && (
                         <div className="col-span-2 space-y-3 mt-2">
-                            {/* Add Tools */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-blue-700">Agregar Herramientas</span>
-                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                            {/* Agregar Herramientas */}
+                            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300 rounded-2xl p-4">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h3 className="font-semibold text-blue-800 text-lg flex items-center gap-2">
+                                        <Plus className="h-5 w-5 text-blue-600" />
+                                        Agregar Herramientas
+                                    </h3>
+                                    <div className="text-sm text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
                                         {tools.filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id)).length} disponibles
-                                    </span>
+                                    </div>
                                 </div>
-                                <div className="flex flex-wrap gap-2">
+
+                                <div className="flex flex-wrap gap-3">
                                     {tools
                                         .filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id))
                                         .map(tool => (
                                             <button
                                                 key={tool.id}
                                                 onClick={() => addToolToRecipe(tool.id)}
-                                                className="flex items-center gap-1 bg-white border border-blue-300 rounded-lg px-2 py-1 text-xs hover:bg-blue-50 transition-colors"
+                                                className="group relative overflow-hidden bg-white hover:bg-green-50 border-2 border-blue-300 hover:border-blue-400 rounded-xl px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95 flex-1 min-w-[140px]"
                                             >
-                                                <Plus className="h-3 w-3 text-blue-600" />
-                                                {tool.name}
+                                                <div className="flex flex-col items-center text-center gap-2">
+                                                    <Plus className="h-5 w-5 text-blue-600 group-hover:text-blue-700 transition-colors" />
+                                                    <span className="text-base font-medium text-blue-800 group-hover:text-blue-900 line-clamp-2">
+                                                        {tool.name}
+                                                    </span>
+                                                    {tool.cost > 0 && (
+                                                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                                                            ${tool.cost.toFixed(2)}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </button>
                                         ))}
+
                                     {tools.filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id)).length === 0 && (
-                                        <div className="text-xs text-green-600 w-full text-center py-1">
-                                            Todas agregadas
+                                        <div className="w-full text-center py-4">
+                                            <div className="text-green-600 text-base font-medium">Todas las herramientas agregadas</div>
+                                            <div className="text-green-500 text-sm mt-1">No hay herramientas disponibles para agregar</div>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            {/* Current Tools */}
+                            {/* Herramientas Actuales*/}
                             <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-2xl p-4">
                                 <h3 className="text-xl font-bold text-indigo-800 mb-4 text-center">Herramientas Actuales</h3>
 
