@@ -101,6 +101,7 @@ export interface Tool {
 	category: string;
 	lifetime?: string; // Tiempo de vida útil estimado
 	recoveryValue?: number; // Valor de reventa/rescate en MXN
+	totalInvestment: number;
 }
 
 // In your lib/types.ts
