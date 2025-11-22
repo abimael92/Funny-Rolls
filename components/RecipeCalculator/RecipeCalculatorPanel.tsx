@@ -559,33 +559,63 @@ export function RecipeCalculatorPanel({
                             </div>
 
                             {/* Current Tools */}
-                            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-indigo-700">Herramientas Actuales</span>
-                                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
-                                        {selectedRecipe.tools?.length || 0}
-                                    </span>
-                                </div>
-                                <div className="space-y-2 max-h-32 overflow-y-auto">
+                            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-2xl p-4">
+                                <h3 className="text-xl font-bold text-indigo-800 mb-4 text-center">Herramientas Actuales</h3>
+
+                                <div className="space-y-3 max-h-64 overflow-y-auto">
                                     {selectedRecipe.tools?.map((recipeTool) => {
                                         const tool = tools.find(t => t.id === recipeTool.toolId)
                                         if (!tool) return null
 
+                                        const cost = tool.cost || 0
+
                                         return (
-                                            <div key={recipeTool.toolId} className="flex items-center justify-between bg-white border border-indigo-200 rounded-lg px-2 py-1">
-                                                <span className="text-xs font-medium">{tool.name}</span>
-                                                <button
-                                                    onClick={() => removeToolFromRecipe(recipeTool.toolId)}
-                                                    className="text-red-500 hover:text-red-700 p-1"
-                                                >
-                                                    <Trash2 className="h-3 w-3" />
-                                                </button>
+                                            <div key={recipeTool.toolId} className="bg-white border-2 border-indigo-200 rounded-xl p-3">
+                                                {/* Top Row - Name and Cost */}
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="text-base font-semibold text-indigo-800 flex-1 pr-2">{tool.name}</span>
+                                                    {cost > 0 && (
+                                                        <span className="text-sm font-bold text-green-600 whitespace-nowrap">
+                                                            ${cost.toFixed(2)}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {/* Middle Row - Type and Category */}
+                                                <div className="flex flex-wrap gap-1 mb-2">
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${tool.type === 'consumible' ? 'bg-blue-100 text-blue-800' :
+                                                        tool.type === 'herramienta' ? 'bg-green-100 text-green-800' :
+                                                            'bg-purple-100 text-purple-800'
+                                                        }`}>
+                                                        {tool.type}
+                                                    </span>
+                                                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
+                                                        {toolCategories[tool.type]?.find(cat => cat.value === tool.category)?.label || 'General'}
+                                                    </span>
+                                                </div>
+
+                                                {/* Bottom Row - Description and Delete */}
+                                                <div className="flex items-center justify-between">
+                                                    {tool.description && (
+                                                        <span className="text-xs text-gray-500 flex-1 pr-2 line-clamp-1">
+                                                            {tool.description}
+                                                        </span>
+                                                    )}
+                                                    <button
+                                                        onClick={() => removeToolFromRecipe(recipeTool.toolId)}
+                                                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         )
                                     })}
+
                                     {(!selectedRecipe.tools || selectedRecipe.tools.length === 0) && (
-                                        <div className="text-xs text-gray-500 text-center py-1">
-                                            No hay herramientas
+                                        <div className="text-center py-6">
+                                            <div className="text-indigo-500 text-base mb-1">No hay herramientas</div>
+                                            <div className="text-indigo-400 text-xs">Agrega herramientas arriba</div>
                                         </div>
                                     )}
                                 </div>
