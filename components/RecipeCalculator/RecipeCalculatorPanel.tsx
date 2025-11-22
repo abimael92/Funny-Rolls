@@ -436,6 +436,72 @@ export function RecipeCalculatorPanel({
                         </div>
                     </div>
 
+
+                    {/* Mobile Production Registration */}
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-2xl p-4">
+                        <h3 className="text-xl font-bold text-purple-800 mb-4 text-center">Registrar Producción</h3>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-lg font-semibold text-purple-700">Lotes producidos</span>
+                                <input
+                                    type="number"
+                                    value={productionBatchCount}
+                                    onChange={(e) => setProductionBatchCount(Number(e.target.value) || 1)}
+                                    className="w-20 px-3 py-2 border-2 border-purple-300 rounded-lg text-lg font-bold text-center"
+                                    min="1"
+                                />
+                            </div>
+                            <Button
+                                onClick={handleRecordProduction}
+                                className="w-full bg-purple-600 hover:bg-purple-700 text-lg py-3"
+                            >
+                                <Plus className="h-5 w-5 mr-2" />
+                                Registrar Producción
+                            </Button>
+                            <div className="text-center text-sm text-purple-600">
+                                Total: {productionBatchCount * selectedRecipe.batchSize} unidades
+                            </div>
+                        </div>
+                    </div>
+
+
+                    {/*    Agregar Ingredientes*/}
+                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
+                                Agregar Ingredientes
+                            </h3>
+                            <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
+                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
+                            </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                            {ingredients
+                                .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
+                                .map(ingredient => (
+                                    <button
+                                        key={ingredient.id}
+                                        onClick={() => addIngredientToRecipe(ingredient.id)}
+                                        className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
+                                            <span className="text-base font-medium text-amber-800 group-hover:text-amber-900">
+                                                {ingredient.name}
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
+
+                            {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
+                                <div className="w-full text-center py-2">
+                                    <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
                     {/* Mobile Ingredients Section */}
                     <div className="bg-gradient-to-br from-amber-50 to-cyan-50 border-2 border-amber-300 rounded-2xl p-4">
                         <h3 className="text-xl font-bold text-amber-800 mb-4 text-center">Ingredientes</h3>
@@ -480,68 +546,95 @@ export function RecipeCalculatorPanel({
                         </div>
                     </div>
 
-                    {/* Mobile Production Registration */}
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-300 rounded-2xl p-4">
-                        <h3 className="text-xl font-bold text-purple-800 mb-4 text-center">Registrar Producción</h3>
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <span className="text-lg font-semibold text-purple-700">Lotes producidos</span>
-                                <input
-                                    type="number"
-                                    value={productionBatchCount}
-                                    onChange={(e) => setProductionBatchCount(Number(e.target.value) || 1)}
-                                    className="w-20 px-3 py-2 border-2 border-purple-300 rounded-lg text-lg font-bold text-center"
-                                    min="1"
-                                />
-                            </div>
-                            <Button
-                                onClick={handleRecordProduction}
-                                className="w-full bg-purple-600 hover:bg-purple-700 text-lg py-3"
-                            >
-                                <Plus className="h-5 w-5 mr-2" />
-                                Registrar Producción
-                            </Button>
-                            <div className="text-center text-sm text-purple-600">
-                                Total: {productionBatchCount * selectedRecipe.batchSize} unidades
+
+                    {/* Add Tools Toggle for Mobile */}
+                    <div className="bg-white border-2 border-blue-300 rounded-xl p-3 cursor-pointer hover:bg-blue-50 transition-colors col-span-2"
+                        onClick={() => setShowAddTools(!showAddTools)}>
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm text-gray-600">Herramientas</div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                    {selectedRecipe.tools?.length || 0}
+                                </span>
+                                <svg
+                                    className={`w-4 h-4 text-blue-600 transition-transform duration-300 ${showAddTools ? "rotate-180" : ""}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
-                                Agregar Ingredientes
-                            </h3>
-                            <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
-                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                            {ingredients
-                                .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
-                                .map(ingredient => (
-                                    <button
-                                        key={ingredient.id}
-                                        onClick={() => addIngredientToRecipe(ingredient.id)}
-                                        className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
-                                            <span className="text-base font-medium text-amber-800 group-hover:text-amber-900">
-                                                {ingredient.name}
-                                            </span>
-                                        </div>
-                                    </button>
-                                ))}
-
-                            {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
-                                <div className="w-full text-center py-2">
-                                    <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
+                    {/* Tools Section - Show when toggled */}
+                    {showAddTools && (
+                        <div className="col-span-2 space-y-3 mt-2">
+                            {/* Add Tools */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-blue-700">Agregar Herramientas</span>
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                        {tools.filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id)).length} disponibles
+                                    </span>
                                 </div>
-                            )}
+                                <div className="flex flex-wrap gap-2">
+                                    {tools
+                                        .filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id))
+                                        .map(tool => (
+                                            <button
+                                                key={tool.id}
+                                                onClick={() => addToolToRecipe(tool.id)}
+                                                className="flex items-center gap-1 bg-white border border-blue-300 rounded-lg px-2 py-1 text-xs hover:bg-blue-50 transition-colors"
+                                            >
+                                                <Plus className="h-3 w-3 text-blue-600" />
+                                                {tool.name}
+                                            </button>
+                                        ))}
+                                    {tools.filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id)).length === 0 && (
+                                        <div className="text-xs text-green-600 w-full text-center py-1">
+                                            Todas agregadas
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Current Tools */}
+                            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-indigo-700">Herramientas Actuales</span>
+                                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
+                                        {selectedRecipe.tools?.length || 0}
+                                    </span>
+                                </div>
+                                <div className="space-y-2 max-h-32 overflow-y-auto">
+                                    {selectedRecipe.tools?.map((recipeTool) => {
+                                        const tool = tools.find(t => t.id === recipeTool.toolId)
+                                        if (!tool) return null
+
+                                        return (
+                                            <div key={recipeTool.toolId} className="flex items-center justify-between bg-white border border-indigo-200 rounded-lg px-2 py-1">
+                                                <span className="text-xs font-medium">{tool.name}</span>
+                                                <button
+                                                    onClick={() => removeToolFromRecipe(recipeTool.toolId)}
+                                                    className="text-red-500 hover:text-red-700 p-1"
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                </button>
+                                            </div>
+                                        )
+                                    })}
+                                    {(!selectedRecipe.tools || selectedRecipe.tools.length === 0) && (
+                                        <div className="text-xs text-gray-500 text-center py-1">
+                                            No hay herramientas
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    )}
+
 
                     {/* Mobile Cost Summary */}
                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4">
