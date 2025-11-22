@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, Download, Upload } from "lucide-react"
+import { Plus, Trash2, Download, Upload, Wrench } from "lucide-react"
 import { products, toolCategories } from '@/lib/data'
 import { Ingredient, Recipe, Tool } from '@/lib/types'
 import {
@@ -676,9 +676,13 @@ export function RecipeCalculatorPanel({
                     </div>
 
                     {/* Add Tools Section - Desktop */}
-                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-1">
 
-                        <div className="flex items-center justify-between mb-4" onClick={() => setShowAddTools(!showAddTools)}>
+                        <div
+                            className={`flex items-center justify-between ${showAddTools ? "mb-4" : ""}`}
+                            onClick={() => setShowAddTools(!showAddTools)}
+                        >
+
                             <h3 className="font-semibold text-blue-800 text-lg flex items-center gap-2">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -686,7 +690,7 @@ export function RecipeCalculatorPanel({
                                 </svg>
                                 Agregar Herramientas
                             </h3>
-                            <div className="flex items-center mb-4" >
+                            <div className="flex items-center " >
                                 <div className="text-sm text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
                                     {tools.filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id)).length} disponibles
                                 </div>
@@ -740,27 +744,37 @@ export function RecipeCalculatorPanel({
 
 
                     {/* Recipe Tools */}
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                        <div className="flex items-center mb-4" onClick={() => setShowRecipeTools(!showRecipeTools)}>
-                            <h3 className="w-full font-semibold text-blue-800 text-xl flex items-center justify-between">
-                                <span>Herramientas de la Receta</span>
-                                <span className="text-sm text-blue-700 bg-blue-100 px-2 py-1 rounded-full font-normal">
-                                    {selectedRecipe.tools?.length || 0} herramientas
-                                </span>
-                            </h3>
-                            {/* CHEVRON */}
-                            <svg
-                                className={`w-5 h-5 text-blue-700 transition-transform duration-300 ${showRecipeTools ? "rotate-180" : ""
-                                    }`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
+                    <div
+                        className={`bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-1 
+                            }`}
+                    >
 
+                        <div
+                            className={`flex items-center justify-between ${showRecipeTools ? "mb-4 " : ""}`}
+                            onClick={() => setShowRecipeTools(!showRecipeTools)}>
+                            <h3 className="font-semibold text-blue-800 text-lg flex items-center gap-2">
+                                <Wrench className="h-4 w-4" />
+
+                                Herramientas de la Receta
+                            </h3>
+                            <div className="flex items-center " >
+                                <div className="text-sm text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+                                    {selectedRecipe.tools?.length || 0} herramientas
+                                </div>
+
+                                {/* CHEVRON */}
+                                <svg
+                                    className={`w-5 h-5 text-blue-700 transition-transform duration-300 ${showAddTools ? "rotate-180" : ""
+                                        }`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
 
                         {showRecipeTools && (
                             <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
@@ -1126,719 +1140,733 @@ export function RecipeCalculatorPanel({
             </CardContent>
 
             {/* Cost Breakdown Modal */}
-            {showCostModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    {/* Add backdrop click to close */}
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowCostModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+            {
+                showCostModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        {/* Add backdrop click to close */}
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowCostModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
-                        {/* Header */}
-                        <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                        <span className="text-lg">💰</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-purple-800">Desglose de Costos</h3>
-                                        <p className="text-sm text-purple-600">Costo total por ingrediente</p>
-                                    </div>
-                                </div>
-                                <CloseButton onClose={() => setShowCostModal(false)} />
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-4 overflow-y-auto max-h-64">
-                            {selectedRecipe.ingredients.map((recipeIngredient) => {
-                                const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
-                                if (!ingredient) return null;
-
-                                const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount;
-                                const percentage = (cost / totalRecipeCost) * 100;
-
-                                return (
-                                    <div key={recipeIngredient.ingredientId} className="flex justify-between items-center py-2 border-b">
-                                        <div className="flex-1">
-                                            <div className="font-medium">{ingredient.name}</div>
-                                            <div className="text-sm text-gray-500">
-                                                {recipeIngredient.amount} {ingredient.unit} × ${getIngredientCostPerUnit(ingredient).toFixed(2)}
-                                            </div>
+                            {/* Header */}
+                            <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                            <span className="text-lg">💰</span>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="font-bold">${cost.toFixed(2)}</div>
-                                            <div className="text-sm text-gray-500">{percentage.toFixed(1)}%</div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-purple-800">Desglose de Costos</h3>
+                                            <p className="text-sm text-purple-600">Costo total por ingrediente</p>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Footer */}
-                        <div className="p-6 border-t bg-gray-50">
-                            <div className="bg-white rounded-lg border p-4 mb-4">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="font-bold text-gray-900">Total de la Receta:</span>
-                                    <span className="text-xl font-bold text-red-700">${totalRecipeIngredientsCost.toFixed(2)}</span>
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                    {selectedRecipe.ingredients.length} ingrediente{selectedRecipe.ingredients.length !== 1 ? 's' : ''} en esta receta
+                                    <CloseButton onClose={() => setShowCostModal(false)} />
                                 </div>
                             </div>
 
-                            <ActionButton
-                                onClick={() => setShowCostModal(false)}
-                                color="red"
-                                fullWidth
-                            >
-                                Cerrar
-                            </ActionButton>
-
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Unit Cost Breakdown Modal */}
-            {showUnitCostModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowUnitCostModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
-
-                        {/* Header */}
-                        <div className="p-6 border-b border-red-100 bg-gradient-to-r from-red-50 to-pink-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                        <span className="text-lg">📦</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-red-800">Costo por Unidad</h3>
-                                        <p className="text-sm text-red-600">Desglose detallado por unidad</p>
-                                    </div>
-                                </div>
-                                <CloseButton onClose={() => setShowUnitCostModal(false)} />
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-6 overflow-y-auto max-h-96">
-                            <div className="space-y-3">
+                            {/* Content */}
+                            <div className="p-4 overflow-y-auto max-h-64">
                                 {selectedRecipe.ingredients.map((recipeIngredient) => {
                                     const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
                                     if (!ingredient) return null;
 
-                                    const unitCost = (getIngredientCostPerUnit(ingredient) * recipeIngredient.amount) / selectedRecipe.batchSize;
-                                    const percentage = (unitCost / costPerItem) * 100;
+                                    const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount;
+                                    const percentage = (cost / totalRecipeCost) * 100;
 
                                     return (
                                         <div key={recipeIngredient.ingredientId} className="flex justify-between items-center py-2 border-b">
                                             <div className="flex-1">
                                                 <div className="font-medium">{ingredient.name}</div>
                                                 <div className="text-sm text-gray-500">
-                                                    {recipeIngredient.amount} {ingredient.unit} ÷ {selectedRecipe.batchSize} unidades
+                                                    {recipeIngredient.amount} {ingredient.unit} × ${getIngredientCostPerUnit(ingredient).toFixed(2)}
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <div className="font-bold">${unitCost.toFixed(4)}</div>
+                                                <div className="font-bold">${cost.toFixed(2)}</div>
                                                 <div className="text-sm text-gray-500">{percentage.toFixed(1)}%</div>
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
-                        </div>
 
-                        {/* Footer */}
-                        <div className="p-6 border-t bg-gray-50">
-                            <div className="bg-white rounded-lg border p-4 mb-4">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="font-bold text-gray-900">Costo por Unidad:</span>
-                                    <span className="text-xl font-bold text-red-700">${costPerItem.toFixed(2)}</span>
+                            {/* Footer */}
+                            <div className="p-6 border-t bg-gray-50">
+                                <div className="bg-white rounded-lg border p-4 mb-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="font-bold text-gray-900">Total de la Receta:</span>
+                                        <span className="text-xl font-bold text-red-700">${totalRecipeIngredientsCost.toFixed(2)}</span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        {selectedRecipe.ingredients.length} ingrediente{selectedRecipe.ingredients.length !== 1 ? 's' : ''} en esta receta
+                                    </div>
                                 </div>
-                                <div className="text-sm text-gray-600">
-                                    {selectedRecipe.batchSize} unidades por lote
-                                </div>
+
+                                <ActionButton
+                                    onClick={() => setShowCostModal(false)}
+                                    color="red"
+                                    fullWidth
+                                >
+                                    Cerrar
+                                </ActionButton>
+
                             </div>
-                            <ActionButton
-                                onClick={() => setShowUnitCostModal(false)}
-                                color="red"
-                                fullWidth
-                            >
-                                Cerrar
-                            </ActionButton>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
+
+            {/* Unit Cost Breakdown Modal */}
+            {
+                showUnitCostModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowUnitCostModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+
+                            {/* Header */}
+                            <div className="p-6 border-b border-red-100 bg-gradient-to-r from-red-50 to-pink-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                            <span className="text-lg">📦</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-red-800">Costo por Unidad</h3>
+                                            <p className="text-sm text-red-600">Desglose detallado por unidad</p>
+                                        </div>
+                                    </div>
+                                    <CloseButton onClose={() => setShowUnitCostModal(false)} />
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 overflow-y-auto max-h-96">
+                                <div className="space-y-3">
+                                    {selectedRecipe.ingredients.map((recipeIngredient) => {
+                                        const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
+                                        if (!ingredient) return null;
+
+                                        const unitCost = (getIngredientCostPerUnit(ingredient) * recipeIngredient.amount) / selectedRecipe.batchSize;
+                                        const percentage = (unitCost / costPerItem) * 100;
+
+                                        return (
+                                            <div key={recipeIngredient.ingredientId} className="flex justify-between items-center py-2 border-b">
+                                                <div className="flex-1">
+                                                    <div className="font-medium">{ingredient.name}</div>
+                                                    <div className="text-sm text-gray-500">
+                                                        {recipeIngredient.amount} {ingredient.unit} ÷ {selectedRecipe.batchSize} unidades
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-bold">${unitCost.toFixed(4)}</div>
+                                                    <div className="text-sm text-gray-500">{percentage.toFixed(1)}%</div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="p-6 border-t bg-gray-50">
+                                <div className="bg-white rounded-lg border p-4 mb-4">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="font-bold text-gray-900">Costo por Unidad:</span>
+                                        <span className="text-xl font-bold text-red-700">${costPerItem.toFixed(2)}</span>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        {selectedRecipe.batchSize} unidades por lote
+                                    </div>
+                                </div>
+                                <ActionButton
+                                    onClick={() => setShowUnitCostModal(false)}
+                                    color="red"
+                                    fullWidth
+                                >
+                                    Cerrar
+                                </ActionButton>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Profit Breakdown Modal */}
-            {showProfitModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    {/* Add backdrop click to close */}
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowProfitModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
-                        {/* Header */}
-                        <div className="p-6 border-b border-green-100 bg-gradient-to-r from-green-50 to-emerald-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                        <span className="text-lg">💸</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-green-800">Análisis de Ganancia</h3>
-                                        <p className="text-sm text-green-600">Rentabilidad por unidad y lote</p>
-                                    </div>
-                                </div>
-                                <CloseButton onClose={() => setShowProfitModal(false)} />
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-4 space-y-4">
-                            <div className="grid grid-cols-2 gap-4 text-center">
-                                <div className="bg-red-50 p-3 rounded-lg">
-                                    <div className="text-sm text-gray-600">Costo/Unidad</div>
-                                    <div className="text-lg font-bold text-red-700">${costPerItem.toFixed(2)}</div>
-                                </div>
-                                <div className="bg-blue-50 p-3 rounded-lg">
-                                    <div className="text-sm text-gray-600">Precio Venta</div>
-                                    <div className="text-lg font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
-                                </div>
-                            </div>
-
-                            <div className="bg-green-50 p-4 rounded-lg">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="font-medium">Ganancia por Unidad:</span>
-                                    <span className="text-lg font-bold text-green-700">${profit.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="font-medium">Margen de Ganancia:</span>
-                                    <span className="text-lg font-bold text-green-700">{profitPercentage.toFixed(1)}%</span>
-                                </div>
-                            </div>
-
-                            <div className="bg-amber-50 p-3 rounded-lg">
-                                <div className="text-sm text-gray-600 mb-1">Ganancia Total por Lote</div>
-                                <div className="text-lg font-bold text-amber-700">
-                                    ${(profit * selectedRecipe.batchSize).toFixed(2)}
-                                </div>
-                                <div className="text-xs text-gray-500">
-                                    {selectedRecipe.batchSize} unidades × ${profit.toFixed(2)}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-4 border-t bg-gray-50">
-                            <button
-                                onClick={() => setShowProfitModal(false)}
-                                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
-                            >
-                                Cerrar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Margin Analysis Modal */}
-            {showMarginModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    {/* Add backdrop click to close */}
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowMarginModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
-
-                        {/* Header */}
-                        <div className="p-6 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <span className="text-lg">📊</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-blue-800">Análisis de Margen</h3>
-                                        <p className="text-sm text-blue-600">Evaluación de rentabilidad</p>
-                                    </div>
-                                </div>
-                                <CloseButton onClose={() => setShowMarginModal(false)} />
-                            </div>
-                        </div>
-
-                        <div className="p-6 space-y-4">
-                            {/* Profitability Indicator */}
-                            <div className="text-center">
-                                <div className={`text-lg font-bold ${profitPercentage >= 50 ? 'text-green-600' :
-                                    profitPercentage >= 30 ? 'text-yellow-600' : 'text-red-600'
-                                    }`}>
-                                    {profitPercentage >= 50 ? '🟢 Excelente' :
-                                        profitPercentage >= 30 ? '🟡 Buena' : '🔴 Baja'} Rentabilidad
-                                </div>
-                            </div>
-
-                            {/* Progress Bar */}
-                            <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span>0%</span>
-                                    <span>Margen Actual: {profitPercentage.toFixed(1)}%</span>
-                                    <span>100%</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-4">
-                                    <div
-                                        className={`h-4 rounded-full transition-all duration-300 ${profitPercentage >= 50 ? 'bg-green-500' :
-                                            profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
-                                            }`}
-                                        style={{ width: `${Math.min(profitPercentage, 100)}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-
-                            {/* Key Metrics */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-red-50 p-3 rounded-lg">
-                                    <div className="text-xs text-gray-600">Costo</div>
-                                    <div className="font-bold text-red-700">${costPerItem.toFixed(2)}</div>
-                                </div>
-                                <div className="bg-green-50 p-3 rounded-lg">
-                                    <div className="text-xs text-gray-600">Ganancia</div>
-                                    <div className="font-bold text-green-700">${profit.toFixed(2)}</div>
-                                </div>
-                                <div className="bg-blue-50 p-3 rounded-lg">
-                                    <div className="text-xs text-gray-600">Precio Venta</div>
-                                    <div className="font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
-                                </div>
-                                <div className="bg-purple-50 p-3 rounded-lg">
-                                    <div className="text-xs text-gray-600">Por cada $1</div>
-                                    <div className="font-bold text-purple-700">${(profitPercentage / 100).toFixed(2)}</div>
-                                </div>
-                            </div>
-
-                            {/* Recommendation */}
-                            <div className="bg-gray-50 p-3 rounded-lg">
-                                <div className="text-sm font-medium text-gray-700 mb-1">Recomendación:</div>
-                                <div className="text-xs text-gray-600">
-                                    {profitPercentage >= 50 ? '✅ Margen saludable. Mantén este precio.' :
-                                        profitPercentage >= 30 ? '⚠️  Margen aceptable. Considera optimizar costos.' :
-                                            '❌ Margen bajo. Revisa costos o aumenta precio.'}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="p-6 border-t bg-gray-50">
-                            <ActionButton
-                                onClick={() => setShowMarginModal(false)}
-                                color="blue"
-                                fullWidth
-                            >
-                                Cerrar
-                            </ActionButton>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Modal showing only recipe ingredients */}
-            {showTotalIngredientsModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowTotalIngredientsModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
-
-                        {/* Header */}
-                        <div className="p-6 border-b border-red-100 bg-gradient-to-r from-red-50 to-pink-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                        <span className="text-lg">🥘</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-red-800">Ingredientes en Receta</h3>
-                                        <p className="text-sm text-red-600">Lista completa de ingredientes</p>
-                                    </div>
-                                </div>
-                                <CloseButton onClose={() => setShowTotalIngredientsModal(false)} />
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-6 overflow-y-auto max-h-96">
-                            {selectedRecipe.ingredients.map((recipeIngredient) => {
-                                const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
-                                if (!ingredient) return null;
-
-                                return (
-                                    <div key={recipeIngredient.ingredientId} className="flex justify-between items-center py-2 border-b">
-                                        <div className="flex-1">
-                                            <div className="font-medium">{ingredient.name}</div>
-                                            <div className="text-sm text-gray-500">
-                                                {recipeIngredient.amount} {ingredient.unit}
-                                            </div>
+            {
+                showProfitModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        {/* Add backdrop click to close */}
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowProfitModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+                            {/* Header */}
+                            <div className="p-6 border-b border-green-100 bg-gradient-to-r from-green-50 to-emerald-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                            <span className="text-lg">💸</span>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="font-bold text-red-700">${(getIngredientCostPerUnit(ingredient) * recipeIngredient.amount).toFixed(2)}</div>
-                                            <div className="text-sm text-gray-500">
-                                                ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
-                                            </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-green-800">Análisis de Ganancia</h3>
+                                            <p className="text-sm text-green-600">Rentabilidad por unidad y lote</p>
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-
-                        <div className="p-4 border-t bg-gray-50">
-                            <div className="flex justify-between items-center font-bold text-lg mb-2">
-                                <span>Total Receta:</span>
-                                <span className="text-red-700">${totalRecipeIngredientsCost.toFixed(2)}</span>
+                                    <CloseButton onClose={() => setShowProfitModal(false)} />
+                                </div>
                             </div>
-                            <div className="text-sm text-gray-600 mb-3">
-                                {selectedRecipe.ingredients.length} ingrediente{selectedRecipe.ingredients.length !== 1 ? 's' : ''} en esta receta
-                            </div>
-                            <button
-                                onClick={() => setShowTotalIngredientsModal(false)}
-                                className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
-                            >
-                                Cerrar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* Lotes Explanation Modal */}
-            {showLotesModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowLotesModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
-                        {/* Swipe indicator for mobile */}
-                        <div className="lg:hidden flex justify-center pt-3 pb-1">
-                            <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-                        </div>
-
-                        {/* Header */}
-                        <div className="p-6 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <span className="text-lg">🎯</span>
+                            {/* Content */}
+                            <div className="p-4 space-y-4">
+                                <div className="grid grid-cols-2 gap-4 text-center">
+                                    <div className="bg-red-50 p-3 rounded-lg">
+                                        <div className="text-sm text-gray-600">Costo/Unidad</div>
+                                        <div className="text-lg font-bold text-red-700">${costPerItem.toFixed(2)}</div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-blue-800">Meta de Lotes</h3>
-                                        <p className="text-sm text-blue-600">Punto de equilibrio de ingredientes</p>
+                                    <div className="bg-blue-50 p-3 rounded-lg">
+                                        <div className="text-sm text-gray-600">Precio Venta</div>
+                                        <div className="text-lg font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
                                     </div>
                                 </div>
-                                <CloseButton onClose={() => setShowLotesModal(false)} />
-                            </div>
-                        </div>
 
-                        {/* Content */}
-                        <div className="p-6 space-y-4 overflow-y-auto max-h-96">
-                            {/* Objective */}
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div className="text-sm font-semibold text-blue-800">Objetivo</div>
-                                </div>
-                                <div className="text-sm text-blue-700">
-                                    Vender suficientes lotes para cubrir el costo total de los ingredientes de esta receta.
-                                </div>
-                            </div>
-
-                            {/* Calculation Breakdown */}
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                    <span className="text-sm font-medium text-gray-700">Costo total ingredientes:</span>
-                                    <span className="font-bold text-red-600">${totalRecipeIngredientsCost.toFixed(2)}</span>
-                                </div>
-
-                                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                    <span className="text-sm font-medium text-gray-700">Ingresos por lote:</span>
-                                    <span className="font-bold text-green-600">
-                                        ${(selectedRecipe.sellingPrice * selectedRecipe.batchSize).toFixed(2)}
-                                    </span>
-                                </div>
-
-                                <div className="border-t border-blue-200 pt-3">
+                                <div className="bg-green-50 p-4 rounded-lg">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-lg font-bold text-blue-700">Lotes necesarios:</span>
-                                        <span className="text-2xl font-bold text-blue-700">{metaLotes}</span>
+                                        <span className="font-medium">Ganancia por Unidad:</span>
+                                        <span className="text-lg font-bold text-green-700">${profit.toFixed(2)}</span>
                                     </div>
-                                    <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
-                                        {totalRecipeIngredientsCost.toFixed(2)} ÷ {(selectedRecipe.sellingPrice * selectedRecipe.batchSize).toFixed(2)} = {Math.ceil(totalRecipeIngredientsCost / (selectedRecipe.sellingPrice * selectedRecipe.batchSize))} lotes
+                                    <div className="flex justify-between items-center">
+                                        <span className="font-medium">Margen de Ganancia:</span>
+                                        <span className="text-lg font-bold text-green-700">{profitPercentage.toFixed(1)}%</span>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Example */}
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div className="text-sm font-semibold text-green-800">Ejemplo Práctico</div>
-                                </div>
-                                <div className="text-sm text-green-700">
-                                    Si vendes <strong>{metaLotes} lotes</strong> de {selectedRecipe.name}, cubrirás el costo de <strong>${totalRecipeIngredientsCost.toFixed(2)}</strong> en ingredientes. Cada lote adicional será <strong>ganancia pura</strong>.
-                                </div>
-                            </div>
-
-                            {/* Note */}
-                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                    </svg>
-                                    <div className="text-sm font-semibold text-amber-800">Nota Importante</div>
-                                </div>
-                                <div className="text-xs text-amber-700">
-                                    Esto solo cubre el costo de ingredientes. No incluye otros gastos como mano de obra, empaque, servicios, o costos operativos.
-                                </div>
-                            </div>
-
-                            {/* Quick Stats */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                                    <div className="text-xs text-gray-600 mb-1">Ganancia por lote</div>
-                                    <div className="text-lg font-bold text-green-600">
+                                <div className="bg-amber-50 p-3 rounded-lg">
+                                    <div className="text-sm text-gray-600 mb-1">Ganancia Total por Lote</div>
+                                    <div className="text-lg font-bold text-amber-700">
                                         ${(profit * selectedRecipe.batchSize).toFixed(2)}
                                     </div>
-                                </div>
-                                <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
-                                    <div className="text-xs text-gray-600 mb-1">Unidades por lote</div>
-                                    <div className="text-lg font-bold text-blue-600">
-                                        {selectedRecipe.batchSize}
+                                    <div className="text-xs text-gray-500">
+                                        {selectedRecipe.batchSize} unidades × ${profit.toFixed(2)}
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Footer */}
-                        <div className="p-6 border-t bg-gray-50">
-                            <ActionButton
-                                onClick={() => setShowLotesModal(false)}
-                                color="blue"
-                                fullWidth
-                            >
-                                Entendido
-                            </ActionButton>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Approximate Profit Modal */}
-            {showProfitGoalModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowProfitGoalModal(false)}
-                    />
-                    <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden relative z-10">
-
-                        {/* Header */}
-                        <div className="p-6 border-b border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-green-800">Ganancia Aproximada</h3>
-                                        <p className="text-sm text-green-600">Proyección de ganancias potenciales</p>
-                                    </div>
-                                </div>
+                            <div className="p-4 border-t bg-gray-50">
                                 <button
-                                    onClick={() => setShowProfitGoalModal(false)}
-                                    className="w-8 h-8 flex items-center justify-center text-green-500 hover:text-green-700 hover:bg-green-100 rounded-full transition-colors"
+                                    onClick={() => setShowProfitModal(false)}
+                                    className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
                                 >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
+                                    Cerrar
                                 </button>
                             </div>
                         </div>
+                    </div>
+                )
+            }
 
-                        {/* Content */}
-                        <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
-                            {/* Key Metrics Summary */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-                                    <div className="text-xs font-medium text-blue-600 mb-1">Meta de Lotes</div>
-                                    <div className="text-2xl font-bold text-blue-700">{metaLotes}</div>
-                                    <div className="text-xs text-blue-500 mt-1">para cubrir costos</div>
-                                </div>
+            {/* Margin Analysis Modal */}
+            {
+                showMarginModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        {/* Add backdrop click to close */}
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowMarginModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
-                                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
-                                    <div className="text-xs font-medium text-purple-600 mb-1">Ganancia Total</div>
-                                    <div className="text-2xl font-bold text-purple-700">
-                                        ${((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost).toFixed(2)}
+                            {/* Header */}
+                            <div className="p-6 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span className="text-lg">📊</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-blue-800">Análisis de Margen</h3>
+                                            <p className="text-sm text-blue-600">Evaluación de rentabilidad</p>
+                                        </div>
                                     </div>
-                                    <div className="text-xs text-purple-500 mt-1">aproximada</div>
-                                </div>
-                            </div>
-
-                            {/* Breakdown Section */}
-                            <div className="space-y-4">
-                                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
-                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                    </svg>
-                                    Desglose de Proyección
-                                </h4>
-
-                                {/* Investment */}
-                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm font-medium text-red-700">Inversión en Ingredientes</span>
-                                        <span className="text-lg font-bold text-red-700">${totalRecipeIngredientsCost.toFixed(2)}</span>
-                                    </div>
-                                    <div className="text-xs text-red-600">
-                                        Costo total de todos los ingredientes de la receta
-                                    </div>
-                                </div>
-
-                                {/* Revenue Projection */}
-                                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm font-medium text-green-700">Ingresos por {metaLotes} lotes</span>
-                                        <span className="text-lg font-bold text-green-700">
-                                            ${(selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes).toFixed(2)}
-                                        </span>
-                                    </div>
-                                    <div className="text-xs text-green-600">
-                                        {metaLotes} lotes × ${selectedRecipe.sellingPrice.toFixed(2)}/unidad × {selectedRecipe.batchSize} unidades
-                                    </div>
-                                </div>
-
-                                {/* Net Profit */}
-                                <div className="bg-gradient-to-r from-emerald-500 to-green-500 border border-green-500 rounded-lg p-4 text-white">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <span className="text-sm font-medium">Ganancia Neta Aproximada</span>
-                                        <span className="text-xl font-bold">
-                                            ${((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost).toFixed(2)}
-                                        </span>
-                                    </div>
-                                    <div className="text-xs opacity-90">
-                                        Después de recuperar la inversión en ingredientes
-                                    </div>
+                                    <CloseButton onClose={() => setShowMarginModal(false)} />
                                 </div>
                             </div>
 
-                            {/* Profitability Indicator */}
-                            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-sm font-medium text-gray-700">Rentabilidad del Proyecto</span>
-                                    <span className={`text-sm font-bold ${profitPercentage >= 50 ? 'text-green-600' :
+                            <div className="p-6 space-y-4">
+                                {/* Profitability Indicator */}
+                                <div className="text-center">
+                                    <div className={`text-lg font-bold ${profitPercentage >= 50 ? 'text-green-600' :
                                         profitPercentage >= 30 ? 'text-yellow-600' : 'text-red-600'
                                         }`}>
                                         {profitPercentage >= 50 ? '🟢 Excelente' :
-                                            profitPercentage >= 30 ? '🟡 Buena' : '🔴 Moderada'}
-                                    </span>
+                                            profitPercentage >= 30 ? '🟡 Buena' : '🔴 Baja'} Rentabilidad
+                                    </div>
                                 </div>
 
+                                {/* Progress Bar */}
                                 <div className="space-y-2">
-                                    <div className="flex justify-between text-xs text-gray-600">
+                                    <div className="flex justify-between text-sm">
                                         <span>0%</span>
-                                        <span className="font-medium">
-                                            Retorno: {((((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost) / totalRecipeIngredientsCost) * 100).toFixed(1)}%
-                                        </span>
-                                        <span>Máx</span>
+                                        <span>Margen Actual: {profitPercentage.toFixed(1)}%</span>
+                                        <span>100%</span>
                                     </div>
-
-                                    <div className="w-full bg-gray-200 rounded-full h-3 relative">
+                                    <div className="w-full bg-gray-200 rounded-full h-4">
                                         <div
-                                            className="h-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-500"
-                                            style={{
-                                                width: `${Math.min(
-                                                    Math.log10(
-                                                        ((((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost) / totalRecipeIngredientsCost) * 100) / 10 + 1
-                                                    ) * 100,
-                                                    100
-                                                )}%`
-                                            }}
+                                            className={`h-4 rounded-full transition-all duration-300 ${profitPercentage >= 50 ? 'bg-green-500' :
+                                                profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
+                                                }`}
+                                            style={{ width: `${Math.min(profitPercentage, 100)}%` }}
                                         ></div>
                                     </div>
+                                </div>
 
-                                    <div className="text-xs text-gray-500 text-center">
-                                        {((((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost) / totalRecipeIngredientsCost) * 100) > 200 ? '🔥 Retorno extraordinario' :
-                                            ((((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost) / totalRecipeIngredientsCost) * 100) > 100 ? '⭐ Alto retorno' :
-                                                'Escala logarítmica'}
+                                {/* Key Metrics */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-red-50 p-3 rounded-lg">
+                                        <div className="text-xs text-gray-600">Costo</div>
+                                        <div className="font-bold text-red-700">${costPerItem.toFixed(2)}</div>
+                                    </div>
+                                    <div className="bg-green-50 p-3 rounded-lg">
+                                        <div className="text-xs text-gray-600">Ganancia</div>
+                                        <div className="font-bold text-green-700">${profit.toFixed(2)}</div>
+                                    </div>
+                                    <div className="bg-blue-50 p-3 rounded-lg">
+                                        <div className="text-xs text-gray-600">Precio Venta</div>
+                                        <div className="font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
+                                    </div>
+                                    <div className="bg-purple-50 p-3 rounded-lg">
+                                        <div className="text-xs text-gray-600">Por cada $1</div>
+                                        <div className="font-bold text-purple-700">${(profitPercentage / 100).toFixed(2)}</div>
+                                    </div>
+                                </div>
+
+                                {/* Recommendation */}
+                                <div className="bg-gray-50 p-3 rounded-lg">
+                                    <div className="text-sm font-medium text-gray-700 mb-1">Recomendación:</div>
+                                    <div className="text-xs text-gray-600">
+                                        {profitPercentage >= 50 ? '✅ Margen saludable. Mantén este precio.' :
+                                            profitPercentage >= 30 ? '⚠️  Margen aceptable. Considera optimizar costos.' :
+                                                '❌ Margen bajo. Revisa costos o aumenta precio.'}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Key Insights */}
-                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                                <h5 className="font-semibold text-amber-800 mb-3 flex items-center gap-2">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Puntos Clave
-                                </h5>
-                                <ul className="space-y-2 text-sm text-amber-700">
-                                    <li className="flex items-start gap-2">
-                                        <span className="text-amber-500 mt-0.5">•</span>
-                                        <span>Vender <strong>{metaLotes} lotes</strong> cubre tu inversión inicial</span>
-                                    </li>
-                                    <li className="flex items-start gap-2">
-                                        <span className="text-amber-500 mt-0.5">•</span>
-                                        <span>Cada lote adicional genera <strong>${(profit * selectedRecipe.batchSize).toFixed(2)}</strong> de ganancia pura</span>
-                                    </li>
-                                    <li className="flex items-start gap-2">
-                                        <span className="text-amber-500 mt-0.5">•</span>
-                                        <span>Tu margen por unidad es <strong>{profitPercentage.toFixed(1)}%</strong> (${profit.toFixed(2)})</span>
-                                    </li>
-                                </ul>
+                            {/* Footer */}
+                            <div className="p-6 border-t bg-gray-50">
+                                <ActionButton
+                                    onClick={() => setShowMarginModal(false)}
+                                    color="blue"
+                                    fullWidth
+                                >
+                                    Cerrar
+                                </ActionButton>
                             </div>
                         </div>
+                    </div>
+                )
+            }
 
-                        {/* Action Buttons */}
-                        <div className="p-6 border-t border-gray-200 bg-gray-50">
-                            <div className="flex flex-col gap-3">
-                                <button
-                                    onClick={() => setShowProfitGoalModal(false)}
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Entendido
-                                </button>
+            {/* Modal showing only recipe ingredients */}
+            {
+                showTotalIngredientsModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowTotalIngredientsModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
+                            {/* Header */}
+                            <div className="p-6 border-b border-red-100 bg-gradient-to-r from-red-50 to-pink-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                            <span className="text-lg">🥘</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-red-800">Ingredientes en Receta</h3>
+                                            <p className="text-sm text-red-600">Lista completa de ingredientes</p>
+                                        </div>
+                                    </div>
+                                    <CloseButton onClose={() => setShowTotalIngredientsModal(false)} />
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 overflow-y-auto max-h-96">
+                                {selectedRecipe.ingredients.map((recipeIngredient) => {
+                                    const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
+                                    if (!ingredient) return null;
+
+                                    return (
+                                        <div key={recipeIngredient.ingredientId} className="flex justify-between items-center py-2 border-b">
+                                            <div className="flex-1">
+                                                <div className="font-medium">{ingredient.name}</div>
+                                                <div className="text-sm text-gray-500">
+                                                    {recipeIngredient.amount} {ingredient.unit}
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-bold text-red-700">${(getIngredientCostPerUnit(ingredient) * recipeIngredient.amount).toFixed(2)}</div>
+                                                <div className="text-sm text-gray-500">
+                                                    ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="p-4 border-t bg-gray-50">
+                                <div className="flex justify-between items-center font-bold text-lg mb-2">
+                                    <span>Total Receta:</span>
+                                    <span className="text-red-700">${totalRecipeIngredientsCost.toFixed(2)}</span>
+                                </div>
+                                <div className="text-sm text-gray-600 mb-3">
+                                    {selectedRecipe.ingredients.length} ingrediente{selectedRecipe.ingredients.length !== 1 ? 's' : ''} en esta receta
+                                </div>
                                 <button
-                                    onClick={() => {
-                                        setShowProfitGoalModal(false);
-                                        setShowLotesModal(true);
-                                    }}
-                                    className="w-full bg-white hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-lg border border-gray-300 font-medium transition-colors duration-200 text-sm"
+                                    onClick={() => setShowTotalIngredientsModal(false)}
+                                    className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors"
                                 >
-                                    Ver detalles de la meta de lotes
+                                    Cerrar
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
+
+            {/* Lotes Explanation Modal */}
+            {
+                showLotesModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowLotesModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+                            {/* Swipe indicator for mobile */}
+                            <div className="lg:hidden flex justify-center pt-3 pb-1">
+                                <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+                            </div>
+
+                            {/* Header */}
+                            <div className="p-6 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                            <span className="text-lg">🎯</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-blue-800">Meta de Lotes</h3>
+                                            <p className="text-sm text-blue-600">Punto de equilibrio de ingredientes</p>
+                                        </div>
+                                    </div>
+                                    <CloseButton onClose={() => setShowLotesModal(false)} />
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 space-y-4 overflow-y-auto max-h-96">
+                                {/* Objective */}
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <div className="text-sm font-semibold text-blue-800">Objetivo</div>
+                                    </div>
+                                    <div className="text-sm text-blue-700">
+                                        Vender suficientes lotes para cubrir el costo total de los ingredientes de esta receta.
+                                    </div>
+                                </div>
+
+                                {/* Calculation Breakdown */}
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                        <span className="text-sm font-medium text-gray-700">Costo total ingredientes:</span>
+                                        <span className="font-bold text-red-600">${totalRecipeIngredientsCost.toFixed(2)}</span>
+                                    </div>
+
+                                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                        <span className="text-sm font-medium text-gray-700">Ingresos por lote:</span>
+                                        <span className="font-bold text-green-600">
+                                            ${(selectedRecipe.sellingPrice * selectedRecipe.batchSize).toFixed(2)}
+                                        </span>
+                                    </div>
+
+                                    <div className="border-t border-blue-200 pt-3">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-lg font-bold text-blue-700">Lotes necesarios:</span>
+                                            <span className="text-2xl font-bold text-blue-700">{metaLotes}</span>
+                                        </div>
+                                        <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
+                                            {totalRecipeIngredientsCost.toFixed(2)} ÷ {(selectedRecipe.sellingPrice * selectedRecipe.batchSize).toFixed(2)} = {Math.ceil(totalRecipeIngredientsCost / (selectedRecipe.sellingPrice * selectedRecipe.batchSize))} lotes
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Example */}
+                                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <div className="text-sm font-semibold text-green-800">Ejemplo Práctico</div>
+                                    </div>
+                                    <div className="text-sm text-green-700">
+                                        Si vendes <strong>{metaLotes} lotes</strong> de {selectedRecipe.name}, cubrirás el costo de <strong>${totalRecipeIngredientsCost.toFixed(2)}</strong> en ingredientes. Cada lote adicional será <strong>ganancia pura</strong>.
+                                    </div>
+                                </div>
+
+                                {/* Note */}
+                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                        </svg>
+                                        <div className="text-sm font-semibold text-amber-800">Nota Importante</div>
+                                    </div>
+                                    <div className="text-xs text-amber-700">
+                                        Esto solo cubre el costo de ingredientes. No incluye otros gastos como mano de obra, empaque, servicios, o costos operativos.
+                                    </div>
+                                </div>
+
+                                {/* Quick Stats */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                                        <div className="text-xs text-gray-600 mb-1">Ganancia por lote</div>
+                                        <div className="text-lg font-bold text-green-600">
+                                            ${(profit * selectedRecipe.batchSize).toFixed(2)}
+                                        </div>
+                                    </div>
+                                    <div className="bg-white border border-gray-200 rounded-lg p-3 text-center">
+                                        <div className="text-xs text-gray-600 mb-1">Unidades por lote</div>
+                                        <div className="text-lg font-bold text-blue-600">
+                                            {selectedRecipe.batchSize}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="p-6 border-t bg-gray-50">
+                                <ActionButton
+                                    onClick={() => setShowLotesModal(false)}
+                                    color="blue"
+                                    fullWidth
+                                >
+                                    Entendido
+                                </ActionButton>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+
+            {/* Approximate Profit Modal */}
+            {
+                showProfitGoalModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowProfitGoalModal(false)}
+                        />
+                        <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-hidden relative z-10">
+
+                            {/* Header */}
+                            <div className="p-6 border-b border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-green-800">Ganancia Aproximada</h3>
+                                            <p className="text-sm text-green-600">Proyección de ganancias potenciales</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowProfitGoalModal(false)}
+                                        className="w-8 h-8 flex items-center justify-center text-green-500 hover:text-green-700 hover:bg-green-100 rounded-full transition-colors"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6 space-y-6 overflow-y-auto max-h-[60vh]">
+                                {/* Key Metrics Summary */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                                        <div className="text-xs font-medium text-blue-600 mb-1">Meta de Lotes</div>
+                                        <div className="text-2xl font-bold text-blue-700">{metaLotes}</div>
+                                        <div className="text-xs text-blue-500 mt-1">para cubrir costos</div>
+                                    </div>
+
+                                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
+                                        <div className="text-xs font-medium text-purple-600 mb-1">Ganancia Total</div>
+                                        <div className="text-2xl font-bold text-purple-700">
+                                            ${((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost).toFixed(2)}
+                                        </div>
+                                        <div className="text-xs text-purple-500 mt-1">aproximada</div>
+                                    </div>
+                                </div>
+
+                                {/* Breakdown Section */}
+                                <div className="space-y-4">
+                                    <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                        Desglose de Proyección
+                                    </h4>
+
+                                    {/* Investment */}
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-sm font-medium text-red-700">Inversión en Ingredientes</span>
+                                            <span className="text-lg font-bold text-red-700">${totalRecipeIngredientsCost.toFixed(2)}</span>
+                                        </div>
+                                        <div className="text-xs text-red-600">
+                                            Costo total de todos los ingredientes de la receta
+                                        </div>
+                                    </div>
+
+                                    {/* Revenue Projection */}
+                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-sm font-medium text-green-700">Ingresos por {metaLotes} lotes</span>
+                                            <span className="text-lg font-bold text-green-700">
+                                                ${(selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes).toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs text-green-600">
+                                            {metaLotes} lotes × ${selectedRecipe.sellingPrice.toFixed(2)}/unidad × {selectedRecipe.batchSize} unidades
+                                        </div>
+                                    </div>
+
+                                    {/* Net Profit */}
+                                    <div className="bg-gradient-to-r from-emerald-500 to-green-500 border border-green-500 rounded-lg p-4 text-white">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-sm font-medium">Ganancia Neta Aproximada</span>
+                                            <span className="text-xl font-bold">
+                                                ${((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost).toFixed(2)}
+                                            </span>
+                                        </div>
+                                        <div className="text-xs opacity-90">
+                                            Después de recuperar la inversión en ingredientes
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Profitability Indicator */}
+                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-sm font-medium text-gray-700">Rentabilidad del Proyecto</span>
+                                        <span className={`text-sm font-bold ${profitPercentage >= 50 ? 'text-green-600' :
+                                            profitPercentage >= 30 ? 'text-yellow-600' : 'text-red-600'
+                                            }`}>
+                                            {profitPercentage >= 50 ? '🟢 Excelente' :
+                                                profitPercentage >= 30 ? '🟡 Buena' : '🔴 Moderada'}
+                                        </span>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-xs text-gray-600">
+                                            <span>0%</span>
+                                            <span className="font-medium">
+                                                Retorno: {((((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost) / totalRecipeIngredientsCost) * 100).toFixed(1)}%
+                                            </span>
+                                            <span>Máx</span>
+                                        </div>
+
+                                        <div className="w-full bg-gray-200 rounded-full h-3 relative">
+                                            <div
+                                                className="h-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-500"
+                                                style={{
+                                                    width: `${Math.min(
+                                                        Math.log10(
+                                                            ((((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost) / totalRecipeIngredientsCost) * 100) / 10 + 1
+                                                        ) * 100,
+                                                        100
+                                                    )}%`
+                                                }}
+                                            ></div>
+                                        </div>
+
+                                        <div className="text-xs text-gray-500 text-center">
+                                            {((((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost) / totalRecipeIngredientsCost) * 100) > 200 ? '🔥 Retorno extraordinario' :
+                                                ((((selectedRecipe.sellingPrice * selectedRecipe.batchSize * metaLotes) - totalRecipeIngredientsCost) / totalRecipeIngredientsCost) * 100) > 100 ? '⭐ Alto retorno' :
+                                                    'Escala logarítmica'}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Key Insights */}
+                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                    <h5 className="font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Puntos Clave
+                                    </h5>
+                                    <ul className="space-y-2 text-sm text-amber-700">
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-amber-500 mt-0.5">•</span>
+                                            <span>Vender <strong>{metaLotes} lotes</strong> cubre tu inversión inicial</span>
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-amber-500 mt-0.5">•</span>
+                                            <span>Cada lote adicional genera <strong>${(profit * selectedRecipe.batchSize).toFixed(2)}</strong> de ganancia pura</span>
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-amber-500 mt-0.5">•</span>
+                                            <span>Tu margen por unidad es <strong>{profitPercentage.toFixed(1)}%</strong> (${profit.toFixed(2)})</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="p-6 border-t border-gray-200 bg-gray-50">
+                                <div className="flex flex-col gap-3">
+                                    <button
+                                        onClick={() => setShowProfitGoalModal(false)}
+                                        className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        Entendido
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            setShowProfitGoalModal(false);
+                                            setShowLotesModal(true);
+                                        }}
+                                        className="w-full bg-white hover:bg-gray-50 text-gray-700 py-2 px-4 rounded-lg border border-gray-300 font-medium transition-colors duration-200 text-sm"
+                                    >
+                                        Ver detalles de la meta de lotes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </Card >
     )
 }
