@@ -464,89 +464,6 @@ export function RecipeCalculatorPanel({
                         </div>
                     </div>
 
-
-                    {/*    Agregar Ingredientes*/}
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
-                                Agregar Ingredientes
-                            </h3>
-                            <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
-                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                            {ingredients
-                                .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
-                                .map(ingredient => (
-                                    <button
-                                        key={ingredient.id}
-                                        onClick={() => addIngredientToRecipe(ingredient.id)}
-                                        className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
-                                            <span className="text-base font-medium text-amber-800 group-hover:text-amber-900">
-                                                {ingredient.name}
-                                            </span>
-                                        </div>
-                                    </button>
-                                ))}
-
-                            {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
-                                <div className="w-full text-center py-2">
-                                    <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Mobile Ingredients Section */}
-                    <div className="bg-gradient-to-br from-amber-50 to-cyan-50 border-2 border-amber-300 rounded-2xl p-4">
-                        <h3 className="text-xl font-bold text-amber-800 mb-4 text-center">Ingredientes</h3>
-
-                        <div className="space-y-3 max-h-96 overflow-y-auto">
-                            {selectedRecipe.ingredients.map((recipeIngredient) => {
-                                const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
-                                if (!ingredient) return null
-
-                                const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount
-
-                                return (
-                                    <div key={recipeIngredient.ingredientId} className="bg-white border-2 border-amber-200 rounded-xl p-3">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className="text-lg font-semibold text-amber-800">{ingredient.name}</span>
-                                            <span className="text-sm font-bold text-green-600">${cost.toFixed(2)}</span>
-                                        </div>
-
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    value={recipeIngredient.amount}
-                                                    onChange={(e) => updateRecipeIngredient(recipeIngredient.ingredientId, Number(e.target.value) || 0)}
-                                                    className="w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-semibold text-center"
-                                                />
-                                                <span className="text-base font-medium text-amber-700">{ingredient.unit}</span>
-                                            </div>
-
-                                            <button
-                                                onClick={() => removeIngredientFromRecipe(recipeIngredient.ingredientId)}
-                                                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
-                                            >
-                                                <Trash2 className="h-5 w-5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-
-
                     {/* Add Tools Toggle for Mobile */}
                     <div className="bg-white border-2 border-blue-300 rounded-xl p-3 cursor-pointer hover:bg-blue-50 transition-colors col-span-2"
                         onClick={() => setShowAddTools(!showAddTools)}>
@@ -635,6 +552,86 @@ export function RecipeCalculatorPanel({
                         </div>
                     )}
 
+                    {/*    Agregar Ingredientes*/}
+                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
+                                Agregar Ingredientes
+                            </h3>
+                            <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
+                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
+                            </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                            {ingredients
+                                .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
+                                .map(ingredient => (
+                                    <button
+                                        key={ingredient.id}
+                                        onClick={() => addIngredientToRecipe(ingredient.id)}
+                                        className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
+                                            <span className="text-base font-medium text-amber-800 group-hover:text-amber-900">
+                                                {ingredient.name}
+                                            </span>
+                                        </div>
+                                    </button>
+                                ))}
+
+                            {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
+                                <div className="w-full text-center py-2">
+                                    <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Mobile Ingredients Section */}
+                    <div className="bg-gradient-to-br from-amber-50 to-cyan-50 border-2 border-amber-300 rounded-2xl p-4">
+                        <h3 className="text-xl font-bold text-amber-800 mb-4 text-center">Ingredientes</h3>
+
+                        <div className="space-y-3 max-h-96 overflow-y-auto">
+                            {selectedRecipe.ingredients.map((recipeIngredient) => {
+                                const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
+                                if (!ingredient) return null
+
+                                const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount
+
+                                return (
+                                    <div key={recipeIngredient.ingredientId} className="bg-white border-2 border-amber-200 rounded-xl p-3">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-lg font-semibold text-amber-800">{ingredient.name}</span>
+                                            <span className="text-sm font-bold text-green-600">${cost.toFixed(2)}</span>
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={recipeIngredient.amount}
+                                                    onChange={(e) => updateRecipeIngredient(recipeIngredient.ingredientId, Number(e.target.value) || 0)}
+                                                    className="w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-semibold text-center"
+                                                />
+                                                <span className="text-base font-medium text-amber-700">{ingredient.unit}</span>
+                                            </div>
+
+                                            <button
+                                                onClick={() => removeIngredientFromRecipe(recipeIngredient.ingredientId)}
+                                                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                                            >
+                                                <Trash2 className="h-5 w-5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
 
                     {/* Mobile Cost Summary */}
                     <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4">
