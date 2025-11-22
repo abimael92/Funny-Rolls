@@ -465,16 +465,36 @@ export function RecipeCalculatorPanel({
                     </div>
 
                     {/* Add Tools Toggle for Mobile */}
-                    <div className="bg-white border-2 border-blue-300 rounded-xl p-3 cursor-pointer hover:bg-blue-50 transition-colors col-span-2"
-                        onClick={() => setShowAddTools(!showAddTools)}>
+                    <div
+                        className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-400 rounded-2xl p-4 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all duration-200 active:scale-95 col-span-2"
+                        onClick={() => setShowAddTools(!showAddTools)}
+                    >
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600">Herramientas</div>
+                            <div className="flex items-center gap-3">
+                                {/* Icon */}
+                                <div className="w-10 h-10 bg-white border-2 border-blue-300 rounded-xl flex items-center justify-center shadow-sm">
+                                    <Wrench className="h-5 w-5 text-blue-600" />
+                                </div>
+
+                                {/* Text Content */}
+                                <div className="text-left">
+                                    <div className="font-semibold text-blue-800 text-base">Herramientas</div>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">
+                                            {selectedRecipe.tools?.length || 0} actuales
+                                        </span>
+                                        <span className="text-xs text-blue-600">
+                                            {tools.filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id)).length} disponibles
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Chevron and Status */}
                             <div className="flex items-center gap-2">
-                                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                    {selectedRecipe.tools?.length || 0}
-                                </span>
+                                <div className={`w-2 h-2 rounded-full ${selectedRecipe.tools && selectedRecipe.tools.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></div>
                                 <svg
-                                    className={`w-4 h-4 text-blue-600 transition-transform duration-300 ${showAddTools ? "rotate-180" : ""}`}
+                                    className={`w-5 h-5 text-blue-600 transition-transform duration-300 ${!showAddTools ? "rotate-180" : ""}`}
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -483,6 +503,27 @@ export function RecipeCalculatorPanel({
                                 </svg>
                             </div>
                         </div>
+
+                        {/* Quick Preview (when closed) */}
+                        {/* {showAddTools && selectedRecipe.tools && selectedRecipe.tools.length > 0 && (
+                            <div className="mt-3 pt-3 border-t border-blue-200">
+                                <div className="flex flex-wrap gap-1">
+                                    {selectedRecipe.tools.slice(0, 3).map((recipeTool) => {
+                                        const tool = tools.find(t => t.id === recipeTool.toolId)
+                                        return tool ? (
+                                            <span key={recipeTool.toolId} className="text-xs bg-white border border-blue-200 text-blue-700 px-2 py-1 rounded-full">
+                                                {tool.name}
+                                            </span>
+                                        ) : null
+                                    })}
+                                    {selectedRecipe.tools.length > 3 && (
+                                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                            +{selectedRecipe.tools.length - 3} más
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        )} */}
                     </div>
 
                     {/* Tools Section - Show when toggled */}
