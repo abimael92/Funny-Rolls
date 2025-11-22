@@ -59,7 +59,10 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             type: 'herramienta',
             category: 'measuring',
             cost: 0,
-            description: ''
+            description: '',
+            lifetime: '2 años',
+            recoveryValue: 0,
+            totalInvestment: 0
         })
         setShowAddSection(false)
     }
