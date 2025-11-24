@@ -3,8 +3,8 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 // import { Card, CardContent } from "@/components/ui/card"
-import { ChevronDown, Plus, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
-import { Tool } from '@/lib/types';
+import { ChevronDown, Info, Plus, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
+import { Tool, TOOL_CATEGORY_CONFIGS } from '@/lib/types';
 import { defaultTools, toolCategories } from '@/lib/data';
 import { CloseButton, ActionButton } from './ModalHelpers';
 import { EditableToolRow } from './EditableToolRow';
@@ -21,15 +21,23 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     const [showTotalToolsModal, setShowTotalToolsModal] = useState(false);
     const [showToolsCostModal, setShowToolsCostModal] = useState(false);
 
-    const [newTool, setNewTool] = useState<Omit<Tool, 'id'>>({
-        name: '',
-        type: 'herramienta',
-        category: 'measuring',
-        cost: 0,
-        description: '',
-        lifetime: '2 años',
-        recoveryValue: 0,
-        totalInvestment: 0
+    const [newTool, setNewTool] = useState<Omit<Tool, 'id'>>(() => {
+        const defaultCategory = 'measuring';
+        const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
+        const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+
+        return {
+            name: '',
+            type: 'herramienta',
+            category: defaultCategory,
+            cost: 0,
+            description: '',
+            lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`, // DYNAMIC
+            recoveryValue: 0,
+            totalInvestment: 0,
+            totalBatches: totalBatches, // DYNAMIC
+            costPerBatch: 0,
+        };
     });
 
 
@@ -54,16 +62,24 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             id: Date.now().toString()
         }
         setTools([...tools, tool])
+
+        // RESET THE FORM PROPERLY
+        const categoryConfig = TOOL_CATEGORY_CONFIGS[newTool.category] || TOOL_CATEGORY_CONFIGS.general;
+        const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+
         setNewTool({
             name: '',
-            type: 'herramienta',
-            category: 'measuring',
+            type: newTool.type,
+            category: newTool.category,
             cost: 0,
             description: '',
-            lifetime: '2 años',
+            lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`,
             recoveryValue: 0,
-            totalInvestment: 0
-        })
+            totalInvestment: 0,
+            totalBatches: totalBatches,
+            costPerBatch: 0,
+        });
+
         setShowAddSection(false)
     }
 
@@ -106,7 +122,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     const getToolIcon = (type: string) => {
         switch (type) {
             case 'consumible': return <Zap className="h-4 w-4 text-blue-600" />
-            case 'utensil': return <Utensils className="h-4 w-4 text-green-600" />
+            case 'herramienta': return <Utensils className="h-4 w-4 text-green-600" /> // Fixed
             case 'especializado': return <Star className="h-4 w-4 text-purple-600" />
             default: return <Utensils className="h-4 w-4 text-gray-600" />
         }
@@ -136,12 +152,12 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     // };
 
     const getCostExplanation = (tool: Tool) => {
-        if (tool.lifetime === 'Operational') {
-            return `Costo operacional: \n$${tool.cost.toFixed(2)} MXN/lote\n${tool.description}`;
+        if (tool.type === 'consumible') {
+            return `Costo operacional directo: $${tool.cost.toFixed(2)} MXN/lote\n${tool.description}`;
         }
 
-        // Use the actual calculation that was used to determine the cost
-        return `Costo amortizado: \n$${tool.cost.toFixed(2)} MXN/lote\nInversión: $${tool.totalInvestment} MXN\nVida útil: ${tool.lifetime}`;
+        // Use the ACTUAL stored values
+        return `Costo amortizado: $${tool.costPerBatch?.toFixed(2) || tool.cost.toFixed(2)} MXN/lote\nInversión: $${tool.totalInvestment} MXN\n${tool.lifetime}\nValor rescate: $${tool.recoveryValue} MXN`;
     };
 
     // Filter default tools by what's not already added
@@ -164,8 +180,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                 </div>
 
                 <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-106 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <div className="p-4 bg-blue-50 rounded-b-lg border border-blue-300 border-t-0">
-                        <h3 className="font-semibold text-lg text-blue-800 text-center mb-4">Agregar Herramienta</h3>
+                    <div className="p-4 bg-blue-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto">
+                        <h3 className="font-semibold text-lg text-blue-800 text-center mb-4">Agregar  Herramienta</h3>
 
                         {error && (
                             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-3">
@@ -173,70 +189,288 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             </div>
                         )}
 
-                        <div className="space-y-3">
-                            <input
-                                type="text"
-                                placeholder="Nombre de la herramienta"
-                                value={newTool.name}
-                                onChange={(e) => setNewTool({ ...newTool, name: e.target.value })}
-                                className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            />
 
-                            <div className="grid grid-cols-2 gap-3">
-                                <select
-                                    value={newTool.type}
-                                    onChange={(e) => {
-                                        const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado'
-                                        const defaultCategory = toolCategories[newType]?.[0]?.value || 'measuring'
-                                        setNewTool({
-                                            ...newTool,
-                                            type: newType,
-                                            category: defaultCategory
-                                        })
-                                    }}
-                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="consumible">consumible</option>
-                                    <option value="herramienta">Utensilio</option>
-                                    <option value="especializado">especializado</option>
-                                </select>
+                        {/*Tools Forms */}
+                        <div className="space-y-4">
 
-                                <select
-                                    value={newTool.category}
-                                    onChange={(e) => setNewTool({ ...newTool, category: e.target.value })}
-                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                >
-                                    {toolCategories[newTool.type]?.map(category => (
-                                        <option key={category.value} value={category.value}>
-                                            {category.label}
-                                        </option>
-                                    ))}
-                                </select>
+                            {/* Name Input with Label */}
+                            <div>
+                                <label className="block text-sm font-medium text-blue-700 mb-1">
+                                    Nombre de la herramienta *
+                                    <span className="ml-1 relative group">
+                                        <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                            Nombre descriptivo de la herramienta o equipo
+                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej: Batidora profesional"
+                                    value={newTool.name}
+                                    onChange={(e) => setNewTool({ ...newTool, name: e.target.value })}
+                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    required
+                                />
                             </div>
 
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                placeholder="Costo adicional (opcional)"
-                                value={newTool.cost === 0 ? '' : newTool.cost}
-                                onChange={(e) => setNewTool({ ...newTool, cost: Number(e.target.value) || 0 })}
-                                className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            />
+                            {/* Type and Category with Labels */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-blue-700 mb-1">
+                                        Tipo *
+                                        <span className="ml-1 relative group">
+                                            <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                Consumible: costo operacional directo | Utensilio/Especializado: costo amortizado
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        </span>
+                                    </label>
+                                    <select
+                                        value={newTool.type}
+                                        onChange={(e) => {
+                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado';
+                                            const defaultCategory = toolCategories[newType]?.[0]?.value || 'general';
+                                            const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
+                                            const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
 
-                            <textarea
-                                placeholder="Descripción (opcional)"
-                                value={newTool.description}
-                                onChange={(e) => setNewTool({ ...newTool, description: e.target.value })}
-                                className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                rows={2}
-                            />
+                                            setNewTool({
+                                                ...newTool,
+                                                type: newType,
+                                                category: defaultCategory,
+                                                lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`,
+                                                totalBatches: totalBatches,
+                                                recoveryValue: 0,
+                                                totalInvestment: 0,
+                                                costPerBatch: 0,
+                                                cost: 0
+                                            });
+                                        }}
+                                        className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    >
+                                        <option value="consumible">Consumible</option>
+                                        <option value="herramienta">Utensilio</option>
+                                        <option value="especializado">Especializado</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-blue-700 mb-1">
+                                        Categoría *
+                                        <span className="ml-1 relative group">
+                                            <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                Agrupa herramientas similares para mejor organización
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        </span>
+                                    </label>
+                                    <select
+                                        value={newTool.category}
+                                        onChange={(e) => {
+                                            const newCategory = e.target.value;
+                                            const categoryConfig = TOOL_CATEGORY_CONFIGS[newCategory] || TOOL_CATEGORY_CONFIGS.general;
+                                            const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+
+                                            setNewTool({
+                                                ...newTool,
+                                                category: newCategory,
+                                                lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`,
+                                                totalBatches: totalBatches,
+                                                // Recalculate cost if we have investment
+                                                ...(newTool.totalInvestment > 0 && {
+                                                    recoveryValue: Math.round(newTool.totalInvestment * categoryConfig.recoveryRate),
+                                                    costPerBatch: Number(((newTool.totalInvestment - Math.round(newTool.totalInvestment * categoryConfig.recoveryRate)) / totalBatches).toFixed(2)),
+                                                    cost: Number(((newTool.totalInvestment - Math.round(newTool.totalInvestment * categoryConfig.recoveryRate)) / totalBatches).toFixed(2))
+                                                })
+                                            });
+                                        }}
+                                        className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    >
+                                        {toolCategories[newTool.type]?.map(category => (
+                                            <option key={category.value} value={category.value}>
+                                                {category.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Cost Input with Helper */}
+                            <div>
+                                <div>
+                                    <label className="block text-sm font-medium text-blue-700 mb-1">
+                                        Inversión total (MXN)
+                                        <span className="ml-1 relative group">
+                                            <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                Costo total de compra de la herramienta
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        </span>
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                        <input
+                                            type="number"
+                                            step="1"
+                                            min="0"
+                                            placeholder="0"
+                                            value={newTool.totalInvestment || ''}
+                                            // In the totalInvestment onChange handler
+                                            onChange={(e) => {
+                                                const investment = Number(e.target.value) || 0;
+                                                const updatedTool = { ...newTool, totalInvestment: investment };
+
+                                                if (newTool.type !== 'consumible') {
+                                                    const categoryConfig = TOOL_CATEGORY_CONFIGS[newTool.category] || TOOL_CATEGORY_CONFIGS.general;
+
+                                                    // DYNAMIC calculation based on ACTUAL category
+                                                    const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+                                                    const recoveryValue = Math.round(investment * categoryConfig.recoveryRate);
+                                                    const costPerBatch = investment > 0 ? (investment - recoveryValue) / totalBatches : 0;
+
+                                                    // Store DYNAMICALLY calculated values
+                                                    updatedTool.recoveryValue = recoveryValue;
+                                                    updatedTool.totalBatches = totalBatches;
+                                                    updatedTool.costPerBatch = Number(costPerBatch.toFixed(2));
+                                                    updatedTool.cost = updatedTool.costPerBatch;
+                                                    updatedTool.lifetime = `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`;
+                                                }
+
+                                                setNewTool(updatedTool);
+                                            }}
+                                            className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Investment Details for Non-Consumables */}
+                            {newTool.type !== 'consumible' && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
+                                    {/* Auto-calculation notice */}
+                                    <div className="md:col-span-2 text-sm text-blue-800 mb-2">
+                                        El costo por lote se calcula automáticamente:<br />
+                                        (Inversión - Valor rescate) / Lotes totales
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-blue-700 mb-1">
+                                            Valor de rescate (MXN)
+                                            <span className="ml-1 relative group">
+                                                <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                    Valor estimado de reventa al final de la vida útil
+                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                </div>
+                                            </span>
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                            <input
+                                                type="number"
+                                                step="1"
+                                                min="0"
+                                                placeholder="0"
+                                                value={newTool.recoveryValue || ''}
+                                                onChange={(e) => {
+                                                    const recoveryValue = Number(e.target.value) || 0;
+                                                    const updatedTool = { ...newTool, recoveryValue };
+
+                                                    // Recalculate cost per batch when recovery value changes
+                                                    if (newTool.totalInvestment > 0 && newTool.totalBatches) {
+                                                        updatedTool.costPerBatch = Number(((newTool.totalInvestment - recoveryValue) / newTool.totalBatches).toFixed(2));
+                                                        updatedTool.cost = updatedTool.costPerBatch;
+                                                    }
+
+                                                    setNewTool(updatedTool);
+                                                }}
+                                                className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-blue-700 mb-1">
+                                            Costo por lote (MXN)
+                                            <span className="ml-1 relative group">
+                                                <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                    Costo amortizado por lote. Se calcula automáticamente basado en la inversión y vida útil
+                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                </div>
+                                            </span>
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                placeholder="0.00"
+                                                value={newTool.costPerBatch || newTool.cost || ''}
+                                                onChange={(e) => {
+                                                    const cost = Number(e.target.value) || 0;
+                                                    setNewTool({
+                                                        ...newTool,
+                                                        cost: cost,
+                                                        costPerBatch: cost // Keep both in sync for now
+                                                    });
+                                                }}
+                                                className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
+                                        {newTool.totalBatches && (
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                Basado en {newTool.totalBatches} lotes totales
+                                            </div>
+                                        )}
+                                    </div>
+
+
+
+
+                                </div>
+                            )}
+
+
+                            {/* Description */}
+                            <div>
+                                <label className="block text-sm font-medium text-blue-700 mb-1">
+                                    Descripción
+                                    <span className="text-xs text-blue-500 ml-1">- Opcional</span>
+                                </label>
+                                <textarea
+                                    placeholder="Describe la herramienta, su uso específico, o cualquier detalle importante..."
+                                    value={newTool.description}
+                                    onChange={(e) => setNewTool({ ...newTool, description: e.target.value })}
+                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                    rows={3}
+                                />
+                            </div>
                         </div>
 
-                        <Button onClick={addTool} className="w-full bg-blue-600 hover:bg-blue-700 py-3 mt-3">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Agregar Herramienta
-                        </Button>
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 mt-6">
+                            <Button
+                                onClick={() => setShowAddSection(false)}
+                                variant="outline"
+                                className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                onClick={addTool}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 py-3"
+                                disabled={!newTool.name.trim()}
+                            >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Agregar Herramienta
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -430,7 +664,10 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <span className="text-lg">🛠️</span>
+                                            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
                                         </div>
                                         <div>
                                             <h3 className="text-xl font-bold text-purple-800">Todas las Herramientas</h3>
@@ -510,7 +747,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                            <span className="text-lg">💰</span>
+                                            <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
                                         </div>
                                         <div>
                                             <h3 className="text-xl font-bold text-orange-800">Costo de Herramientas</h3>

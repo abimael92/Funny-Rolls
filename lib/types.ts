@@ -92,17 +92,49 @@ export interface InventoryItem {
 }
 
 // In your lib/types.ts
+// lib/types.ts - Updated Tool interface
 export interface Tool {
 	id: string;
 	name: string;
 	type: 'consumible' | 'herramienta' | 'equipo' | 'especializado';
-	cost: number; // Costo que se carga al cliente por lote
+	cost: number; // Cost per batch (automatically calculated for non-consumables)
 	description?: string;
 	category: string;
-	lifetime?: string; // Tiempo de vida útil estimado
-	recoveryValue?: number; // Valor de reventa/rescate en MXN
-	totalInvestment: number;
+	lifetime?: string; // Estimated useful life in time
+	totalBatches?: number; // Total batches expected over lifetime (calculated)
+	batchesUsed?: number; // How many batches have used this tool
+	recoveryValue: number; // Resale value at end of life
+	totalInvestment: number; // Purchase cost
+	costPerBatch?: number; // Auto-calculated: (totalInvestment - recoveryValue) / totalBatches
+	yearsLifespan?: number;
 }
+
+// Add tool category configurations for batch calculations
+export interface ToolCategoryConfig {
+	batchesPerYear: number;
+	yearsLifespan: number;
+	recoveryRate: number; // Default recovery percentage if not specified
+}
+
+export const TOOL_CATEGORY_CONFIGS: Record<string, ToolCategoryConfig> = {
+	// Measuring tools
+	measuring: { batchesPerYear: 500, yearsLifespan: 3, recoveryRate: 0.1 },
+	mixing: { batchesPerYear: 600, yearsLifespan: 2, recoveryRate: 0.05 },
+	shaping: { batchesPerYear: 550, yearsLifespan: 2, recoveryRate: 0.1 },
+	baking: { batchesPerYear: 450, yearsLifespan: 3, recoveryRate: 0.1 },
+	cutting: { batchesPerYear: 500, yearsLifespan: 2, recoveryRate: 0.1 },
+	decorating: { batchesPerYear: 400, yearsLifespan: 1, recoveryRate: 0.1 },
+
+	// Equipment
+	equipment: { batchesPerYear: 400, yearsLifespan: 5, recoveryRate: 0.1 },
+	energy: { batchesPerYear: 0, yearsLifespan: 0, recoveryRate: 0 }, // Operational costs
+
+	// Specialized
+	finishing: { batchesPerYear: 300, yearsLifespan: 3, recoveryRate: 0.2 },
+	professional: { batchesPerYear: 350, yearsLifespan: 4, recoveryRate: 0.15 },
+
+	general: { batchesPerYear: 400, yearsLifespan: 3, recoveryRate: 0.1 },
+};
 
 // In your lib/types.ts
 interface RecipeTool {
