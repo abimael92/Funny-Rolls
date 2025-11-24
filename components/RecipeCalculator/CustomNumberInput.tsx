@@ -184,9 +184,7 @@ export function CustomNumberInput({
         <div className={`flex items-center w-full ${className || ''}`}>
             <button
                 type="button"
-                className="w-6 h-6 sm:w-6 flex items-center justify-center bg-amber-50 text-amber-700 
-                rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 
-                transition-colors duration-150 group"
+                className="w-6 h-8 sm:w-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
                 onClick={(e) => {
                     e.preventDefault();
                     const currentStr = displayValue || '0';
