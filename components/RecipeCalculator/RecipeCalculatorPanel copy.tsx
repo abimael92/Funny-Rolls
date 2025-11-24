@@ -13,7 +13,6 @@ import {
     calculateProfitPercentage,
     getIngredientCostPerUnit,
 } from '@/lib/utils'
-import { FlipCard } from './FlipCard'
 
 interface RecipeCalculatorPanelProps {
     selectedRecipe: Recipe
@@ -32,9 +31,7 @@ export function RecipeCalculatorPanel({
     ingredients,
     recordProduction // ✅ ADDED THIS PROP
 }: RecipeCalculatorPanelProps) {
-    const [newStep, setNewStep] = useState('')
-    const [isEditingSteps, setIsEditingSteps] = useState(false)
-    const [isCardFlipped, setIsCardFlipped] = useState(false)
+
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
     const [productionBatchCount, setProductionBatchCount] = useState(1)
@@ -105,45 +102,9 @@ export function RecipeCalculatorPanel({
         setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
     }
 
-    // Add step to recipe
-    const addStep = () => {
-        if (newStep.trim()) {
-            const updatedRecipe = {
-                ...selectedRecipe,
-                steps: [...selectedRecipe.steps, newStep.trim()]
-            }
-            setSelectedRecipe(updatedRecipe)
-            setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
-            setNewStep('')
-        }
-    }
 
-    // Remove step from recipe
-    const removeStep = (index: number) => {
-        const updatedRecipe = {
-            ...selectedRecipe,
-            steps: selectedRecipe.steps.filter((_, i) => i !== index)
-        }
-        setSelectedRecipe(updatedRecipe)
-        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
-    }
 
-    // Update step in recipe
-    const updateStep = (index: number, newStepText: string) => {
-        const updatedSteps = [...selectedRecipe.steps]
-        updatedSteps[index] = newStepText
-        const updatedRecipe = {
-            ...selectedRecipe,
-            steps: updatedSteps
-        }
-        setSelectedRecipe(updatedRecipe)
-    }
 
-    // Save steps and exit edit mode
-    const saveSteps = () => {
-        setRecipes(recipes.map(r => r.id === selectedRecipe.id ? selectedRecipe : r))
-        setIsEditingSteps(false)
-    }
 
 
     const handleRecordProduction = () => {
@@ -201,26 +162,7 @@ export function RecipeCalculatorPanel({
 
                 </div>
 
-                {/* Flip Card - Desktop Only */}
-                <div className="hidden lg:block">
-                    <FlipCard
-                        selectedRecipe={selectedRecipe}
-                        costPerItem={costPerItem}
-                        profit={profit}
-                        updateRecipeBatchSize={updateRecipeBatchSize}
-                        updateRecipeSellingPrice={updateRecipeSellingPrice}
-                        isCardFlipped={isCardFlipped}
-                        setIsCardFlipped={setIsCardFlipped}
-                        isEditingSteps={isEditingSteps}
-                        setIsEditingSteps={setIsEditingSteps}
-                        newStep={newStep}
-                        setNewStep={setNewStep}
-                        updateStep={updateStep}
-                        removeStep={removeStep}
-                        addStep={addStep}
-                        saveSteps={saveSteps}
-                    />
-                </div>
+
 
                 {/* Mobile Price and Ingredients Section */}
                 <div className="lg:hidden space-y-4">
@@ -258,15 +200,8 @@ export function RecipeCalculatorPanel({
                                 </div>
                             </div>
 
-                            <div className="flex justify-between items-center py-2">
-                                <span className="text-lg font-semibold text-blue-700">Costo por unidad</span>
-                                <span className="text-xl font-bold text-red-800">${costPerItem.toFixed(2)}</span>
-                            </div>
 
-                            <div className="flex justify-between items-center py-2">
-                                <span className="text-lg font-semibold text-blue-700">Ganancia</span>
-                                <span className="text-xl font-bold text-green-600">${profit.toFixed(2)}</span>
-                            </div>
+
                         </div>
                     </div>
 
@@ -467,22 +402,9 @@ export function RecipeCalculatorPanel({
                                 <select
                                     className="w-full px-4 py-4 border-2 border-amber-500 rounded-xl text-lg font-medium text-amber-700 bg-white flex justify-between items-center shadow-sm hover:bg-amber-200 hover:shadow-md transition-all"
                                     value={selectedRecipe.id}
-                                    onChange={(e) => {
-                                        const recipe = recipes.find(r => r.id === e.target.value)
-                                        if (recipe) {
-                                            setSelectedRecipe(recipe)
-                                            setIsCardFlipped(false)
-                                            setIsEditingSteps(false)
-                                        }
-                                    }}
+
                                 >
-                                    {products
-                                        .filter(product => product.available)
-                                        .map(product => (
-                                            <option key={product.recipe.id} value={product.recipe.id}>
-                                                {product.recipe.name}
-                                            </option>
-                                        ))}
+
                                 </select>
                             )}
                         </div>
