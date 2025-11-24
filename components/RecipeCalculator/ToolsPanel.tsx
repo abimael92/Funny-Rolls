@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 // import { Card, CardContent } from "@/components/ui/card"
-import { ChevronDown, Plus, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
+import { ChevronDown, Info, Plus, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
 import { Tool, TOOL_CATEGORY_CONFIGS } from '@/lib/types';
 import { defaultTools, toolCategories } from '@/lib/data';
 import { CloseButton, ActionButton } from './ModalHelpers';
@@ -197,7 +197,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             <div>
                                 <label className="block text-sm font-medium text-blue-700 mb-1">
                                     Nombre de la herramienta *
-                                    <span className="ml-1 text-blue-500 cursor-help" title="Nombre descriptivo de la herramienta o equipo">ℹ️</span>
+                                    <span className="ml-1 text-blue-500 cursor-help" title="Nombre descriptivo de la herramienta o equipo">    <Info className="h-4 w-4 inline" /></span>
                                 </label>
                                 <input
                                     type="text"
@@ -214,7 +214,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Tipo *
-                                        <span className="ml-1 text-blue-500 cursor-help" title="Consumible: costo operacional directo | Utensilio/Especializado: costo amortizado">ℹ️</span>
+                                        <span className="ml-1 text-blue-500 cursor-help" title="Consumible: costo operacional directo | Utensilio/Especializado: costo amortizado">    <Info className="h-4 w-4 inline" /></span>
                                     </label>
                                     <select
                                         value={newTool.type}
@@ -238,16 +238,16 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         }}
                                         className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                     >
-                                        <option value="consumible">🔄 Consumible</option>
-                                        <option value="herramienta">🛠️ Utensilio</option>
-                                        <option value="especializado">⭐ Especializado</option>
+                                        <option value="consumible">Consumible</option>
+                                        <option value="herramienta">Utensilio</option>
+                                        <option value="especializado">Especializado</option>
                                     </select>
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Categoría *
-                                        <span className="ml-1 text-blue-500 cursor-help" title="Agrupa herramientas similares para mejor organización">ℹ️</span>
+                                        <span className="ml-1 text-blue-500 cursor-help" title="Agrupa herramientas similares para mejor organización">    <Info className="h-4 w-4 inline" /></span>
                                     </label>
                                     <select
                                         value={newTool.category}
@@ -285,7 +285,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Inversión total (MXN)
-                                        <span className="ml-1 text-blue-500 cursor-help" title="Costo total de compra de la herramienta">ℹ️</span>
+                                        <span className="ml-1 text-blue-500 cursor-help" title="Costo total de compra de la herramienta">    <Info className="h-4 w-4 inline" /></span>
                                     </label>
                                     <div className="relative">
                                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
@@ -335,7 +335,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <div>
                                         <label className="block text-sm font-medium text-blue-700 mb-1">
                                             Costo por lote (MXN)
-                                            <span className="ml-1 text-blue-500 cursor-help" title="Costo amortizado por lote. Se calcula automáticamente basado en la inversión y vida útil">ℹ️</span>
+                                            <span className="ml-1 text-blue-500 cursor-help" title="Costo amortizado por lote. Se calcula automáticamente basado en la inversión y vida útil">    <Info className="h-4 w-4 inline" /></span>
                                         </label>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
@@ -366,7 +366,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <div>
                                         <label className="block text-sm font-medium text-blue-700 mb-1">
                                             Valor de rescate (MXN)
-                                            <span className="ml-1 text-blue-500 cursor-help" title="Valor estimado de reventa al final de la vida útil">ℹ️</span>
+                                            <span className="ml-1 text-blue-500 cursor-help" title="Valor estimado de reventa al final de la vida útil">    <Info className="h-4 w-4 inline" /></span>
                                         </label>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
@@ -635,7 +635,10 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <span className="text-lg">🛠️</span>
+                                            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
                                         </div>
                                         <div>
                                             <h3 className="text-xl font-bold text-purple-800">Todas las Herramientas</h3>
@@ -715,7 +718,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                            <span className="text-lg">💰</span>
+                                            <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
                                         </div>
                                         <div>
                                             <h3 className="text-xl font-bold text-orange-800">Costo de Herramientas</h3>
