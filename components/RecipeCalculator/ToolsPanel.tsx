@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 // import { Card, CardContent } from "@/components/ui/card"
-import { ChevronDown, Info, Plus, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
+import { ChevronDown, Info, Save, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
 import { Tool, TOOL_CATEGORY_CONFIGS } from '@/lib/types';
 import { defaultTools, toolCategories } from '@/lib/data';
 import { CloseButton, ActionButton } from './ModalHelpers';
@@ -176,9 +176,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             <div className="mb-4 overflow-hidden">
                 <div
                     onClick={() => setShowAddSection(!showAddSection)}
-                    className={`w-full bg-blue-600 hover:bg-blue-700 text-white text-base py-2 px-4 
-                        cursor-pointer flex items-center justify-center transition-all duration-300 ease-out 
-                        relative ${showAddSection ? 'rounded-t-lg' : 'rounded-lg'}`}
+                    className={`w-full bg-blue-600 hover:bg-blue-700 text-white text-base py-2 px-4 cursor-pointer flex items-center justify-center transition-all duration-300 ease-out relative ${showAddSection ? 'rounded-t-lg' : 'rounded-lg'}`}
                 >
                     <div className="flex items-center">
                         {showAddSection ? 'Cancelar' : 'Agregar Herramienta'}
@@ -187,10 +185,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                 </div>
 
                 <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-106 opacity-100' : 'max-h-0 opacity-0'}`}>
-
-                    <div className="p-4 bg-blue-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto overflow-x-hidden">
-
-                        <h3 className="font-semibold text-lg text-blue-800 text-center mb-4">Agregar  Herramienta</h3>
+                    <div className="p-4 bg-amber-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto">
+                        <h3 className="font-semibold text-lg text-blue-800 text-center mb-4">Agregar Herramienta</h3>
 
                         {error && (
                             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-3">
@@ -198,8 +194,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             </div>
                         )}
 
-                        {/*Tools Forms */}
-                        <div className="space-y-4 overflow-visible">
+                        {/* Tools Forms */}
+                        <div className="space-y-4">
 
                             {/* Name Input with Label */}
                             <div>
@@ -208,7 +204,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <span className="ml-1 relative group">
                                         <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
                                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                            Nombre de la herramienta o equipo
+                                            Nombre descriptivo de la herramienta o equipo
                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                                         </div>
                                     </span>
@@ -228,13 +224,10 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Tipo *
-                                        <span className="ml-1 relative group inline-block">
+                                        <span className="ml-1 relative group">
                                             <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 max-w-xs">
-                                                <div className="text-center">
-                                                    <div><strong>Consumible:</strong><br /> se gasta por completo</div>
-                                                    <div><strong>Utensilio/Equipo:</strong><br />  costo se reparte por su vida útil</div>
-                                                </div>
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                Consumible: costo operacional directo | Utensilio/Especializado: costo amortizado
                                                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                                             </div>
                                         </span>
@@ -242,7 +235,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <select
                                         value={newTool.type}
                                         onChange={(e) => {
-                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'equipo';
+                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado';
                                             const defaultCategory = toolCategories[newType]?.[0]?.value || 'general';
                                             const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
                                             const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
@@ -263,7 +256,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     >
                                         <option value="consumible">Consumible</option>
                                         <option value="herramienta">Utensilio</option>
-                                        <option value="equipo">Equipo</option>
+                                        <option value="especializado">Especializado</option>
                                     </select>
                                 </div>
 
@@ -272,38 +265,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         Categoría *
                                         <span className="ml-1 relative group">
                                             <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                            <div>
-                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-xs text-center">
-                                                    {newTool.type === 'consumible' ? (
-                                                        <>
-                                                            <strong>General:</strong> Uso múltiple o no especifico<br />
-                                                            <strong>Empaque:</strong> Materiales de empaque y presentación<br />
-                                                            <strong>Limpieza:</strong> Productos de limpieza y sanitización<br />
-                                                        </>
-                                                    ) : newTool.type === 'herramienta' ? (
-                                                        <>
-                                                            <strong>General:</strong> Uso múltiple o no especifico<br />
-                                                            <strong>Cocina:</strong> Utiles básicos de cocina<br />
-                                                            <strong>Medición:</strong> Cuando necesitas cuantificar ingredientes<br />
-                                                        </>
-                                                    ) : newTool.type === 'equipo' ? (
-                                                        <>
-                                                            <strong>General:</strong> Uso múltiple o no especifico<br />
-                                                            <strong>Electrodomésticos:</strong> Electrodomésticos de cocina<br />
-                                                        </>
-                                                    ) : (
-                                                        // Fallback for especializado or other types
-                                                        <>
-                                                            <strong>General:</strong> Uso múltiple o no especifico<br />
-                                                            Elige la categoría que mejor describa el equipo
-                                                        </>
-                                                    )}
-
-                                                    {/* <strong>Preparación:</strong>Cuando transformas ingredientes crudos<br />
-                                                    <strong>Cocción:</strong>Cuando aplicas calor en estufa o fuego<br />
-                                                    <strong>Horneado:</strong> Cuando usas calor indirecto del horno */}
-                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                                </div>
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                Agrupa herramientas similares para mejor organización
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                                             </div>
                                         </span>
                                     </label>
@@ -329,7 +293,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         }}
                                         className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                     >
-                                        {(toolCategories[newTool.type as keyof typeof toolCategories] || []).map(category => (
+                                        {toolCategories[newTool.type as keyof typeof toolCategories]?.map(category => (
                                             <option key={category.value} value={category.value}>
                                                 {category.label}
                                             </option>
@@ -359,7 +323,6 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                             min="0"
                                             placeholder="0"
                                             value={newTool.totalInvestment || ''}
-                                            // In the totalInvestment onChange handler
                                             onChange={(e) => {
                                                 const investment = Number(e.target.value) || 0;
                                                 const updatedTool = { ...newTool, totalInvestment: investment };
@@ -469,13 +432,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                             </div>
                                         )}
                                     </div>
-
-
-
-
                                 </div>
                             )}
-
 
                             {/* Description */}
                             <div>
@@ -491,25 +449,25 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     rows={3}
                                 />
                             </div>
-                        </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex gap-3 mt-6">
-                            <Button
-                                onClick={() => setShowAddSection(false)}
-                                variant="outline"
-                                className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50"
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                onClick={addTool}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 py-3"
-                                disabled={!newTool.name.trim()}
-                            >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Agregar Herramienta
-                            </Button>
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 mt-6">
+                                <Button
+                                    onClick={() => setShowAddSection(false)}
+                                    variant="outline"
+                                    className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50"
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    onClick={addTool}
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 py-3"
+                                    disabled={!newTool.name.trim()}
+                                >
+                                    <Save className="h-4 w-4 mr-2" />
+                                    Guardar
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>

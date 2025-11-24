@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeftRight, Calculator, ChevronDown, CookingPot, Plus, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
+import { ArrowLeftRight, Calculator, ChevronDown, CookingPot, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
 import { UnitConverter } from '../../lib/unit-conversion';
@@ -159,7 +159,6 @@ export function IngredientsPanel({
                 ) : (
 
                     <>
-
                         {/* Error Display */}
                         {error && (
                             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -176,11 +175,10 @@ export function IngredientsPanel({
                         )}
 
                         {/* Add New Ingredient */}
-                        <div className="mb-4 overflow-hidden">
+                        <div className="mb-4">
                             <div
                                 onClick={() => setShowAddSection(!showAddSection)}
-                                className={`w-full bg-amber-600 hover:bg-amber-700 text-white text-base py-2 px-4 cursor-pointer flex items-center justify-center transition-all duration-300 ease-out relative ${showAddSection ? 'rounded-t-lg' : 'rounded-lg'
-                                    }`}
+                                className={`w-full bg-amber-600 hover:bg-amber-700 text-white text-base py-2 px-4 cursor-pointer flex items-center justify-center transition-all duration-300 ease-out relative ${showAddSection ? 'rounded-t-lg' : 'rounded-lg'}`}
                             >
                                 <div className="flex items-center">
                                     {showAddSection ? 'Cancelar' : 'Agregar Ingrediente'}
@@ -188,8 +186,8 @@ export function IngredientsPanel({
                                 <ChevronDown className={`h-6 w-6 absolute right-4 transition-transform duration-300 ease-out ${showAddSection ? '-rotate-180' : ''}`} />
                             </div>
 
-                            <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-106 opacity-100' : 'max-h-0 opacity-0'
-                                }`}>
+                            {/* Remove overflow-hidden and use conditional rendering instead */}
+                            {showAddSection && (
                                 <div className="p-4 bg-amber-50 rounded-b-lg border border-amber-300 border-t-0">
                                     <h3 className="font-semibold text-lg text-amber-800 text-center mb-4">Agregar Ingrediente</h3>
                                     <div className="space-y-3">
@@ -207,17 +205,18 @@ export function IngredientsPanel({
                                             <CustomNumberInput
                                                 value={newIngredient.amount || 0}
                                                 onChange={(value) => setNewIngredient({ ...newIngredient, amount: value })}
-                                                className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                                className="border-2 border-amber-300 rounded-lg text-base sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                                 min={0}
                                                 max={10000}
                                                 placeholder="Cantidad"
                                             />
 
-                                            <CustomSelect
-                                                value={newIngredient.unit}
-                                                onChange={(value) => setNewIngredient({ ...newIngredient, unit: value })}
-                                            />
-
+                                            <div className="relative z-50">
+                                                <CustomSelect
+                                                    value={newIngredient.unit}
+                                                    onChange={(value) => setNewIngredient({ ...newIngredient, unit: value })}
+                                                />
+                                            </div>
                                         </div>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             <input
@@ -236,7 +235,7 @@ export function IngredientsPanel({
                                             <CustomNumberInput
                                                 value={newIngredient.minAmount || 0}
                                                 onChange={(value) => setNewIngredient({ ...newIngredient, minAmount: value })}
-                                                className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                                className="border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                                 min={0}
                                                 max={10000}
                                                 placeholder="Minimo"
@@ -244,11 +243,11 @@ export function IngredientsPanel({
                                         </div>
                                     </div>
                                     <Button onClick={addIngredient} className="w-full bg-amber-600 hover:bg-amber-700 text-sm sm:text-base py-2 sm:py-3 mt-2">
-                                        <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
-                                        Agregar Ingrediente
+                                        <Save className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                                        Guardar
                                     </Button>
                                 </div>
-                            </div>
+                            )}
                         </div>
 
                         {/* Divider */}
