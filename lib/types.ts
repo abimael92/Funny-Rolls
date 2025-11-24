@@ -96,7 +96,7 @@ export interface InventoryItem {
 export interface Tool {
 	id: string;
 	name: string;
-	type: 'consumible' | 'herramienta' | 'equipo' | 'especializado';
+	type: 'consumible' | 'herramienta' | 'equipo';
 	cost: number; // Cost per batch (automatically calculated for non-consumables)
 	description?: string;
 	category: string;
