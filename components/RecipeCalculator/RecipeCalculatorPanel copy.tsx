@@ -105,16 +105,7 @@ export function RecipeCalculatorPanel({
 
 
 
-    // Update step in recipe
-    const updateStep = (index: number, newStepText: string) => {
-        const updatedSteps = [...selectedRecipe.steps]
-        updatedSteps[index] = newStepText
-        const updatedRecipe = {
-            ...selectedRecipe,
-            steps: updatedSteps
-        }
-        setSelectedRecipe(updatedRecipe)
-    }
+
 
 
     const handleRecordProduction = () => {
