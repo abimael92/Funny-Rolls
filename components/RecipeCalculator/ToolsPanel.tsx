@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 // import { Card, CardContent } from "@/components/ui/card"
 import { ChevronDown, Plus, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
-import { Tool } from '@/lib/types';
+import { Tool, TOOL_CATEGORY_CONFIGS } from '@/lib/types';
 import { defaultTools, toolCategories } from '@/lib/data';
 import { CloseButton, ActionButton } from './ModalHelpers';
 import { EditableToolRow } from './EditableToolRow';
@@ -21,15 +21,23 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     const [showTotalToolsModal, setShowTotalToolsModal] = useState(false);
     const [showToolsCostModal, setShowToolsCostModal] = useState(false);
 
-    const [newTool, setNewTool] = useState<Omit<Tool, 'id'>>({
-        name: '',
-        type: 'herramienta',
-        category: 'measuring',
-        cost: 0,
-        description: '',
-        lifetime: '2 años',
-        recoveryValue: 0,
-        totalInvestment: 0
+    const [newTool, setNewTool] = useState<Omit<Tool, 'id'>>(() => {
+        const defaultCategory = 'measuring';
+        const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
+        const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+
+        return {
+            name: '',
+            type: 'herramienta',
+            category: defaultCategory,
+            cost: 0,
+            description: '',
+            lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`, // DYNAMIC
+            recoveryValue: 0,
+            totalInvestment: 0,
+            totalBatches: totalBatches, // DYNAMIC
+            costPerBatch: 0,
+        };
     });
 
 
@@ -54,16 +62,24 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             id: Date.now().toString()
         }
         setTools([...tools, tool])
+
+        // RESET THE FORM PROPERLY
+        const categoryConfig = TOOL_CATEGORY_CONFIGS[newTool.category] || TOOL_CATEGORY_CONFIGS.general;
+        const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+
         setNewTool({
             name: '',
-            type: 'herramienta',
-            category: 'measuring',
+            type: newTool.type,
+            category: newTool.category,
             cost: 0,
             description: '',
-            lifetime: '2 años',
+            lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`,
             recoveryValue: 0,
-            totalInvestment: 0
-        })
+            totalInvestment: 0,
+            totalBatches: totalBatches,
+            costPerBatch: 0,
+        });
+
         setShowAddSection(false)
     }
 
@@ -106,7 +122,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     const getToolIcon = (type: string) => {
         switch (type) {
             case 'consumible': return <Zap className="h-4 w-4 text-blue-600" />
-            case 'utensil': return <Utensils className="h-4 w-4 text-green-600" />
+            case 'herramienta': return <Utensils className="h-4 w-4 text-green-600" /> // Fixed
             case 'especializado': return <Star className="h-4 w-4 text-purple-600" />
             default: return <Utensils className="h-4 w-4 text-gray-600" />
         }
@@ -136,12 +152,12 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     // };
 
     const getCostExplanation = (tool: Tool) => {
-        if (tool.lifetime === 'Operational') {
-            return `Costo operacional: \n$${tool.cost.toFixed(2)} MXN/lote\n${tool.description}`;
+        if (tool.type === 'consumible') {
+            return `Costo operacional directo: $${tool.cost.toFixed(2)} MXN/lote\n${tool.description}`;
         }
 
-        // Use the actual calculation that was used to determine the cost
-        return `Costo amortizado: \n$${tool.cost.toFixed(2)} MXN/lote\nInversión: $${tool.totalInvestment} MXN\nVida útil: ${tool.lifetime}`;
+        // Use the ACTUAL stored values
+        return `Costo amortizado: $${tool.costPerBatch?.toFixed(2) || tool.cost.toFixed(2)} MXN/lote\nInversión: $${tool.totalInvestment} MXN\n${tool.lifetime}\nValor rescate: $${tool.recoveryValue} MXN`;
     };
 
     // Filter default tools by what's not already added
@@ -173,11 +189,15 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             </div>
                         )}
 
+
+                        {/*Tools Forms */}
                         <div className="space-y-4">
+
                             {/* Name Input with Label */}
                             <div>
                                 <label className="block text-sm font-medium text-blue-700 mb-1">
                                     Nombre de la herramienta *
+                                    <span className="ml-1 text-blue-500 cursor-help" title="Nombre descriptivo de la herramienta o equipo">ℹ️</span>
                                 </label>
                                 <input
                                     type="text"
@@ -194,33 +214,61 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Tipo *
+                                        <span className="ml-1 text-blue-500 cursor-help" title="Consumible: costo operacional directo | Utensilio/Especializado: costo amortizado">ℹ️</span>
                                     </label>
                                     <select
                                         value={newTool.type}
                                         onChange={(e) => {
-                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado'
-                                            const defaultCategory = toolCategories[newType]?.[0]?.value || 'general'
+                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado';
+                                            const defaultCategory = toolCategories[newType]?.[0]?.value || 'general';
+                                            const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
+                                            const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+
                                             setNewTool({
                                                 ...newTool,
                                                 type: newType,
-                                                category: defaultCategory
-                                            })
+                                                category: defaultCategory,
+                                                lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`,
+                                                totalBatches: totalBatches,
+                                                recoveryValue: 0,
+                                                totalInvestment: 0,
+                                                costPerBatch: 0,
+                                                cost: 0
+                                            });
                                         }}
                                         className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                     >
-                                        <option value="consumible">Consumible</option>
-                                        <option value="herramienta">Utensilio</option>
-                                        <option value="especializado">Especializado</option>
+                                        <option value="consumible">🔄 Consumible</option>
+                                        <option value="herramienta">🛠️ Utensilio</option>
+                                        <option value="especializado">⭐ Especializado</option>
                                     </select>
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Categoría *
+                                        <span className="ml-1 text-blue-500 cursor-help" title="Agrupa herramientas similares para mejor organización">ℹ️</span>
                                     </label>
                                     <select
                                         value={newTool.category}
-                                        onChange={(e) => setNewTool({ ...newTool, category: e.target.value })}
+                                        onChange={(e) => {
+                                            const newCategory = e.target.value;
+                                            const categoryConfig = TOOL_CATEGORY_CONFIGS[newCategory] || TOOL_CATEGORY_CONFIGS.general;
+                                            const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+
+                                            setNewTool({
+                                                ...newTool,
+                                                category: newCategory,
+                                                lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`,
+                                                totalBatches: totalBatches,
+                                                // Recalculate cost if we have investment
+                                                ...(newTool.totalInvestment > 0 && {
+                                                    recoveryValue: Math.round(newTool.totalInvestment * categoryConfig.recoveryRate),
+                                                    costPerBatch: Number(((newTool.totalInvestment - Math.round(newTool.totalInvestment * categoryConfig.recoveryRate)) / totalBatches).toFixed(2)),
+                                                    cost: Number(((newTool.totalInvestment - Math.round(newTool.totalInvestment * categoryConfig.recoveryRate)) / totalBatches).toFixed(2))
+                                                })
+                                            });
+                                        }}
                                         className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                     >
                                         {toolCategories[newTool.type]?.map(category => (
@@ -234,48 +282,91 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
 
                             {/* Cost Input with Helper */}
                             <div>
-                                <label className="block text-sm font-medium text-blue-700 mb-1">
-                                    Costo por lote (MXN)
-                                    <span className="text-xs text-blue-500 ml-1">- Se suma al precio final</span>
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        max="1000"
-                                        placeholder="0.00"
-                                        value={newTool.cost === 0 ? '' : newTool.cost}
-                                        onChange={(e) => setNewTool({ ...newTool, cost: Number(e.target.value) || 0 })}
-                                        className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    />
+                                <div>
+                                    <label className="block text-sm font-medium text-blue-700 mb-1">
+                                        Inversión total (MXN)
+                                        <span className="ml-1 text-blue-500 cursor-help" title="Costo total de compra de la herramienta">ℹ️</span>
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                        <input
+                                            type="number"
+                                            step="1"
+                                            min="0"
+                                            placeholder="0"
+                                            value={newTool.totalInvestment || ''}
+                                            // In the totalInvestment onChange handler
+                                            onChange={(e) => {
+                                                const investment = Number(e.target.value) || 0;
+                                                const updatedTool = { ...newTool, totalInvestment: investment };
+
+                                                if (newTool.type !== 'consumible') {
+                                                    const categoryConfig = TOOL_CATEGORY_CONFIGS[newTool.category] || TOOL_CATEGORY_CONFIGS.general;
+
+                                                    // DYNAMIC calculation based on ACTUAL category
+                                                    const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+                                                    const recoveryValue = Math.round(investment * categoryConfig.recoveryRate);
+                                                    const costPerBatch = investment > 0 ? (investment - recoveryValue) / totalBatches : 0;
+
+                                                    // Store DYNAMICALLY calculated values
+                                                    updatedTool.recoveryValue = recoveryValue;
+                                                    updatedTool.totalBatches = totalBatches;
+                                                    updatedTool.costPerBatch = Number(costPerBatch.toFixed(2));
+                                                    updatedTool.cost = updatedTool.costPerBatch;
+                                                    updatedTool.lifetime = `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`;
+                                                }
+
+                                                setNewTool(updatedTool);
+                                            }}
+                                            className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Investment Details for Non-Consumables */}
                             {newTool.type !== 'consumible' && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
+                                    {/* Auto-calculation notice */}
+                                    <div className="md:col-span-2 text-xs text-blue-600 mb-2">
+                                        💡 El costo por lote se calcula automáticamente: (Inversión - Valor rescate) / Lotes totales
+                                    </div>
+
                                     <div>
                                         <label className="block text-sm font-medium text-blue-700 mb-1">
-                                            Inversión total (MXN)
+                                            Costo por lote (MXN)
+                                            <span className="ml-1 text-blue-500 cursor-help" title="Costo amortizado por lote. Se calcula automáticamente basado en la inversión y vida útil">ℹ️</span>
                                         </label>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
                                             <input
                                                 type="number"
-                                                step="1"
+                                                step="0.01"
                                                 min="0"
-                                                placeholder="0"
-                                                value={newTool.totalInvestment || ''}
-                                                onChange={(e) => setNewTool({ ...newTool, totalInvestment: Number(e.target.value) || 0 })}
+                                                placeholder="0.00"
+                                                value={newTool.costPerBatch || newTool.cost || ''}
+                                                onChange={(e) => {
+                                                    const cost = Number(e.target.value) || 0;
+                                                    setNewTool({
+                                                        ...newTool,
+                                                        cost: cost,
+                                                        costPerBatch: cost // Keep both in sync for now
+                                                    });
+                                                }}
                                                 className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                             />
                                         </div>
+                                        {newTool.totalBatches && (
+                                            <div className="text-xs text-gray-500 mt-1">
+                                                Basado en {newTool.totalBatches} lotes totales
+                                            </div>
+                                        )}
                                     </div>
+
                                     <div>
                                         <label className="block text-sm font-medium text-blue-700 mb-1">
                                             Valor de rescate (MXN)
+                                            <span className="ml-1 text-blue-500 cursor-help" title="Valor estimado de reventa al final de la vida útil">ℹ️</span>
                                         </label>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
@@ -285,27 +376,37 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 min="0"
                                                 placeholder="0"
                                                 value={newTool.recoveryValue || ''}
-                                                onChange={(e) => setNewTool({ ...newTool, recoveryValue: Number(e.target.value) || 0 })}
+                                                onChange={(e) => {
+                                                    const recoveryValue = Number(e.target.value) || 0;
+                                                    const updatedTool = { ...newTool, recoveryValue };
+
+                                                    // Recalculate cost per batch when recovery value changes
+                                                    if (newTool.totalInvestment > 0 && newTool.totalBatches) {
+                                                        updatedTool.costPerBatch = Number(((newTool.totalInvestment - recoveryValue) / newTool.totalBatches).toFixed(2));
+                                                        updatedTool.cost = updatedTool.costPerBatch;
+                                                    }
+
+                                                    setNewTool(updatedTool);
+                                                }}
                                                 className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                             />
                                         </div>
                                     </div>
+
+                                    {/* Additional calculated fields */}
+                                    {newTool.totalBatches && (
+                                        <div className="md:col-span-2 grid grid-cols-2 gap-2 text-sm">
+                                            <div className="text-gray-600">
+                                                Lotes totales estimados: <span className="font-medium">{newTool.totalBatches}</span>
+                                            </div>
+                                            <div className="text-gray-600">
+                                                Amortización por lote: <span className="font-medium">${newTool.costPerBatch?.toFixed(2)} MXN</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
-                            {/* Lifetime Input */}
-                            <div>
-                                <label className="block text-sm font-medium text-blue-700 mb-1">
-                                    Vida útil estimada
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="Ej: 2 años, 500 lotes, etc."
-                                    value={newTool.lifetime}
-                                    onChange={(e) => setNewTool({ ...newTool, lifetime: e.target.value })}
-                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                />
-                            </div>
 
                             {/* Description */}
                             <div>
