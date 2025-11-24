@@ -103,18 +103,7 @@ export function RecipeCalculatorPanel({
         setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
     }
 
-    // Add step to recipe
-    const addStep = () => {
-        if (newStep.trim()) {
-            const updatedRecipe = {
-                ...selectedRecipe,
-                steps: [...selectedRecipe.steps, newStep.trim()]
-            }
-            setSelectedRecipe(updatedRecipe)
-            setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
-            setNewStep('')
-        }
-    }
+
 
     // Remove step from recipe
     const removeStep = (index: number) => {
