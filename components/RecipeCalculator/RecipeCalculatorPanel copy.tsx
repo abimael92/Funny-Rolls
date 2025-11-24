@@ -404,13 +404,7 @@ export function RecipeCalculatorPanel({
                                     value={selectedRecipe.id}
 
                                 >
-                                    {products
-                                        .filter(product => product.available)
-                                        .map(product => (
-                                            <option key={product.recipe.id} value={product.recipe.id}>
-                                                {product.recipe.name}
-                                            </option>
-                                        ))}
+
                                 </select>
                             )}
                         </div>
