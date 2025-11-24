@@ -239,10 +239,6 @@ export function RecipeCalculatorPanel({
                                 </div>
                             </div>
 
-                            <div className="flex justify-between items-center py-2">
-                                <span className="text-lg font-semibold text-blue-700">Costo por unidad</span>
-                                <span className="text-xl font-bold text-red-800">${costPerItem.toFixed(2)}</span>
-                            </div>
 
 
                         </div>
