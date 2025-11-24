@@ -32,8 +32,7 @@ export function RecipeCalculatorPanel({
     recordProduction // ✅ ADDED THIS PROP
 }: RecipeCalculatorPanelProps) {
     const [newStep, setNewStep] = useState('')
-    const [isEditingSteps, setIsEditingSteps] = useState(false)
-    const [isCardFlipped, setIsCardFlipped] = useState(false)
+
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
     const [productionBatchCount, setProductionBatchCount] = useState(1)
