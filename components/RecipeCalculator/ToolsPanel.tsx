@@ -227,7 +227,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         <span className="ml-1 relative group">
                                             <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
                                             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                                Consumible: costo operacional directo | Utensilio/Especializado: costo amortizado
+                                                Consumible: costo operacional directo | Utensilio/Equipo: costo amortizado
                                                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                                             </div>
                                         </span>
@@ -235,8 +235,10 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <select
                                         value={newTool.type}
                                         onChange={(e) => {
-                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado';
+                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'equipo';
+
                                             const defaultCategory = toolCategories[newType]?.[0]?.value || 'general';
+
                                             const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
                                             const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
 
@@ -256,7 +258,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     >
                                         <option value="consumible">Consumible</option>
                                         <option value="herramienta">Utensilio</option>
-                                        <option value="especializado">Especializado</option>
+                                        <option value="equipo">Equipo</option>
                                     </select>
                                 </div>
 
