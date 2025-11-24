@@ -164,8 +164,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                 </div>
 
                 <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-106 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <div className="p-4 bg-blue-50 rounded-b-lg border border-blue-300 border-t-0">
-                        <h3 className="font-semibold text-lg text-blue-800 text-center mb-4">Agregar Herramienta</h3>
+                    <div className="p-4 bg-blue-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto">
+                        <h3 className="font-semibold text-lg text-blue-800 text-center mb-4">Agregar  Herramienta</h3>
 
                         {error && (
                             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-3">
@@ -173,70 +173,174 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             </div>
                         )}
 
-                        <div className="space-y-3">
-                            <input
-                                type="text"
-                                placeholder="Nombre de la herramienta"
-                                value={newTool.name}
-                                onChange={(e) => setNewTool({ ...newTool, name: e.target.value })}
-                                className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            />
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <select
-                                    value={newTool.type}
-                                    onChange={(e) => {
-                                        const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado'
-                                        const defaultCategory = toolCategories[newType]?.[0]?.value || 'measuring'
-                                        setNewTool({
-                                            ...newTool,
-                                            type: newType,
-                                            category: defaultCategory
-                                        })
-                                    }}
-                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="consumible">consumible</option>
-                                    <option value="herramienta">Utensilio</option>
-                                    <option value="especializado">especializado</option>
-                                </select>
-
-                                <select
-                                    value={newTool.category}
-                                    onChange={(e) => setNewTool({ ...newTool, category: e.target.value })}
-                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                >
-                                    {toolCategories[newTool.type]?.map(category => (
-                                        <option key={category.value} value={category.value}>
-                                            {category.label}
-                                        </option>
-                                    ))}
-                                </select>
+                        <div className="space-y-4">
+                            {/* Name Input with Label */}
+                            <div>
+                                <label className="block text-sm font-medium text-blue-700 mb-1">
+                                    Nombre de la herramienta *
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej: Batidora profesional"
+                                    value={newTool.name}
+                                    onChange={(e) => setNewTool({ ...newTool, name: e.target.value })}
+                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    required
+                                />
                             </div>
 
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                placeholder="Costo adicional (opcional)"
-                                value={newTool.cost === 0 ? '' : newTool.cost}
-                                onChange={(e) => setNewTool({ ...newTool, cost: Number(e.target.value) || 0 })}
-                                className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            />
+                            {/* Type and Category with Labels */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-blue-700 mb-1">
+                                        Tipo *
+                                    </label>
+                                    <select
+                                        value={newTool.type}
+                                        onChange={(e) => {
+                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado'
+                                            const defaultCategory = toolCategories[newType]?.[0]?.value || 'general'
+                                            setNewTool({
+                                                ...newTool,
+                                                type: newType,
+                                                category: defaultCategory
+                                            })
+                                        }}
+                                        className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    >
+                                        <option value="consumible">Consumible</option>
+                                        <option value="herramienta">Utensilio</option>
+                                        <option value="especializado">Especializado</option>
+                                    </select>
+                                </div>
 
-                            <textarea
-                                placeholder="Descripción (opcional)"
-                                value={newTool.description}
-                                onChange={(e) => setNewTool({ ...newTool, description: e.target.value })}
-                                className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                rows={2}
-                            />
+                                <div>
+                                    <label className="block text-sm font-medium text-blue-700 mb-1">
+                                        Categoría *
+                                    </label>
+                                    <select
+                                        value={newTool.category}
+                                        onChange={(e) => setNewTool({ ...newTool, category: e.target.value })}
+                                        className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    >
+                                        {toolCategories[newTool.type]?.map(category => (
+                                            <option key={category.value} value={category.value}>
+                                                {category.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Cost Input with Helper */}
+                            <div>
+                                <label className="block text-sm font-medium text-blue-700 mb-1">
+                                    Costo por lote (MXN)
+                                    <span className="text-xs text-blue-500 ml-1">- Se suma al precio final</span>
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        max="1000"
+                                        placeholder="0.00"
+                                        value={newTool.cost === 0 ? '' : newTool.cost}
+                                        onChange={(e) => setNewTool({ ...newTool, cost: Number(e.target.value) || 0 })}
+                                        className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Investment Details for Non-Consumables */}
+                            {newTool.type !== 'consumible' && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
+                                    <div>
+                                        <label className="block text-sm font-medium text-blue-700 mb-1">
+                                            Inversión total (MXN)
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                            <input
+                                                type="number"
+                                                step="1"
+                                                min="0"
+                                                placeholder="0"
+                                                value={newTool.totalInvestment || ''}
+                                                onChange={(e) => setNewTool({ ...newTool, totalInvestment: Number(e.target.value) || 0 })}
+                                                className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-blue-700 mb-1">
+                                            Valor de rescate (MXN)
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                            <input
+                                                type="number"
+                                                step="1"
+                                                min="0"
+                                                placeholder="0"
+                                                value={newTool.recoveryValue || ''}
+                                                onChange={(e) => setNewTool({ ...newTool, recoveryValue: Number(e.target.value) || 0 })}
+                                                className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Lifetime Input */}
+                            <div>
+                                <label className="block text-sm font-medium text-blue-700 mb-1">
+                                    Vida útil estimada
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Ej: 2 años, 500 lotes, etc."
+                                    value={newTool.lifetime}
+                                    onChange={(e) => setNewTool({ ...newTool, lifetime: e.target.value })}
+                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                />
+                            </div>
+
+                            {/* Description */}
+                            <div>
+                                <label className="block text-sm font-medium text-blue-700 mb-1">
+                                    Descripción
+                                    <span className="text-xs text-blue-500 ml-1">- Opcional</span>
+                                </label>
+                                <textarea
+                                    placeholder="Describe la herramienta, su uso específico, o cualquier detalle importante..."
+                                    value={newTool.description}
+                                    onChange={(e) => setNewTool({ ...newTool, description: e.target.value })}
+                                    className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
+                                    rows={3}
+                                />
+                            </div>
                         </div>
 
-                        <Button onClick={addTool} className="w-full bg-blue-600 hover:bg-blue-700 py-3 mt-3">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Agregar Herramienta
-                        </Button>
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 mt-6">
+                            <Button
+                                onClick={() => setShowAddSection(false)}
+                                variant="outline"
+                                className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50"
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                onClick={addTool}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 py-3"
+                                disabled={!newTool.name.trim()}
+                            >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Agregar Herramienta
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
