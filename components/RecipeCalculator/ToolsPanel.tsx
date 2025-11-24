@@ -197,7 +197,13 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             <div>
                                 <label className="block text-sm font-medium text-blue-700 mb-1">
                                     Nombre de la herramienta *
-                                    <span className="ml-1 text-blue-500 cursor-help" title="Nombre descriptivo de la herramienta o equipo">    <Info className="h-4 w-4 inline" /></span>
+                                    <span className="ml-1 relative group">
+                                        <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                            Nombre descriptivo de la herramienta o equipo
+                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                        </div>
+                                    </span>
                                 </label>
                                 <input
                                     type="text"
@@ -214,7 +220,13 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Tipo *
-                                        <span className="ml-1 text-blue-500 cursor-help" title="Consumible: costo operacional directo | Utensilio/Especializado: costo amortizado">    <Info className="h-4 w-4 inline" /></span>
+                                        <span className="ml-1 relative group">
+                                            <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                Consumible: costo operacional directo | Utensilio/Especializado: costo amortizado
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        </span>
                                     </label>
                                     <select
                                         value={newTool.type}
@@ -247,7 +259,13 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Categoría *
-                                        <span className="ml-1 text-blue-500 cursor-help" title="Agrupa herramientas similares para mejor organización">    <Info className="h-4 w-4 inline" /></span>
+                                        <span className="ml-1 relative group">
+                                            <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                Agrupa herramientas similares para mejor organización
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        </span>
                                     </label>
                                     <select
                                         value={newTool.category}
@@ -285,7 +303,13 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Inversión total (MXN)
-                                        <span className="ml-1 text-blue-500 cursor-help" title="Costo total de compra de la herramienta">    <Info className="h-4 w-4 inline" /></span>
+                                        <span className="ml-1 relative group">
+                                            <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                Costo total de compra de la herramienta
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        </span>
                                     </label>
                                     <div className="relative">
                                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
@@ -328,14 +352,57 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             {newTool.type !== 'consumible' && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
                                     {/* Auto-calculation notice */}
-                                    <div className="md:col-span-2 text-xs text-blue-600 mb-2">
-                                        💡 El costo por lote se calcula automáticamente: (Inversión - Valor rescate) / Lotes totales
+                                    <div className="md:col-span-2 text-sm text-blue-800 mb-2">
+                                        El costo por lote se calcula automáticamente:<br />
+                                        (Inversión - Valor rescate) / Lotes totales
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-blue-700 mb-1">
+                                            Valor de rescate (MXN)
+                                            <span className="ml-1 relative group">
+                                                <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                    Valor estimado de reventa al final de la vida útil
+                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                </div>
+                                            </span>
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                                            <input
+                                                type="number"
+                                                step="1"
+                                                min="0"
+                                                placeholder="0"
+                                                value={newTool.recoveryValue || ''}
+                                                onChange={(e) => {
+                                                    const recoveryValue = Number(e.target.value) || 0;
+                                                    const updatedTool = { ...newTool, recoveryValue };
+
+                                                    // Recalculate cost per batch when recovery value changes
+                                                    if (newTool.totalInvestment > 0 && newTool.totalBatches) {
+                                                        updatedTool.costPerBatch = Number(((newTool.totalInvestment - recoveryValue) / newTool.totalBatches).toFixed(2));
+                                                        updatedTool.cost = updatedTool.costPerBatch;
+                                                    }
+
+                                                    setNewTool(updatedTool);
+                                                }}
+                                                className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div>
                                         <label className="block text-sm font-medium text-blue-700 mb-1">
                                             Costo por lote (MXN)
-                                            <span className="ml-1 text-blue-500 cursor-help" title="Costo amortizado por lote. Se calcula automáticamente basado en la inversión y vida útil">    <Info className="h-4 w-4 inline" /></span>
+                                            <span className="ml-1 relative group">
+                                                <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                                                    Costo amortizado por lote. Se calcula automáticamente basado en la inversión y vida útil
+                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                </div>
+                                            </span>
                                         </label>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
@@ -363,47 +430,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         )}
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-blue-700 mb-1">
-                                            Valor de rescate (MXN)
-                                            <span className="ml-1 text-blue-500 cursor-help" title="Valor estimado de reventa al final de la vida útil">    <Info className="h-4 w-4 inline" /></span>
-                                        </label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                                            <input
-                                                type="number"
-                                                step="1"
-                                                min="0"
-                                                placeholder="0"
-                                                value={newTool.recoveryValue || ''}
-                                                onChange={(e) => {
-                                                    const recoveryValue = Number(e.target.value) || 0;
-                                                    const updatedTool = { ...newTool, recoveryValue };
 
-                                                    // Recalculate cost per batch when recovery value changes
-                                                    if (newTool.totalInvestment > 0 && newTool.totalBatches) {
-                                                        updatedTool.costPerBatch = Number(((newTool.totalInvestment - recoveryValue) / newTool.totalBatches).toFixed(2));
-                                                        updatedTool.cost = updatedTool.costPerBatch;
-                                                    }
 
-                                                    setNewTool(updatedTool);
-                                                }}
-                                                className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                            />
-                                        </div>
-                                    </div>
 
-                                    {/* Additional calculated fields */}
-                                    {newTool.totalBatches && (
-                                        <div className="md:col-span-2 grid grid-cols-2 gap-2 text-sm">
-                                            <div className="text-gray-600">
-                                                Lotes totales estimados: <span className="font-medium">{newTool.totalBatches}</span>
-                                            </div>
-                                            <div className="text-gray-600">
-                                                Amortización por lote: <span className="font-medium">${newTool.costPerBatch?.toFixed(2)} MXN</span>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             )}
 
