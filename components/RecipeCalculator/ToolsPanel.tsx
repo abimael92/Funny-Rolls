@@ -235,8 +235,10 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <select
                                         value={newTool.type}
                                         onChange={(e) => {
-                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado';
+                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'equipo';
+
                                             const defaultCategory = toolCategories[newType]?.[0]?.value || 'general';
+
                                             const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
                                             const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
 
