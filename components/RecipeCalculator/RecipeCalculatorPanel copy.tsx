@@ -13,7 +13,6 @@ import {
     calculateProfitPercentage,
     getIngredientCostPerUnit,
 } from '@/lib/utils'
-import { FlipCard } from './FlipCard'
 
 interface RecipeCalculatorPanelProps {
     selectedRecipe: Recipe
