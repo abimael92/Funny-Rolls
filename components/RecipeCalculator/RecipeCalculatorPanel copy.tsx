@@ -31,7 +31,6 @@ export function RecipeCalculatorPanel({
     ingredients,
     recordProduction // ✅ ADDED THIS PROP
 }: RecipeCalculatorPanelProps) {
-    const [newStep, setNewStep] = useState('')
 
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
