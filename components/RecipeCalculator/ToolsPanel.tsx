@@ -22,7 +22,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     const [showToolsCostModal, setShowToolsCostModal] = useState(false);
 
     const [newTool, setNewTool] = useState<Omit<Tool, 'id'>>(() => {
-        const defaultCategory = 'measuring';
+        const defaultCategory = 'general';
         const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
         const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
 
@@ -113,7 +113,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         switch (type) {
             case 'consumible': return 'bg-blue-50 border-blue-200 hover:border-blue-400'
             case 'herramienta': return 'bg-green-50 border-green-200 hover:border-green-400'
-            case 'especializado': return 'bg-purple-50 border-purple-200 hover:border-purple-400'
+            case 'equipo': return 'bg-purple-50 border-purple-200 hover:border-purple-400'
             default: return 'bg-gray-50 border-gray-200 hover:border-gray-400'
         }
     }
@@ -123,7 +123,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         switch (type) {
             case 'consumible': return <Zap className="h-4 w-4 text-blue-600" />
             case 'herramienta': return <Utensils className="h-4 w-4 text-green-600" /> // Fixed
-            case 'especializado': return <Star className="h-4 w-4 text-purple-600" />
+            case 'equipo': return <Star className="h-4 w-4 text-purple-600" />
             default: return <Utensils className="h-4 w-4 text-gray-600" />
         }
     }
@@ -133,7 +133,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         switch (type) {
             case 'consumible': return 'bg-blue-100 text-blue-800'
             case 'herramienta': return 'bg-green-100 text-green-800'
-            case 'especializado': return 'bg-purple-100 text-purple-800'
+            case 'equipo': return 'bg-purple-100 text-purple-800'
             default: return 'bg-gray-100 text-gray-800'
         }
     }
@@ -165,13 +165,20 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     //     !tools.some(tool => tool.name === defaultTool.name)
     // )
 
+
+
+    // Usage:
+
+
     return (
         <div className="space-y-6">
             {/* Add New Tool Section */}
             <div className="mb-4 overflow-hidden">
                 <div
                     onClick={() => setShowAddSection(!showAddSection)}
-                    className={`w-full bg-blue-600 hover:bg-blue-700 text-white text-base py-2 px-4 cursor-pointer flex items-center justify-center transition-all duration-300 ease-out relative ${showAddSection ? 'rounded-t-lg' : 'rounded-lg'}`}
+                    className={`w-full bg-blue-600 hover:bg-blue-700 text-white text-base py-2 px-4 
+                        cursor-pointer flex items-center justify-center transition-all duration-300 ease-out 
+                        relative ${showAddSection ? 'rounded-t-lg' : 'rounded-lg'}`}
                 >
                     <div className="flex items-center">
                         {showAddSection ? 'Cancelar' : 'Agregar Herramienta'}
@@ -180,7 +187,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                 </div>
 
                 <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-106 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <div className="p-4 bg-blue-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto">
+
+                    <div className="p-4 bg-blue-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto overflow-x-hidden">
+
                         <h3 className="font-semibold text-lg text-blue-800 text-center mb-4">Agregar  Herramienta</h3>
 
                         {error && (
@@ -189,9 +198,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             </div>
                         )}
 
-
                         {/*Tools Forms */}
-                        <div className="space-y-4">
+                        <div className="space-y-4 overflow-visible">
 
                             {/* Name Input with Label */}
                             <div>
@@ -200,7 +208,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <span className="ml-1 relative group">
                                         <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
                                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                            Nombre descriptivo de la herramienta o equipo
+                                            Nombre de la herramienta o equipo
                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                                         </div>
                                     </span>
@@ -220,10 +228,13 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Tipo *
-                                        <span className="ml-1 relative group">
+                                        <span className="ml-1 relative group inline-block">
                                             <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                                Consumible: costo operacional directo | Utensilio/Especializado: costo amortizado
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 max-w-xs">
+                                                <div className="text-center">
+                                                    <div><strong>Consumible:</strong><br /> se gasta por completo</div>
+                                                    <div><strong>Utensilio/Equipo:</strong><br />  costo se reparte por su vida útil</div>
+                                                </div>
                                                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                                             </div>
                                         </span>
@@ -231,7 +242,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <select
                                         value={newTool.type}
                                         onChange={(e) => {
-                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'especializado';
+                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'equipo';
                                             const defaultCategory = toolCategories[newType]?.[0]?.value || 'general';
                                             const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
                                             const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
@@ -252,7 +263,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     >
                                         <option value="consumible">Consumible</option>
                                         <option value="herramienta">Utensilio</option>
-                                        <option value="especializado">Especializado</option>
+                                        <option value="equipo">Equipo</option>
                                     </select>
                                 </div>
 
@@ -261,9 +272,38 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         Categoría *
                                         <span className="ml-1 relative group">
                                             <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                                Agrupa herramientas similares para mejor organización
-                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                            <div>
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 max-w-xs text-center">
+                                                    {newTool.type === 'consumible' ? (
+                                                        <>
+                                                            <strong>General:</strong> Uso múltiple o no especifico<br />
+                                                            <strong>Empaque:</strong> Materiales de empaque y presentación<br />
+                                                            <strong>Limpieza:</strong> Productos de limpieza y sanitización<br />
+                                                        </>
+                                                    ) : newTool.type === 'herramienta' ? (
+                                                        <>
+                                                            <strong>General:</strong> Uso múltiple o no especifico<br />
+                                                            <strong>Cocina:</strong> Utiles básicos de cocina<br />
+                                                            <strong>Medición:</strong> Cuando necesitas cuantificar ingredientes<br />
+                                                        </>
+                                                    ) : newTool.type === 'equipo' ? (
+                                                        <>
+                                                            <strong>General:</strong> Uso múltiple o no especifico<br />
+                                                            <strong>Electrodomésticos:</strong> Electrodomésticos de cocina<br />
+                                                        </>
+                                                    ) : (
+                                                        // Fallback for especializado or other types
+                                                        <>
+                                                            <strong>General:</strong> Uso múltiple o no especifico<br />
+                                                            Elige la categoría que mejor describa el equipo
+                                                        </>
+                                                    )}
+
+                                                    {/* <strong>Preparación:</strong>Cuando transformas ingredientes crudos<br />
+                                                    <strong>Cocción:</strong>Cuando aplicas calor en estufa o fuego<br />
+                                                    <strong>Horneado:</strong> Cuando usas calor indirecto del horno */}
+                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                </div>
                                             </div>
                                         </span>
                                     </label>
@@ -289,7 +329,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         }}
                                         className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                     >
-                                        {toolCategories[newTool.type]?.map(category => (
+                                        {(toolCategories[newTool.type as keyof typeof toolCategories] || []).map(category => (
                                             <option key={category.value} value={category.value}>
                                                 {category.label}
                                             </option>
@@ -506,7 +546,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             {/* Tools List */}
             <div className="space-y-4 max-h-292 overflow-y-auto pr-2">
                 {defaultTools.map((tool) => {
-                    const categoryLabel = toolCategories[tool.type]?.find(cat => cat.value === tool.category)?.label || 'General'
+                    const categoryLabel = toolCategories[tool.type as keyof typeof toolCategories]?.find(cat => cat.value === tool.category)?.label || 'General'
 
                     return (
                         <div
@@ -682,7 +722,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             <div className="p-6 overflow-y-auto max-h-96">
                                 <div className="space-y-3">
                                     {defaultTools.map((tool) => {
-                                        const categoryLabel = toolCategories[tool.type]?.find(cat => cat.value === tool.category)?.label || 'General';
+                                        const categoryLabel = (toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General';
 
                                         return (
                                             <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
@@ -770,7 +810,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 <div className="flex-1">
                                                     <div className="font-semibold text-gray-900">{tool.name}</div>
                                                     <div className="text-sm text-gray-600 mt-1 capitalize">
-                                                        {tool.type} • {toolCategories[tool.type]?.find(cat => cat.value === tool.category)?.label || 'General'}
+                                                        {tool.type} • {(toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General'}
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
