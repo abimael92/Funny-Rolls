@@ -293,7 +293,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         }}
                                         className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                     >
-                                        {toolCategories[newTool.type]?.map(category => (
+                                        {toolCategories[newTool.type as keyof typeof toolCategories]?.map(category => (
                                             <option key={category.value} value={category.value}>
                                                 {category.label}
                                             </option>
