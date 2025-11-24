@@ -201,26 +201,7 @@ export function RecipeCalculatorPanel({
 
                 </div>
 
-                {/* Flip Card - Desktop Only */}
-                <div className="hidden lg:block">
-                    <FlipCard
-                        selectedRecipe={selectedRecipe}
-                        costPerItem={costPerItem}
-                        profit={profit}
-                        updateRecipeBatchSize={updateRecipeBatchSize}
-                        updateRecipeSellingPrice={updateRecipeSellingPrice}
-                        isCardFlipped={isCardFlipped}
-                        setIsCardFlipped={setIsCardFlipped}
-                        isEditingSteps={isEditingSteps}
-                        setIsEditingSteps={setIsEditingSteps}
-                        newStep={newStep}
-                        setNewStep={setNewStep}
-                        updateStep={updateStep}
-                        removeStep={removeStep}
-                        addStep={addStep}
-                        saveSteps={saveSteps}
-                    />
-                </div>
+
 
                 {/* Mobile Price and Ingredients Section */}
                 <div className="lg:hidden space-y-4">
