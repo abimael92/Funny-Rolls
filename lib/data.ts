@@ -433,35 +433,35 @@ export const defaultTools: Tool[] = [
 	{
 		id: 'util-1',
 		name: 'Horno',
-		type: 'consumible',
-		category: 'energy',
-		cost: 2.5, // $2.50 MXN por lote
-		description: 'Consumo eléctrico por horneado (180°C por 25-30 min)',
-		lifetime: 'Operational',
-		recoveryValue: 0,
-		totalInvestment: 0, // Operational cost, no investment
+		type: 'equipo', // Changed from consumible
+		category: 'electrodomestico',
+		cost: 0.8, // Amortized cost, not operational
+		description: 'Horno para horneado a 180°C',
+		lifetime: '5 años',
+		recoveryValue: 200,
+		totalInvestment: 2000,
 	},
 	{
 		id: 'util-2',
 		name: 'Estufa',
-		type: 'consumible',
-		category: 'energy',
-		cost: 0.8, // $0.80 MXN por lote
-		description: 'Consumo de gas para preparaciones en estufa',
-		lifetime: 'Operational',
-		recoveryValue: 0,
-		totalInvestment: 0,
+		type: 'equipo', // Changed from consumible
+		category: 'electrodomestico',
+		cost: 0.6,
+		description: 'Estufa para preparaciones en cocina',
+		lifetime: '5 años',
+		recoveryValue: 150,
+		totalInvestment: 1500,
 	},
 	{
 		id: 'util-3',
 		name: 'Mezcladora',
-		type: 'consumible',
-		category: 'equipment',
-		cost: 1.2, // $1.20 MXN por lote
-		description: 'Consumo eléctrico por batch de masa',
-		lifetime: 'Operational',
-		recoveryValue: 0,
-		totalInvestment: 0,
+		type: 'equipo', // Changed from consumible
+		category: 'electrodomestico',
+		cost: 0.4,
+		description: 'Mezcladora eléctrica para masa',
+		lifetime: '3 años',
+		recoveryValue: 80,
+		totalInvestment: 800,
 	},
 
 	// HERRAMIENTAS (amortized costs - portion per batch)
@@ -569,57 +569,57 @@ export const defaultTools: Tool[] = [
 	{
 		id: 'enh-1',
 		name: 'Mezcladora Planetaria',
-		type: 'especializado',
-		category: 'equipment',
-		cost: 3.5, // $3.50 MXN por lote
+		type: 'equipo', // Mezcladora industrial profesional
+		category: 'electrodomestico', // Electrodoméstico de cocina
+		cost: 3.5, // Costo amortizado por lote
 		description: 'Mezclado profesional para consistencia perfecta',
 		lifetime: '5 años',
-		recoveryValue: 200, // $200 MXN valor de reventa
-		totalInvestment: 2000, // $2,000 MXN inversión total
+		recoveryValue: 200, // Valor de reventa estimado
+		totalInvestment: 2000, // Precio de compra original
 	},
 	{
 		id: 'enh-2',
 		name: 'Proveedora de Masa',
-		type: 'especializado',
-		category: 'equipment',
-		cost: 2.0, // $2.00 MXN por lote
+		type: 'equipo', // Equipo de fermentación controlada
+		category: 'electrodomestico', // Electrodoméstico especializado
+		cost: 2.0, // Costo amortizado por lote
 		description: 'Control de temperatura para fermentación óptima',
 		lifetime: '4 años',
-		recoveryValue: 80, // $80 MXN valor de reventa
-		totalInvestment: 800, // $800 MXN inversión total
+		recoveryValue: 80, // Valor de reventa estimado
+		totalInvestment: 800, // Precio de compra original
 	},
 	{
 		id: 'enh-3',
 		name: 'Soplete Culinario',
-		type: 'especializado',
-		category: 'finishing',
-		cost: 1.5, // $1.50 MXN por lote
+		type: 'herramienta', // Herramienta para acabados
+		category: 'cocina', // Utensilio de cocina
+		cost: 1.5, // Costo amortizado por lote
 		description: 'Para acabados caramelizados y decoraciones',
 		lifetime: '3 años',
-		recoveryValue: 40, // $40 MXN valor de reventa
-		totalInvestment: 400, // $400 MXN inversión total
+		recoveryValue: 40, // Valor de reventa estimado
+		totalInvestment: 400, // Precio de compra original
 	},
 	{
 		id: 'enh-4',
 		name: 'Manga Pastelera',
-		type: 'especializado',
-		category: 'decorating',
-		cost: 0.35, // $0.35 MXN por lote
+		type: 'herramienta', // Herramienta de decoración
+		category: 'cocina', // Utensilio de repostería
+		cost: 0.35, // Costo amortizado por lote
 		description: 'Para decoraciones precisas con glaseados',
 		lifetime: '1 año',
-		recoveryValue: 3, // $3 MXN valor de reventa
-		totalInvestment: 30, // $30 MXN inversión total
+		recoveryValue: 3, // Valor de reventa estimado
+		totalInvestment: 30, // Precio de compra original
 	},
 	{
 		id: 'enh-5',
 		name: 'Kit de Medición Avanzado',
-		type: 'especializado',
-		category: 'measuring',
-		cost: 1.2, // $1.20 MXN por lote
+		type: 'herramienta', // Herramienta de medición precisa
+		category: 'medicion', // Equipo de medición
+		cost: 1.2, // Costo amortizado por lote
 		description: 'Medidores de precisión para profesionales',
 		lifetime: '4 años',
-		recoveryValue: 60, // $60 MXN valor de reventa
-		totalInvestment: 600, // $600 MXN inversión total
+		recoveryValue: 60, // Valor de reventa estimado
+		totalInvestment: 600, // Precio de compra original
 	},
 ];
 
@@ -639,13 +639,13 @@ export const toolCategories = {
 	equipo: [
 		{ value: 'general', label: 'General' },
 		{ value: 'electrodomestico', label: 'Electrodoméstico' },
-		{ value: 'utensilio', label: 'Utensilio' },
+		// { value: 'utensilio', label: 'Utensilio' },
 		// Add more categories as needed
 	],
-	especializado: [
-		// Add this
-		{ value: 'general', label: 'General' },
-		{ value: 'profesional', label: 'Profesional' },
-		{ value: 'tecnicocientifico', label: 'Técnico-Científico' },
-	],
+	// especializado: [
+	// 	// Add this
+	// 	{ value: 'general', label: 'General' },
+	// 	{ value: 'profesional', label: 'Profesional' },
+	// 	{ value: 'tecnicocientifico', label: 'Técnico-Científico' },
+	// ],
 };
