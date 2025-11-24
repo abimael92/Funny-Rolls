@@ -402,14 +402,7 @@ export function RecipeCalculatorPanel({
                                 <select
                                     className="w-full px-4 py-4 border-2 border-amber-500 rounded-xl text-lg font-medium text-amber-700 bg-white flex justify-between items-center shadow-sm hover:bg-amber-200 hover:shadow-md transition-all"
                                     value={selectedRecipe.id}
-                                    onChange={(e) => {
-                                        const recipe = recipes.find(r => r.id === e.target.value)
-                                        if (recipe) {
-                                            setSelectedRecipe(recipe)
-                                            setIsCardFlipped(false)
-                                            setIsEditingSteps(false)
-                                        }
-                                    }}
+
                                 >
                                     {products
                                         .filter(product => product.available)
