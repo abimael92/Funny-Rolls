@@ -13,6 +13,7 @@ import { CustomSelect } from './CustomSelect';
 import { ToolsPanel } from './ToolsPanel';
 import { CloseButton, ActionButton } from './ModalHelpers';
 import { Tool } from '@/lib/types';
+import { defaultTools, } from '@/lib/data';
 
 // List,
 interface IngredientsPanelProps {
@@ -36,7 +37,7 @@ export function IngredientsPanel({
         name: '', price: 0, unit: '', amount: 0, minAmount: 0
     });
     const [showTotalCostModal, setShowTotalCostModal] = useState(false);
-    const [tools, setTools] = useState<Tool[]>([]);
+    const [tools, setTools] = useState<Tool[]>(defaultTools);
     const [showTools, setShowTools] = useState(false);
     const [showIngredientsModal, setShowIngredientsModal] = useState(false);
 
