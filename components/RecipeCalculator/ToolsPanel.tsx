@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-// import { Card, CardContent } from "@/components/ui/card"
 import { ChevronDown, Info, Save, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
 import { Tool, TOOL_CATEGORY_CONFIGS } from '@/lib/types';
 import { defaultTools, toolCategories } from '@/lib/data';
@@ -63,7 +62,6 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         }
         setTools([...tools, tool])
 
-        // RESET THE FORM PROPERLY
         const categoryConfig = TOOL_CATEGORY_CONFIGS[newTool.category] || TOOL_CATEGORY_CONFIGS.general;
         const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
 
@@ -89,11 +87,6 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             setTools(tools.filter(tool => tool.id !== id))
         }
     }
-
-    // Add default tool
-    // const addDefaultTool = (tool: Tool) => {
-    //     setTools([...tools, { ...tool, id: Date.now().toString() }])
-    // }
 
     // Save edited tool
     const saveEditedTool = (updatedTool: Tool) => {
@@ -137,8 +130,6 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             default: return 'bg-gray-100 text-gray-800'
         }
     }
-
-
 
     const getCostExplanation = (tool: Tool) => {
         if (tool.type === 'consumible') {
