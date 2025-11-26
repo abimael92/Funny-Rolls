@@ -39,13 +39,11 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         };
     });
 
-
     // Total Investment = Recovery Value × 10
     // Actual Cost = Total Investment - Recovery Value  
     // Batches per Year = 52
     // Total Batches = Years × 52
     //     Cost / Batch = Actual Cost ÷ Total Batches
-
 
     // Add new tool
     const addTool = () => {
