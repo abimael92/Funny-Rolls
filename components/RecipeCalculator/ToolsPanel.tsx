@@ -138,18 +138,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         }
     }
 
-    // const getCostExplanation2 = (tool: Tool) => {
-    //     switch (tool.type) {
-    //         case 'consumible':
-    //             return 'Costo operacional directo por lote (energía, gas, etc.)';
-    //         case 'herramienta':
-    //             return `Amortizado: ${tool.lifetime} • Valor residual: $${tool.recoveryValue}`;
-    //         case 'especializado':
-    //             return `Equipo premium: ${tool.lifetime} • Valor residual: $${tool.recoveryValue}`;
-    //         default:
-    //             return 'Costo calculado por uso en producción';
-    //     }
-    // };
+
 
     const getCostExplanation = (tool: Tool) => {
         if (tool.type === 'consumible') {
