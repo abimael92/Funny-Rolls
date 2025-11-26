@@ -149,10 +149,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         return `Costo amortizado: $${tool.costPerBatch?.toFixed(2) || tool.cost.toFixed(2)} MXN/lote\nInversión: $${tool.totalInvestment} MXN\n${tool.lifetime}\nValor rescate: $${tool.recoveryValue} MXN`;
     };
 
-    // Filter default tools by what's not already added
-    // const availableDefaultTools = defaultTools.filter(defaultTool =>
-    //     !tools.some(tool => tool.name === defaultTool.name)
-    // )
+
 
 
 
