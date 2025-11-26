@@ -97,42 +97,54 @@ export interface Tool {
 	id: string;
 	name: string;
 	type: 'consumible' | 'herramienta' | 'equipo';
-	cost: number; // Cost per batch (automatically calculated for non-consumables)
+	category: string; // Maps to a ToolCategoryConfig
 	description?: string;
-	category: string;
-	lifetime?: string; // Estimated useful life in time
-	totalBatches?: number; // Total batches expected over lifetime (calculated)
-	batchesUsed?: number; // How many batches have used this tool
-	recoveryValue: number; // Resale value at end of life
-	totalInvestment: number; // Purchase cost
-	costPerBatch?: number; // Auto-calculated: (totalInvestment - recoveryValue) / totalBatches
-	yearsLifespan?: number;
+	lifetime?: string; // Text for UI, e.g., "2 años"
+	totalBatches?: number; // batchesPerYear * yearsLifespan
+	batchesUsed?: number;
+	batchesPerYear?: number;
+	totalInvestment: number;
+	recoveryValue: number; // totalInvestment * recoveryRate
+	costPerBatch?: number; // (totalInvestment - recoveryValue) / totalBatches
 }
 
 // Add tool category configurations for batch calculations
 export interface ToolCategoryConfig {
-	batchesPerYear: number;
-	yearsLifespan: number;
-	recoveryRate: number; // Default recovery percentage if not specified
+	batchesPerYear: number; // How many times the tool can be used per year
+	yearsLifespan: number; // How many years it will last
+	recoveryRate: number; // % of total investment you can recover at end of life
 }
 
 export const TOOL_CATEGORY_CONFIGS: Record<string, ToolCategoryConfig> = {
-	// Measuring tools
-	measuring: { batchesPerYear: 500, yearsLifespan: 3, recoveryRate: 0.1 },
-	mixing: { batchesPerYear: 600, yearsLifespan: 2, recoveryRate: 0.05 },
-	shaping: { batchesPerYear: 550, yearsLifespan: 2, recoveryRate: 0.1 },
-	baking: { batchesPerYear: 450, yearsLifespan: 3, recoveryRate: 0.1 },
-	cutting: { batchesPerYear: 500, yearsLifespan: 2, recoveryRate: 0.1 },
-	decorating: { batchesPerYear: 400, yearsLifespan: 1, recoveryRate: 0.1 },
+	// Measuring tools (light, precise)
+	measuring: { batchesPerYear: 200, yearsLifespan: 3, recoveryRate: 0.1 }, // e.g., tazas, básculas
 
-	// Equipment
-	equipment: { batchesPerYear: 400, yearsLifespan: 5, recoveryRate: 0.1 },
-	energy: { batchesPerYear: 0, yearsLifespan: 0, recoveryRate: 0 }, // Operational costs
+	// Mixing tools (medium use)
+	mixing: { batchesPerYear: 400, yearsLifespan: 2, recoveryRate: 0.05 }, // bowls, batidores
 
-	// Specialized
-	finishing: { batchesPerYear: 300, yearsLifespan: 3, recoveryRate: 0.2 },
-	professional: { batchesPerYear: 350, yearsLifespan: 4, recoveryRate: 0.15 },
+	// Shaping tools (medium use)
+	shaping: { batchesPerYear: 300, yearsLifespan: 2, recoveryRate: 0.1 }, // rodillos
 
+	// Baking tools (medium-heavy use)
+	baking: { batchesPerYear: 450, yearsLifespan: 3, recoveryRate: 0.1 }, // moldes
+
+	// Cutting tools (light-medium use)
+	cutting: { batchesPerYear: 250, yearsLifespan: 2, recoveryRate: 0.1 }, // cuchillos
+
+	// Decorating tools (low use, fragile)
+	decorating: { batchesPerYear: 150, yearsLifespan: 1, recoveryRate: 0.1 }, // mangas, decor tools
+
+	// Equipment (heavy use, long lifespan)
+	equipment: { batchesPerYear: 500, yearsLifespan: 5, recoveryRate: 0.8 }, // horno, estufa, industrial mixers
+
+	// Energy/operational (not amortized)
+	energy: { batchesPerYear: 0, yearsLifespan: 0, recoveryRate: 0 }, // consumables, utilities
+
+	// Specialized / professional tools
+	finishing: { batchesPerYear: 300, yearsLifespan: 3, recoveryRate: 0.2 }, // caramelizing, finishing tools
+	professional: { batchesPerYear: 350, yearsLifespan: 4, recoveryRate: 0.15 }, // advanced measurement kits
+
+	// Default fallback
 	general: { batchesPerYear: 400, yearsLifespan: 3, recoveryRate: 0.1 },
 };
 
