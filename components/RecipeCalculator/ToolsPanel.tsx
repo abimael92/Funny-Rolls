@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, Info, Save, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
 import { Tool, TOOL_CATEGORY_CONFIGS } from '@/lib/types';
-import { defaultTools, toolCategories } from '@/lib/data';
+import { toolCategories } from '@/lib/data';
 import { CloseButton, ActionButton } from './ModalHelpers';
 import { EditableToolRow } from './EditableToolRow';
 
@@ -67,7 +67,6 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             name: '',
             type: newTool.type,
             category: newTool.category,
-            cost: 0,
             description: '',
             lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`,
             recoveryValue: 0,
@@ -130,12 +129,13 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     }
 
     const getCostExplanation = (tool: Tool) => {
+        const costPerBatch = tool.costPerBatch?.toFixed(2) || '0.00';
+
         if (tool.type === 'consumible') {
-            return `Costo operacional directo: $${tool.cost.toFixed(2)} MXN/lote\n${tool.description}`;
+            return `Costo operacional directo: $${costPerBatch} MXN/lote\n${tool.description}`;
         }
 
-        // Use the ACTUAL stored values
-        return `Costo amortizado: $${tool.costPerBatch?.toFixed(2) || tool.cost.toFixed(2)} MXN/lote\nInversión: $${tool.totalInvestment} MXN\n${tool.lifetime}\nValor rescate: $${tool.recoveryValue} MXN`;
+        return `Costo amortizado: $${costPerBatch} MXN/lote\nInversión: $${tool.totalInvestment} MXN\n${tool.lifetime}\nValor rescate: $${tool.recoveryValue} MXN`;
     };
 
     return (
@@ -219,7 +219,6 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 recoveryValue: 0,
                                                 totalInvestment: 0,
                                                 costPerBatch: 0,
-                                                cost: 0
                                             });
                                         }}
                                         className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -253,7 +252,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 category: newCategory,
                                                 lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`,
                                                 totalBatches: totalBatches,
-                                                // Recalculate cost if we have investment
+
                                                 ...(newTool.totalInvestment > 0 && {
                                                     recoveryValue: Math.round(newTool.totalInvestment * categoryConfig.recoveryRate),
                                                     costPerBatch: Number(((newTool.totalInvestment - Math.round(newTool.totalInvestment * categoryConfig.recoveryRate)) / totalBatches).toFixed(2)),
@@ -300,16 +299,15 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 if (newTool.type !== 'consumible') {
                                                     const categoryConfig = TOOL_CATEGORY_CONFIGS[newTool.category] || TOOL_CATEGORY_CONFIGS.general;
 
-                                                    // DYNAMIC calculation based on ACTUAL category
                                                     const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
                                                     const recoveryValue = Math.round(investment * categoryConfig.recoveryRate);
-                                                    const costPerBatch = investment > 0 ? (investment - recoveryValue) / totalBatches : 0;
 
-                                                    // Store DYNAMICALLY calculated values
+                                                    const costPerBatch = investment > 0 ?
+                                                        Number(((investment - recoveryValue) / totalBatches).toFixed(2)) : 0;
+
                                                     updatedTool.recoveryValue = recoveryValue;
                                                     updatedTool.totalBatches = totalBatches;
-                                                    updatedTool.costPerBatch = Number(costPerBatch.toFixed(2));
-                                                    updatedTool.cost = updatedTool.costPerBatch;
+                                                    updatedTool.costPerBatch = costPerBatch;
                                                     updatedTool.lifetime = `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`;
                                                 }
 
@@ -325,9 +323,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             {newTool.type !== 'consumible' && (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
                                     {/* Auto-calculation notice */}
-                                    <div className="md:col-span-2 text-sm text-blue-800 mb-2">
+                                    <div className="md:col-span-2 text-xs text-blue-800 mb-2">
                                         El costo por lote se calcula automáticamente:<br />
-                                        (Inversión - Valor rescate) / Lotes totales
+                                        <strong>(Inversión - Valor rescate) / Lotes totales</strong>
                                     </div>
 
                                     <div>
@@ -347,16 +345,17 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 type="number"
                                                 step="1"
                                                 min="0"
+                                                readOnly
                                                 placeholder="0"
                                                 value={newTool.recoveryValue || ''}
                                                 onChange={(e) => {
                                                     const recoveryValue = Number(e.target.value) || 0;
                                                     const updatedTool = { ...newTool, recoveryValue };
 
-                                                    // Recalculate cost per batch when recovery value changes
+                                                    // FIXED: Recalculate cost per batch when recovery value changes
                                                     if (newTool.totalInvestment > 0 && newTool.totalBatches) {
-                                                        updatedTool.costPerBatch = Number(((newTool.totalInvestment - recoveryValue) / newTool.totalBatches).toFixed(2));
-                                                        updatedTool.cost = updatedTool.costPerBatch;
+                                                        const costPerBatch = Number(((newTool.totalInvestment - recoveryValue) / newTool.totalBatches).toFixed(2));
+                                                        updatedTool.costPerBatch = costPerBatch;
                                                     }
 
                                                     setNewTool(updatedTool);
@@ -383,25 +382,31 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 type="number"
                                                 step="0.01"
                                                 min="0"
+                                                readOnly
                                                 placeholder="0.00"
-                                                value={newTool.costPerBatch || newTool.cost || ''}
+                                                value={newTool.costPerBatch || ''}
                                                 onChange={(e) => {
                                                     const cost = Number(e.target.value) || 0;
                                                     setNewTool({
                                                         ...newTool,
-                                                        cost: cost,
-                                                        costPerBatch: cost // Keep both in sync for now
+                                                        costPerBatch: cost
                                                     });
                                                 }}
                                                 className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                             />
                                         </div>
 
-
                                     </div>
 
                                     <div className="md:col-span-2 text-xs text-gray-500 mt-1">
                                         Basado en {newTool.totalBatches} lotes totales
+
+
+
+                                        {/*     <>{(newTool.totalInvestment && newTool.costPerBatch)
+                                            ? Math.ceil((newTool.totalInvestment - (newTool.recoveryValue || 0)) / newTool.costPerBatch)
+                                            : 'Ingresa una inversión y costo por lote'}
+                                        </>*/}
                                     </div>
                                 </div>
                             )}
@@ -468,7 +473,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
 
             {/* Tools List */}
             <div className="space-y-4 max-h-292 overflow-y-auto pr-2">
-                {defaultTools.map((tool) => {
+                {tools.map((tool) => {
                     const categoryLabel = toolCategories[tool.type as keyof typeof toolCategories]?.find(cat => cat.value === tool.category)?.label || 'General'
 
                     return (
@@ -538,7 +543,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 </div>
 
                                                 {/* Cost */}
-                                                {tool.cost && tool.cost > 0 && (
+                                                {tool.costPerBatch && (
                                                     <div className="flex flex-col gap-1">
                                                         <div className="flex items-center gap-2">
                                                             <div className="relative group">
@@ -552,7 +557,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                             <div className="text-sm text-gray-700">Costo adicional:</div>
                                                         </div>
                                                         <div className="text-sm font-bold text-green-700 break-words pl-6">
-                                                            ${tool.cost.toFixed(2)}
+                                                            ${tool.costPerBatch.toFixed(2)}
                                                         </div>
                                                     </div>
                                                 )}
@@ -576,7 +581,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                 })}
 
                 {/* Empty State */}
-                {defaultTools.length === 0 && (
+                {tools.length === 0 && (
                     <div className="text-center py-8 sm:py-12 bg-gradient-to-br from-gray-50 to-blue-50 border-2 border-dashed border-gray-300 rounded-xl">
                         <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                             <Utensils className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
@@ -594,13 +599,13 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                     <div className="bg-white border border-purple-500 rounded-lg p-2 sm:p-3 cursor-pointer hover:bg-purple-50 transition-colors"
                         onClick={() => setShowTotalToolsModal(true)}>
                         <div className="text-xs sm:text-sm text-gray-600">Total Herramientas</div>
-                        <div className="text-base sm:text-lg font-bold text-purple-700">{defaultTools.length}</div>
+                        <div className="text-base sm:text-lg font-bold text-purple-700">{tools.length}</div>
                     </div>
                     <div className="bg-white border border-orange-500 rounded-lg p-2 sm:p-3 cursor-pointer hover:bg-orange-50 transition-colors"
                         onClick={() => setShowToolsCostModal(true)}>
                         <div className="text-xs sm:text-sm text-gray-600">Costo Total</div>
                         <div className="text-base sm:text-lg font-bold text-orange-700">
-                            ${defaultTools.reduce((total, tool) => total + (tool.cost || 0), 0)
+                            ${tools.reduce((total, tool) => total + (tool.costPerBatch || 0), 0)
                                 .toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
                             }
                         </div>
@@ -629,7 +634,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     </div>
                                     <div>
                                         <h3 className="text-xl font-bold text-purple-800">Todas las Herramientas</h3>
-                                        <p className="text-sm text-purple-600">Inventario completo ({defaultTools.length} herramientas)</p>
+                                        <p className="text-sm text-purple-600">Inventario completo ({tools.length} herramientas)</p>
                                     </div>
                                 </div>
                                 <CloseButton onClose={() => setShowTotalToolsModal(false)} />
@@ -639,7 +644,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                         {/* Content */}
                         <div className="p-6 overflow-y-auto max-h-96">
                             <div className="space-y-3">
-                                {defaultTools.map((tool) => {
+                                {tools.map((tool) => {
                                     const categoryLabel = (toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General';
 
                                     return (
@@ -656,9 +661,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 )}
                                             </div>
                                             <div className="text-right">
-                                                {tool.cost > 0 && (
+                                                {tool.costPerBatch && (
                                                     <div className="text-sm font-bold text-purple-700">
-                                                        ${tool.cost.toFixed(2)}
+                                                        ${tool.costPerBatch.toFixed(2)}
                                                     </div>
                                                 )}
                                                 <div className="text-xs text-gray-500 capitalize">
@@ -675,7 +680,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                         <div className="p-6 border-t bg-gray-50">
                             <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
                                 <span className="font-bold text-gray-900">Total de Herramientas:</span>
-                                <span className="text-xl font-bold text-purple-700">{defaultTools.length}</span>
+                                <span className="text-xl font-bold text-purple-700">{tools.length}</span>
                             </div>
                             <ActionButton
                                 onClick={() => setShowTotalToolsModal(false)}
@@ -718,8 +723,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                         {/* Content */}
                         <div className="p-6 overflow-y-auto max-h-96">
                             <div className="space-y-3">
-                                {defaultTools
-                                    .filter(tool => tool.cost > 0)
+                                {tools
+                                    .filter(tool => tool?.costPerBatch)
                                     .map((tool) => (
                                         <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                                             <div className="flex-1">
@@ -729,18 +734,19 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <div className="font-bold text-orange-700">${tool.cost.toFixed(2)}</div>
+                                                <div className="font-bold text-orange-700">
+                                                    ${tool.costPerBatch && tool.costPerBatch.toFixed(2)}</div>
                                             </div>
                                         </div>
                                     ))
                                 }
 
-                                {defaultTools.filter(tool => tool.cost > 0).length === 0 && (
+                                {tools.length === 0 && (
                                     <div className="text-center py-8 text-gray-500">
                                         <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
                                             <DollarSign className="h-6 w-6 text-gray-400" />
                                         </div>
-                                        <div>No hay herramientas con costo adicional</div>
+                                        <div>No hay herramientas registradas</div>
                                     </div>
                                 )}
                             </div>
@@ -751,7 +757,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                             <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
                                 <span className="font-bold text-gray-900">Costo Total:</span>
                                 <span className="text-xl font-bold text-orange-700">
-                                    ${defaultTools.reduce((total, tool) => total + (tool.cost || 0), 0).toFixed(2)}
+                                    ${tools.reduce((total, tool) => total + (tool.costPerBatch || 0), 0).toFixed(2)}
                                 </span>
                             </div>
                             <ActionButton
