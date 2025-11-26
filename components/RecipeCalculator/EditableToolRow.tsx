@@ -64,8 +64,8 @@ export function EditableToolRow({ tool, onSave, onCancel }: EditableToolRowProps
                 type="number"
                 step="0.01"
                 min="0"
-                value={editedTool.cost || 0}
-                onChange={(e) => setEditedTool({ ...editedTool, cost: Number(e.target.value) || 0 })}
+                value={editedTool.costPerBatch || 0}
+                onChange={(e) => setEditedTool({ ...editedTool, costPerBatch: Number(e.target.value) || 0 })}
                 className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg"
                 placeholder="Costo adicional"
             />
