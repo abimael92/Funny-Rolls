@@ -506,24 +506,24 @@ export function RecipeCalculatorPanel({
 
                         {/* Quick Preview (when closed) */}
                         {/* {showAddTools && selectedRecipe.tools && selectedRecipe.tools.length > 0 && (
-                            <div className="mt-3 pt-3 border-t border-blue-200">
-                                <div className="flex flex-wrap gap-1">
-                                    {selectedRecipe.tools.slice(0, 3).map((recipeTool) => {
-                                        const tool = tools.find(t => t.id === recipeTool.toolId)
-                                        return tool ? (
-                                            <span key={recipeTool.toolId} className="text-xs bg-white border border-blue-200 text-blue-700 px-2 py-1 rounded-full">
-                                                {tool.name}
-                                            </span>
-                                        ) : null
-                                    })}
-                                    {selectedRecipe.tools.length > 3 && (
-                                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                            +{selectedRecipe.tools.length - 3} más
+                        <div className="mt-3 pt-3 border-t border-blue-200">
+                            <div className="flex flex-wrap gap-1">
+                                {selectedRecipe.tools.slice(0, 3).map((recipeTool) => {
+                                    const tool = tools.find(t => t.id === recipeTool.toolId)
+                                    return tool ? (
+                                        <span key={recipeTool.toolId} className="text-xs bg-white border border-blue-200 text-blue-700 px-2 py-1 rounded-full">
+                                            {tool.name}
                                         </span>
-                                    )}
-                                </div>
+                                    ) : null
+                                })}
+                                {selectedRecipe.tools.length > 3 && (
+                                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                                        +{selectedRecipe.tools.length - 3} más
+                                    </span>
+                                )}
                             </div>
-                        )} */}
+                        </div>
+                    )} */}
                     </div>
 
                     {/* Herramientas Section */}
@@ -554,9 +554,9 @@ export function RecipeCalculatorPanel({
                                                 <span className="text-sm font-medium text-blue-800 group-hover:text-blue-900">
                                                     {tool.name}
                                                 </span>
-                                                {tool.cost > 0 && (
+                                                {tool.costPerBatch && tool.costPerBatch > 0 && (
                                                     <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-medium ml-1">
-                                                        ${tool.cost.toFixed(2)}
+                                                        ${tool.costPerBatch.toFixed(2)}
                                                     </span>
                                                 )}
                                             </button>
@@ -580,7 +580,7 @@ export function RecipeCalculatorPanel({
                                         const tool = tools.find(t => t.id === recipeTool.toolId)
                                         if (!tool) return null
 
-                                        const cost = tool.cost || 0
+                                        const cost = tool.costPerBatch || 0
 
                                         return (
                                             <div key={recipeTool.toolId} className="bg-white border-2 border-indigo-200 rounded-xl p-3">
@@ -898,9 +898,9 @@ export function RecipeCalculatorPanel({
                                                 <span className="text-base font-medium text-blue-800 group-hover:text-blue-900">
                                                     {tool.name}
                                                 </span>
-                                                {tool.cost > 0 && (
+                                                {tool.costPerBatch && tool.costPerBatch > 0 && (
                                                     <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                                        ${tool.cost.toFixed(2)}
+                                                        ${tool.costPerBatch.toFixed(2)}
                                                     </span>
                                                 )}
                                             </div>
@@ -956,7 +956,7 @@ export function RecipeCalculatorPanel({
                                     const tool = tools.find(t => t.id === recipeTool.toolId)
                                     if (!tool) return null
 
-                                    const cost = tool.cost || 0
+                                    const cost = tool.costPerBatch || 0
                                     const costPercentage = (cost / totalRecipeCost) * 100
 
                                     return (

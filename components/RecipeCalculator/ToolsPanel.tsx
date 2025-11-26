@@ -19,6 +19,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     const [editingToolId, setEditingToolId] = useState<string | null>(null)
     const [showTotalToolsModal, setShowTotalToolsModal] = useState(false);
     const [showToolsCostModal, setShowToolsCostModal] = useState(false);
+    const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
     const [newTool, setNewTool] = useState<Omit<Tool, 'id'>>(() => {
         const defaultCategory = 'general';
@@ -39,8 +40,9 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         };
     });
 
+
     // Total Investment = Recovery Value × 10
-    // Actual Cost = Total Investment - Recovery Value  
+    // Actual Cost = Total Investment - Recovery Value
     // Batches per Year = 52
     // Total Batches = Years × 52
     //     Cost / Batch = Actual Cost ÷ Total Batches
@@ -97,6 +99,12 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     const startEditingTool = (tool: Tool) => {
         setEditingToolId(tool.id)
     }
+
+    const toggleTooltip = (fieldName: string) => {
+        setActiveTooltip(activeTooltip === fieldName ? null : fieldName);
+    };
+
+
 
     // Get tool color based on type
     const getToolColor = (type: string) => {
@@ -170,11 +178,16 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <label className="block text-sm font-medium text-blue-700 mb-1">
                                     Nombre de la herramienta *
                                     <span className="ml-1 relative group">
-                                        <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                            Nombre descriptivo de la herramienta o equipo
-                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                        </div>
+                                        <Info
+                                            className="h-4 w-4 inline text-blue-500 cursor-help tooltip-icon"
+                                            onClick={() => toggleTooltip('name')}
+                                        />
+                                        {activeTooltip === 'name' && (
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-nowrap">
+                                                {`Nombre de la herramienta o equipo`}
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        )}
                                     </span>
                                 </label>
                                 <input
@@ -192,12 +205,18 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Tipo *
-                                        <span className="ml-1 relative group">
-                                            <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                                Consumible: costo operacional directo | Utensilio/Equipo: costo amortizado
-                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                            </div>
+                                        <span className="ml-1 relative">
+                                            <Info
+                                                className="h-4 w-4 inline text-blue-500 cursor-help tooltip-icon"
+                                                onClick={() => toggleTooltip('type')}
+                                            />
+                                            {activeTooltip === 'type' && (
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-pre-line tooltip-content ">
+                                                    <span className="font-bold text-sm">Consumible</span>: costo operacional directo<br />
+                                                    <span className="font-bold text-sm">Utensilio/Equipo</span>: costo amortizado
+                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                </div>
+                                            )}
                                         </span>
                                     </label>
                                     <select
@@ -232,12 +251,17 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Categoría *
-                                        <span className="ml-1 relative group">
-                                            <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                                Agrupa herramientas similares para mejor organización
-                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                            </div>
+                                        <span className="ml-1 relative">
+                                            <Info
+                                                className="h-4 w-4 inline text-blue-500 cursor-help tooltip-icon"
+                                                onClick={() => toggleTooltip('category')}
+                                            />
+                                            {activeTooltip === 'category' && (
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-pre-line tooltip-content">
+                                                    <span>Organiza herramientas por función o tipo de uso</span>
+                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                </div>
+                                            )}
                                         </span>
                                     </label>
                                     <select
@@ -276,12 +300,17 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                 <div>
                                     <label className="block text-sm font-medium text-blue-700 mb-1">
                                         Inversión total (MXN)
-                                        <span className="ml-1 relative group">
-                                            <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                                Costo total de compra de la herramienta
-                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                            </div>
+                                        <span className="ml-1 relative">
+                                            <Info
+                                                className="h-4 w-4 inline text-blue-500 cursor-help tooltip-icon"
+                                                onClick={() => toggleTooltip('investment')}
+                                            />
+                                            {activeTooltip === 'investment' && (
+                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-nowrap">
+                                                    Costo total de compra de la herramienta
+                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                </div>
+                                            )}
                                         </span>
                                     </label>
                                     <div className="relative">
@@ -331,12 +360,17 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <div>
                                         <label className="block text-sm font-medium text-blue-700 mb-1">
                                             Valor de rescate (MXN)
-                                            <span className="ml-1 relative group">
-                                                <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                                    Valor estimado de reventa al final de la vida útil
-                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                                </div>
+                                            <span className="ml-1 relative">
+                                                <Info
+                                                    className="h-4 w-4 inline text-blue-500 cursor-help tooltip-icon"
+                                                    onClick={() => toggleTooltip('recovery')}
+                                                />
+                                                {activeTooltip === 'recovery' && (
+                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-pre-line tooltip-content">
+                                                        Valor estimado de reventa al final de la vida útil
+                                                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                    </div>
+                                                )}
                                             </span>
                                         </label>
                                         <div className="relative">
@@ -368,12 +402,17 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     <div>
                                         <label className="block text-sm font-medium text-blue-700 mb-1">
                                             Costo por lote (MXN)
-                                            <span className="ml-1 relative group">
-                                                <Info className="h-4 w-4 inline text-blue-500 cursor-help" />
-                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                                                    Costo amortizado por lote. Se calcula automáticamente basado en la inversión y vida útil
-                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                                </div>
+                                            <span className="ml-1 relative">
+                                                <Info
+                                                    className="h-4 w-4 inline text-blue-500 cursor-help tooltip-icon"
+                                                    onClick={() => toggleTooltip('costPerBatch')}
+                                                />
+                                                {activeTooltip === 'costPerBatch' && (
+                                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-pre-line tooltip-content">
+                                                        Costo amortizado por lote. Se calcula automáticamente basado en la inversión y vida útil
+                                                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                    </div>
+                                                )}
                                             </span>
                                         </label>
                                         <div className="relative">
@@ -547,8 +586,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                     <div className="flex flex-col gap-1">
                                                         <div className="flex items-center gap-2">
                                                             <div className="relative group">
-                                                                <DollarSign className="h-4 w-4 text-green-600 cursor-help" />
-                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-pre-line z-10 min-w-[200px] text-left">
+                                                                <DollarSign className="h-4 w-4 text-green-600 cursor-help tooltip-icon" />
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-pre-line tooltip-content z-10 min-w-[200px] text-left">
                                                                     {getCostExplanation(tool)}
                                                                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                                                                 </div>

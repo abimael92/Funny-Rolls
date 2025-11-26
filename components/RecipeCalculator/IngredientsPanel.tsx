@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeftRight, Calculator, ChevronDown, CookingPot, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
+import { ArrowLeftRight, Calculator, ChevronDown, CookingPot, Info, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
 import { UnitConverter } from '../../lib/unit-conversion';
@@ -40,6 +40,7 @@ export function IngredientsPanel({
     const [tools, setTools] = useState<Tool[]>(defaultTools);
     const [showTools, setShowTools] = useState(false);
     const [showIngredientsModal, setShowIngredientsModal] = useState(false);
+    const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
 
     // Add new ingredient
@@ -110,6 +111,10 @@ export function IngredientsPanel({
 
         // Return original if no conversion needed or conversion fails
         return `${amount} ${unit}`;
+    };
+
+    const toggleTooltip = (fieldName: string) => {
+        setActiveTooltip(activeTooltip === fieldName ? null : fieldName);
     };
 
     return (
@@ -191,59 +196,147 @@ export function IngredientsPanel({
                             {showAddSection && (
                                 <div className="p-4 bg-amber-50 rounded-b-lg border border-amber-300 border-t-0">
                                     <h3 className="font-semibold text-lg text-amber-800 text-center mb-4">Agregar Ingrediente</h3>
-                                    <div className="space-y-3">
-                                        <input
-                                            type="text"
-                                            maxLength={50}
-                                            placeholder="Nombre del ingrediente"
-                                            value={newIngredient.name}
-                                            onChange={(e) => setNewIngredient({
-                                                ...newIngredient, name: e.target.value.slice(0, 50)
-                                            })}
-                                            className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                        />
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            <CustomNumberInput
-                                                value={newIngredient.amount || 0}
-                                                onChange={(value) => setNewIngredient({ ...newIngredient, amount: value })}
-                                                className="border-2 border-amber-300 rounded-lg text-base sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                                min={0}
-                                                max={10000}
-                                                placeholder="Cantidad"
+                                    <div className="space-y-4">
+                                        {/* Name Input */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-amber-700 mb-2">
+                                                Nombre del ingrediente *
+                                                <span className="ml-1 relative inline-block align-middle">
+                                                    <Info
+                                                        className="h-4 w-4 inline text-amber-600 cursor-help tooltip-icon"
+                                                        onClick={() => toggleTooltip('ingredient-name')}
+                                                    />
+                                                    {activeTooltip === 'ingredient-name' && (
+                                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-nowrap">
+                                                            {`Nombre del ingrediente`}
+                                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                        </div>
+                                                    )}
+                                                </span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                maxLength={50}
+                                                placeholder="Harina de trigo"
+                                                value={newIngredient.name}
+                                                onChange={(e) => setNewIngredient({
+                                                    ...newIngredient, name: e.target.value.slice(0, 50)
+                                                })}
+                                                className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                                             />
+                                        </div>
 
-                                            <div className="relative z-50">
+                                        {/* Amount and Unit Row */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-amber-700 mb-2">
+                                                    Cantidad *
+                                                    <span className="ml-1 relative inline-block align-middle">
+                                                        <Info
+                                                            className="h-4 w-4 inline text-amber-600 cursor-help tooltip-icon"
+                                                            onClick={() => toggleTooltip('ingredient-amount')}
+                                                        />
+                                                        {activeTooltip === 'ingredient-amount' && (
+                                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-nowrap">
+                                                                {`Cantidad del ingrediente`}
+                                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                            </div>
+                                                        )}
+                                                    </span>
+                                                </label>
+                                                <CustomNumberInput
+                                                    value={newIngredient.amount || 0}
+                                                    onChange={(value) => setNewIngredient({ ...newIngredient, amount: value })}
+                                                    className="w-full border-2 border-amber-300 rounded-lg text-base sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                                    min={0}
+                                                    max={10000}
+                                                    placeholder="100"
+                                                    allowDecimals={true}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-amber-700 mb-2">
+                                                    Unidad *
+                                                    <span className="ml-1 relative inline-block align-middle">
+                                                        <Info
+                                                            className="h-4 w-4 inline text-amber-600 cursor-help tooltip-icon"
+                                                            onClick={() => toggleTooltip('ingredient-unit')}
+                                                        />
+                                                        {activeTooltip === 'ingredient-unit' && (
+                                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-nowrap">
+                                                                {`Unidad de medida del ingrediente`}
+                                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                            </div>
+                                                        )}
+                                                    </span>
+                                                </label>
                                                 <CustomSelect
                                                     value={newIngredient.unit}
                                                     onChange={(value) => setNewIngredient({ ...newIngredient, unit: value })}
                                                 />
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            <input
-                                                type="number"
-                                                step="1"
-                                                min="0"
-                                                placeholder="Precio $"
-                                                value={newIngredient.price === 0 ? '' : newIngredient.price}
-                                                className="px-3 sm:px-4 py-2 sm:py-3 border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                                onChange={(e) => setNewIngredient({ ...newIngredient, price: Math.max(1, Number(e.target.value) || 0) })}
-                                                onBlur={(e) => {
-                                                    const value = Number(e.target.value)
-                                                    if (value <= 0) setNewIngredient({ ...newIngredient, price: 0.01 })
-                                                }}
-                                            />
-                                            <CustomNumberInput
-                                                value={newIngredient.minAmount || 0}
-                                                onChange={(value) => setNewIngredient({ ...newIngredient, minAmount: value })}
-                                                className="border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                                                min={0}
-                                                max={10000}
-                                                placeholder="Minimo"
-                                            />
+
+                                        {/* Price and Min Amount Row */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-amber-700 mb-2">
+                                                    Precio *
+                                                    <span className="ml-1 relative inline-block align-middle">
+                                                        <Info
+                                                            className="h-4 w-4 inline text-amber-600 cursor-help tooltip-icon"
+                                                            onClick={() => toggleTooltip('ingredient-price')}
+                                                        />
+                                                        {activeTooltip === 'ingredient-price' && (
+                                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-nowrap">
+                                                                {`Precio total del ingrediente`}
+                                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                            </div>
+                                                        )}
+                                                    </span>
+                                                </label>
+                                                <CustomNumberInput
+                                                    value={newIngredient.price}
+                                                    onChange={(value) => setNewIngredient({ ...newIngredient, price: Math.max(1, value || 0) })}
+                                                    allowDecimals={false}
+                                                    className="w-full border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                                    min={0}
+                                                    max={10000}
+                                                    placeholder="20"
+                                                />
+
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-amber-700 mb-2">
+                                                    Stock Mínimo *
+                                                    <span className="ml-1 relative inline-block align-middle">
+                                                        <Info
+                                                            className="h-4 w-4 inline text-amber-600 cursor-help tooltip-icon"
+                                                            onClick={() => toggleTooltip('ingredient-minAmount')}
+                                                        />
+                                                        {activeTooltip === 'ingredient-minAmount' && (
+                                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-nowrap">
+                                                                {`Cantidad mínima para un lote`}
+                                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                            </div>
+                                                        )}
+                                                    </span>
+                                                </label>
+                                                <CustomNumberInput
+                                                    value={newIngredient.minAmount || 0}
+                                                    onChange={(value) => setNewIngredient({ ...newIngredient, minAmount: value })}
+                                                    className="w-full border-2 border-amber-300 rounded-lg text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                                    min={0}
+                                                    max={10000}
+                                                    placeholder="0.10"
+                                                    allowDecimals={true}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                    <Button onClick={addIngredient} className="w-full bg-amber-600 hover:bg-amber-700 text-sm sm:text-base py-2 sm:py-3 mt-2">
+                                    <Button onClick={addIngredient} className="w-full bg-amber-600 hover:bg-amber-700 text-sm sm:text-base py-2 sm:py-3 mt-4">
                                         <Save className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                                         Guardar
                                     </Button>

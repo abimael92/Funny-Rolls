@@ -9,6 +9,7 @@ interface CustomNumberInputProps {
     max?: number
     placeholder?: string
     className?: string
+    allowDecimals?: boolean  // Add this prop
 }
 
 export function CustomNumberInput({
@@ -17,7 +18,8 @@ export function CustomNumberInput({
     min = 0,
     max = 10000,
     placeholder,
-    className
+    className,
+    allowDecimals = true  // Default to true for backward compatibility
 }: CustomNumberInputProps) {
     const [displayValue, setDisplayValue] = useState(
         value && value !== 0 ? value.toString() : ''
@@ -33,7 +35,7 @@ export function CustomNumberInput({
         const chars = str.split('')
         const currentChar = chars[pos]
 
-        if (currentChar === '.') {
+        if (currentChar === '.' && allowDecimals) {
             return modifyDigitAtPosition(str, pos + increment > 0 ? pos + 1 : pos - 1, increment)
         }
 
@@ -69,7 +71,11 @@ export function CustomNumberInput({
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value
-        if (/^(\d*\.?\d*)$/.test(newValue)) {
+
+        // Use different regex based on allowDecimals
+        const regex = allowDecimals ? /^(\d*\.?\d*)$/ : /^\d*$/
+
+        if (regex.test(newValue)) {
             setDisplayValue(newValue)
             const numValue = newValue && newValue !== '0' ? parseFloat(newValue) : 0
             onChange(Math.max(min, Math.min(max, numValue)))
@@ -77,6 +83,12 @@ export function CustomNumberInput({
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        // Prevent decimal point if decimals not allowed
+        if (!allowDecimals && e.key === '.') {
+            e.preventDefault()
+            return
+        }
+
         if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
             e.preventDefault()
 
@@ -165,6 +177,7 @@ export function CustomNumberInput({
 
         const chars = valueToRender.split('')
         return chars.map((char, index) => {
+            // Don't highlight decimal point if it's not allowed (shouldn't happen but just in case)
             if (index === cursorPosition && /\d/.test(char) && isFocused) {
                 return (
                     <span key={index} className="underline decoration-2 decoration-amber-500 bg-amber-200 text-amber-900 px-0.5 rounded">
@@ -181,7 +194,7 @@ export function CustomNumberInput({
     }, [value])
 
     return (
-        <div className={`flex items-center w-full ${className || ''}`}>
+        <div className={`flex items-center h-12 w-full ${className || ''}`}>
             <button
                 type="button"
                 className="w-6 h-6 sm:w-6 flex items-center justify-center bg-amber-50 text-amber-700 
@@ -213,7 +226,7 @@ export function CustomNumberInput({
                 <input
                     ref={inputRef}
                     type="text"
-                    inputMode="decimal"
+                    inputMode={allowDecimals ? "decimal" : "numeric"}  // Change inputMode based on allowDecimals
                     placeholder={placeholder}
                     value={displayValue}
                     onChange={handleChange}
