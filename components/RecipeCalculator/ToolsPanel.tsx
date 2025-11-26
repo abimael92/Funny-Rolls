@@ -153,7 +153,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                 </div>
 
                 <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-106 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <div className="p-4 bg-amber-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto">
+                    <div className="p-4 bg-amber-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto overflow-x-hidden">
                         <h3 className="font-semibold text-lg text-blue-800 text-center mb-4">Agregar Herramienta</h3>
 
                         {error && (
