@@ -429,197 +429,128 @@ export const products: Product[] = [
 ];
 
 export const defaultTools: Tool[] = [
-	// UTILITIES (operational costs - direct pass-through)
+	// ----------------------------
+	// UTILITIES (equipo / electrodoméstico)
+	// Heavy-duty machines, long-lasting, used many batches per year
+	// ----------------------------
 	{
 		id: 'util-1',
 		name: 'Horno',
-		type: 'equipo', // Changed from consumible
+		type: 'equipo', // Durable equipment
 		category: 'electrodomestico',
-		cost: 0.8, // Amortized cost, not operational
-		description: 'Horno para horneado a 180°C',
-		lifetime: '5 años',
-		recoveryValue: 200,
-		totalInvestment: 2000,
+		totalInvestment: 2000, // Purchase price
+		lifetime: '5 años', // Expected useful life
+		batchesPerYear: 300, // Estimated batches this horno can handle per year
+		totalBatches: 300 * 5, // lifetime * batches/year
+		recoveryValue: 200, // Resale at end of life (~10% of investment)
+		costPerBatch: (2000 - 200) / (300 * 5), // Amortized cost per batch
+		// yearUsage same as batchesPerYear for calculation
 	},
 	{
 		id: 'util-2',
 		name: 'Estufa',
-		type: 'equipo', // Changed from consumible
+		type: 'equipo',
 		category: 'electrodomestico',
-		cost: 0.6,
-		description: 'Estufa para preparaciones en cocina',
-		lifetime: '5 años',
-		recoveryValue: 150,
 		totalInvestment: 1500,
+		lifetime: '5 años',
+		batchesPerYear: 300,
+		totalBatches: 300 * 5,
+		recoveryValue: 150,
+		costPerBatch: (1500 - 150) / (300 * 5),
 	},
 	{
 		id: 'util-3',
 		name: 'Mezcladora',
-		type: 'equipo', // Changed from consumible
+		type: 'equipo',
 		category: 'electrodomestico',
-		cost: 0.4,
-		description: 'Mezcladora eléctrica para masa',
-		lifetime: '3 años',
-		recoveryValue: 80,
 		totalInvestment: 800,
+		lifetime: '3 años',
+		batchesPerYear: 250,
+		totalBatches: 250 * 3,
+		recoveryValue: 80,
+		costPerBatch: (800 - 80) / (250 * 3),
 	},
 
-	// HERRAMIENTAS (amortized costs - portion per batch)
+	// ----------------------------
+	// TOOLS (herramienta)
+	// Small tools, limited use per year, moderate recovery
+	// ----------------------------
 	{
 		id: 'uten-1',
 		name: 'Juego de Medidores',
 		type: 'herramienta',
-		category: 'measuring',
-		cost: 0.5, // $0.50 MXN por lote
-		description: 'Tazas y cucharas medidoras para ingredientes',
+		category: 'medicion',
+		totalInvestment: 150,
 		lifetime: '2 años',
-		recoveryValue: 15, // $15 MXN valor de reventa
-		totalInvestment: 150, // $150 MXN inversión total
+		batchesPerYear: 250, // moderate use
+		totalBatches: 250 * 2,
+		recoveryValue: 15, // ~10% resale
+		costPerBatch: (150 - 15) / (250 * 2),
 	},
 	{
 		id: 'uten-2',
 		name: 'Báscula Digital',
 		type: 'herramienta',
-		category: 'measuring',
-		cost: 0.8, // $0.80 MXN por lote
-		description: 'Para mediciones precisas en gramos',
+		category: 'medicion',
+		totalInvestment: 250,
 		lifetime: '3 años',
-		recoveryValue: 25, // $25 MXN valor de reventa
-		totalInvestment: 250, // $250 MXN inversión total
+		batchesPerYear: 300,
+		totalBatches: 300 * 3,
+		recoveryValue: 25, // ~10% resale
+		costPerBatch: (250 - 25) / (300 * 3),
 	},
 	{
 		id: 'uten-3',
 		name: 'Bowls Mezcladores',
 		type: 'herramienta',
-		category: 'mixing',
-		cost: 0.4, // $0.40 MXN por lote
-		description: 'Set de bowls de diferentes tamaños',
+		category: 'mezcla',
+		totalInvestment: 100,
 		lifetime: '2 años',
-		recoveryValue: 10, // $10 MXN valor de reventa
-		totalInvestment: 100, // $100 MXN inversión total
+		batchesPerYear: 200,
+		totalBatches: 200 * 2,
+		recoveryValue: 10,
+		costPerBatch: (100 - 10) / (200 * 2),
 	},
 	{
 		id: 'uten-4',
 		name: 'Batidor de Alambre',
 		type: 'herramienta',
 		category: 'mixing',
-		cost: 0.25, // $0.25 MXN por lote
-		description: 'Para incorporar aire en mezclas',
+		totalInvestment: 50,
 		lifetime: '1.5 años',
-		recoveryValue: 5, // $5 MXN valor de reventa
-		totalInvestment: 50, // $50 MXN inversión total
-	},
-	{
-		id: 'uten-5',
-		name: 'Espátula de Goma',
-		type: 'herramienta',
-		category: 'mixing',
-		cost: 0.2, // $0.20 MXN por lote
-		description: 'Para raspar bowls y mezclar suavemente',
-		lifetime: '1 año',
-		recoveryValue: 2, // $2 MXN valor de reventa
-		totalInvestment: 20, // $20 MXN inversión total
-	},
-	{
-		id: 'uten-6',
-		name: 'Rodillo para Masa',
-		type: 'herramienta',
-		category: 'shaping',
-		cost: 0.6, // $0.60 MXN por lote
-		description: 'Para extender masa uniformemente',
-		lifetime: '2 años',
-		recoveryValue: 20, // $20 MXN valor de reventa
-		totalInvestment: 200, // $200 MXN inversión total
-	},
-	{
-		id: 'uten-7',
-		name: 'Moldes para Hornear',
-		type: 'herramienta',
-		category: 'baking',
-		cost: 1.0, // $1.00 MXN por lote
-		description: 'Charolas para hornear rolls',
-		lifetime: '3 años',
-		recoveryValue: 30, // $30 MXN valor de reventa
-		totalInvestment: 300, // $300 MXN inversión total
-	},
-	{
-		id: 'uten-8',
-		name: 'Cuchillo de Sierra',
-		type: 'herramienta',
-		category: 'cutting',
-		cost: 0.3, // $0.30 MXN por lote
-		description: 'Para cortar rolls sin aplastar',
-		lifetime: '2 años',
-		recoveryValue: 8, // $8 MXN valor de reventa
-		totalInvestment: 80, // $80 MXN inversión total
-	},
-	{
-		id: 'uten-9',
-		name: 'Termómetro Digital',
-		type: 'herramienta',
-		category: 'measuring',
-		cost: 0.45, // $0.45 MXN por lote
-		description: 'Para temperatura interna perfecta',
-		lifetime: '3 años',
-		recoveryValue: 12, // $12 MXN valor de reventa
-		totalInvestment: 120, // $120 MXN inversión total
+		batchesPerYear: 150,
+		totalBatches: Math.ceil(150 * 1.5), // round up for partial year
+		recoveryValue: 5,
+		costPerBatch: (50 - 5) / Math.ceil(150 * 1.5),
 	},
 
-	// ESPECIALIZADOS (premium equipment - higher amortization)
+	// ----------------------------
+	// SPECIALIZED / HIGH-END
+	// Professional equipment, high investment, fewer batches per year
+	// ----------------------------
 	{
 		id: 'enh-1',
 		name: 'Mezcladora Planetaria',
-		type: 'equipo', // Mezcladora industrial profesional
-		category: 'electrodomestico', // Electrodoméstico de cocina
-		cost: 3.5, // Costo amortizado por lote
-		description: 'Mezclado profesional para consistencia perfecta',
+		type: 'equipo',
+		category: 'electrodomestico',
+		totalInvestment: 2000,
 		lifetime: '5 años',
-		recoveryValue: 200, // Valor de reventa estimado
-		totalInvestment: 2000, // Precio de compra original
-	},
-	{
-		id: 'enh-2',
-		name: 'Proveedora de Masa',
-		type: 'equipo', // Equipo de fermentación controlada
-		category: 'electrodomestico', // Electrodoméstico especializado
-		cost: 2.0, // Costo amortizado por lote
-		description: 'Control de temperatura para fermentación óptima',
-		lifetime: '4 años',
-		recoveryValue: 80, // Valor de reventa estimado
-		totalInvestment: 800, // Precio de compra original
+		batchesPerYear: 300, // heavy use but less than small tools
+		totalBatches: 300 * 5,
+		recoveryValue: 200,
+		costPerBatch: (2000 - 200) / (300 * 5),
 	},
 	{
 		id: 'enh-3',
 		name: 'Soplete Culinario',
-		type: 'herramienta', // Herramienta para acabados
-		category: 'cocina', // Utensilio de cocina
-		cost: 1.5, // Costo amortizado por lote
-		description: 'Para acabados caramelizados y decoraciones',
+		type: 'herramienta',
+		category: 'cocina',
+		totalInvestment: 400,
 		lifetime: '3 años',
-		recoveryValue: 40, // Valor de reventa estimado
-		totalInvestment: 400, // Precio de compra original
-	},
-	{
-		id: 'enh-4',
-		name: 'Manga Pastelera',
-		type: 'herramienta', // Herramienta de decoración
-		category: 'cocina', // Utensilio de repostería
-		cost: 0.35, // Costo amortizado por lote
-		description: 'Para decoraciones precisas con glaseados',
-		lifetime: '1 año',
-		recoveryValue: 3, // Valor de reventa estimado
-		totalInvestment: 30, // Precio de compra original
-	},
-	{
-		id: 'enh-5',
-		name: 'Kit de Medición Avanzado',
-		type: 'herramienta', // Herramienta de medición precisa
-		category: 'medicion', // Equipo de medición
-		cost: 1.2, // Costo amortizado por lote
-		description: 'Medidores de precisión para profesionales',
-		lifetime: '4 años',
-		recoveryValue: 60, // Valor de reventa estimado
-		totalInvestment: 600, // Precio de compra original
+		batchesPerYear: 150, // specialized, limited use
+		totalBatches: 150 * 3,
+		recoveryValue: 40,
+		costPerBatch: (400 - 40) / (150 * 3),
 	},
 ];
 
@@ -628,24 +559,20 @@ export const toolCategories = {
 		{ value: 'general', label: 'General' },
 		{ value: 'empaque', label: 'Empaque' },
 		{ value: 'limpieza', label: 'Limpieza' },
-		// Add more categories as needed
 	],
 	herramienta: [
 		{ value: 'general', label: 'General' },
 		{ value: 'cocina', label: 'Cocina' },
 		{ value: 'medicion', label: 'Medición' },
-		// Add more categories as needed
+		{ value: 'mezcla', label: 'Mezcla' },
+		{ value: 'moldeo', label: 'Moldeo' },
+		{ value: 'horneado', label: 'Horneado' },
+		{ value: 'corte', label: 'Corte' },
+		{ value: 'decoracion', label: 'Decoración' },
 	],
 	equipo: [
 		{ value: 'general', label: 'General' },
 		{ value: 'electrodomestico', label: 'Electrodoméstico' },
-		// { value: 'utensilio', label: 'Utensilio' },
-		// Add more categories as needed
+		{ value: 'profesional', label: 'Profesional' },
 	],
-	// especializado: [
-	// 	// Add this
-	// 	{ value: 'general', label: 'General' },
-	// 	{ value: 'profesional', label: 'Profesional' },
-	// 	{ value: 'tecnicocientifico', label: 'Técnico-Científico' },
-	// ],
 };
