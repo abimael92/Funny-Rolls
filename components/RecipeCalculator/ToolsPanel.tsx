@@ -149,13 +149,6 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         return `Costo amortizado: $${tool.costPerBatch?.toFixed(2) || tool.cost.toFixed(2)} MXN/lote\nInversión: $${tool.totalInvestment} MXN\n${tool.lifetime}\nValor rescate: $${tool.recoveryValue} MXN`;
     };
 
-
-
-
-
-    // Usage:
-
-
     return (
         <div className="space-y-6">
             {/* Add New Tool Section */}
