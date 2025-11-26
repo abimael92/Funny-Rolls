@@ -396,11 +396,12 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                             />
                                         </div>
-                                        {newTool.totalBatches && (
-                                            <div className="text-xs text-gray-500 mt-1">
-                                                Basado en {newTool.totalBatches} lotes totales
-                                            </div>
-                                        )}
+
+
+                                    </div>
+
+                                    <div className="md:col-span-2 text-xs text-gray-500 mt-1">
+                                        Basado en {newTool.totalBatches} lotes totales
                                     </div>
                                 </div>
                             )}
@@ -422,17 +423,11 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
 
                             {/* Action Buttons */}
                             <div className="flex gap-3 mt-6">
-                                <Button
-                                    onClick={() => setShowAddSection(false)}
-                                    variant="outline"
-                                    className="flex-1 border-blue-300 text-blue-700 hover:bg-blue-50"
-                                >
-                                    Cancelar
-                                </Button>
+
                                 <Button
                                     onClick={addTool}
                                     className="flex-1 bg-blue-600 hover:bg-blue-700 py-3"
-                                    disabled={!newTool.name.trim()}
+                                // disabled={!newTool.name.trim()}
                                 >
                                     <Save className="h-4 w-4 mr-2" />
                                     Guardar
