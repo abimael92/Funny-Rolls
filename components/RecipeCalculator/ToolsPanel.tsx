@@ -31,10 +31,10 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             category: defaultCategory,
             cost: 0,
             description: '',
-            lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`, // DYNAMIC
+            lifetime: `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`,
             recoveryValue: 0,
             totalInvestment: 0,
-            totalBatches: totalBatches, // DYNAMIC
+            totalBatches: totalBatches,
             costPerBatch: 0,
         };
     });
@@ -615,170 +615,162 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                 </div>
             </div>
 
-
-
-
             {/* Total Tools Count Modal */}
-            {
-                showTotalToolsModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div
-                            className="fixed inset-0"
-                            onClick={() => setShowTotalToolsModal(false)}
-                        />
-                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+            {showTotalToolsModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div
+                        className="fixed inset-0"
+                        onClick={() => setShowTotalToolsModal(false)}
+                    />
+                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
-                            {/* Header */}
-                            <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-bold text-purple-800">Todas las Herramientas</h3>
-                                            <p className="text-sm text-purple-600">Inventario completo ({defaultTools.length} herramientas)</p>
-                                        </div>
+                        {/* Header */}
+                        <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
                                     </div>
-                                    <CloseButton onClose={() => setShowTotalToolsModal(false)} />
+                                    <div>
+                                        <h3 className="text-xl font-bold text-purple-800">Todas las Herramientas</h3>
+                                        <p className="text-sm text-purple-600">Inventario completo ({defaultTools.length} herramientas)</p>
+                                    </div>
                                 </div>
+                                <CloseButton onClose={() => setShowTotalToolsModal(false)} />
                             </div>
+                        </div>
 
-                            {/* Content */}
-                            <div className="p-6 overflow-y-auto max-h-96">
-                                <div className="space-y-3">
-                                    {defaultTools.map((tool) => {
-                                        const categoryLabel = (toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General';
+                        {/* Content */}
+                        <div className="p-6 overflow-y-auto max-h-96">
+                            <div className="space-y-3">
+                                {defaultTools.map((tool) => {
+                                    const categoryLabel = (toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General';
 
-                                        return (
-                                            <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                                <div className="flex-1">
-                                                    <div className="font-semibold text-gray-900">{tool.name}</div>
-                                                    <div className="text-sm text-gray-600 mt-1 capitalize">
-                                                        {tool.type} • {categoryLabel}
-                                                    </div>
-                                                    {tool.description && (
-                                                        <div className="text-xs text-gray-500 mt-1">
-                                                            {tool.description}
-                                                        </div>
-                                                    )}
+                                    return (
+                                        <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                            <div className="flex-1">
+                                                <div className="font-semibold text-gray-900">{tool.name}</div>
+                                                <div className="text-sm text-gray-600 mt-1 capitalize">
+                                                    {tool.type} • {categoryLabel}
                                                 </div>
-                                                <div className="text-right">
-                                                    {tool.cost > 0 && (
-                                                        <div className="text-sm font-bold text-purple-700">
-                                                            ${tool.cost.toFixed(2)}
-                                                        </div>
-                                                    )}
-                                                    <div className="text-xs text-gray-500 capitalize">
-                                                        {tool.type}
+                                                {tool.description && (
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {tool.description}
                                                     </div>
+                                                )}
+                                            </div>
+                                            <div className="text-right">
+                                                {tool.cost > 0 && (
+                                                    <div className="text-sm font-bold text-purple-700">
+                                                        ${tool.cost.toFixed(2)}
+                                                    </div>
+                                                )}
+                                                <div className="text-xs text-gray-500 capitalize">
+                                                    {tool.type}
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
+                        </div>
 
-                            {/* Footer */}
-                            <div className="p-6 border-t bg-gray-50">
-                                <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
-                                    <span className="font-bold text-gray-900">Total de Herramientas:</span>
-                                    <span className="text-xl font-bold text-purple-700">{defaultTools.length}</span>
-                                </div>
-                                <ActionButton
-                                    onClick={() => setShowTotalToolsModal(false)}
-                                    color="purple"
-                                    fullWidth
-                                >
-                                    Cerrar
-                                </ActionButton>
+                        {/* Footer */}
+                        <div className="p-6 border-t bg-gray-50">
+                            <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
+                                <span className="font-bold text-gray-900">Total de Herramientas:</span>
+                                <span className="text-xl font-bold text-purple-700">{defaultTools.length}</span>
                             </div>
+                            <ActionButton
+                                onClick={() => setShowTotalToolsModal(false)}
+                                color="purple"
+                                fullWidth
+                            >
+                                Cerrar
+                            </ActionButton>
                         </div>
                     </div>
-                )
-            }
+                </div>)}
 
             {/* Tools Cost Breakdown Modal */}
-            {
-                showToolsCostModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        <div
-                            className="fixed inset-0"
-                            onClick={() => setShowToolsCostModal(false)}
-                        />
-                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+            {showToolsCostModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div
+                        className="fixed inset-0"
+                        onClick={() => setShowToolsCostModal(false)}
+                    />
+                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
-                            {/* Header */}
-                            <div className="p-6 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                            <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-bold text-orange-800">Costo de Herramientas</h3>
-                                            <p className="text-sm text-orange-600">Desglose de inversión en herramientas</p>
-                                        </div>
+                        {/* Header */}
+                        <div className="p-6 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
                                     </div>
-                                    <CloseButton onClose={() => setShowToolsCostModal(false)} />
+                                    <div>
+                                        <h3 className="text-xl font-bold text-orange-800">Costo de Herramientas</h3>
+                                        <p className="text-sm text-orange-600">Desglose de inversión en herramientas</p>
+                                    </div>
                                 </div>
-                            </div>
-
-                            {/* Content */}
-                            <div className="p-6 overflow-y-auto max-h-96">
-                                <div className="space-y-3">
-                                    {defaultTools
-                                        .filter(tool => tool.cost > 0)
-                                        .map((tool) => (
-                                            <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                                <div className="flex-1">
-                                                    <div className="font-semibold text-gray-900">{tool.name}</div>
-                                                    <div className="text-sm text-gray-600 mt-1 capitalize">
-                                                        {tool.type} • {(toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General'}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="font-bold text-orange-700">${tool.cost.toFixed(2)}</div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    }
-
-                                    {defaultTools.filter(tool => tool.cost > 0).length === 0 && (
-                                        <div className="text-center py-8 text-gray-500">
-                                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                                                <DollarSign className="h-6 w-6 text-gray-400" />
-                                            </div>
-                                            <div>No hay herramientas con costo adicional</div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Footer */}
-                            <div className="p-6 border-t bg-gray-50">
-                                <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
-                                    <span className="font-bold text-gray-900">Costo Total:</span>
-                                    <span className="text-xl font-bold text-orange-700">
-                                        ${defaultTools.reduce((total, tool) => total + (tool.cost || 0), 0).toFixed(2)}
-                                    </span>
-                                </div>
-                                <ActionButton
-                                    onClick={() => setShowToolsCostModal(false)}
-                                    color="red"
-                                    fullWidth
-                                >
-                                    Cerrar
-                                </ActionButton>
+                                <CloseButton onClose={() => setShowToolsCostModal(false)} />
                             </div>
                         </div>
-                    </div>)
+
+                        {/* Content */}
+                        <div className="p-6 overflow-y-auto max-h-96">
+                            <div className="space-y-3">
+                                {defaultTools
+                                    .filter(tool => tool.cost > 0)
+                                    .map((tool) => (
+                                        <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                            <div className="flex-1">
+                                                <div className="font-semibold text-gray-900">{tool.name}</div>
+                                                <div className="text-sm text-gray-600 mt-1 capitalize">
+                                                    {tool.type} • {(toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General'}
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-bold text-orange-700">${tool.cost.toFixed(2)}</div>
+                                            </div>
+                                        </div>
+                                    ))
+                                }
+
+                                {defaultTools.filter(tool => tool.cost > 0).length === 0 && (
+                                    <div className="text-center py-8 text-gray-500">
+                                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <DollarSign className="h-6 w-6 text-gray-400" />
+                                        </div>
+                                        <div>No hay herramientas con costo adicional</div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-6 border-t bg-gray-50">
+                            <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
+                                <span className="font-bold text-gray-900">Costo Total:</span>
+                                <span className="text-xl font-bold text-orange-700">
+                                    ${defaultTools.reduce((total, tool) => total + (tool.cost || 0), 0).toFixed(2)}
+                                </span>
+                            </div>
+                            <ActionButton
+                                onClick={() => setShowToolsCostModal(false)}
+                                color="red"
+                                fullWidth
+                            >
+                                Cerrar
+                            </ActionButton>
+                        </div>
+                    </div>
+                </div>)
             }
-        </div >
-    )
+        </div >)
 }
