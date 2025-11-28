@@ -964,7 +964,7 @@ export function RecipeCalculatorPanel({
                                     const tool = tools.find(t => t.id === recipeTool.toolId)
                                     if (!tool) return null
 
-                                    const cost = tool.costPerBatch || 0
+                                    const cost = tool.costPerBatch || 0;
                                     const costPercentage = (cost / totalRecipeCost) * 100
 
                                     return (
