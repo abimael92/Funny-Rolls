@@ -17,6 +17,8 @@ import {
 } from '@/lib/utils'
 import { FlipCard } from './FlipCard';
 import { CloseButton, ActionButton } from './ModalHelpers';
+import { UnitConverter } from '@/lib/unit-conversion';
+import { CustomNumberInput } from './CustomNumberInput';
 
 interface RecipeCalculatorPanelProps {
     selectedRecipe: Recipe
@@ -675,7 +677,7 @@ export function RecipeCalculatorPanel({
 
                     {/* Mobile Ingredients Section */}
                     <div className="bg-gradient-to-br from-amber-50 to-cyan-50 border-2 border-amber-300 rounded-2xl p-4">
-                        <h3 className="text-xl font-bold text-amber-800 mb-4 text-center">Ingredientes</h3>
+                        <h3 className="text-xl font-bold text-amber-800 mb-4 text-center">Ingredientesss</h3>
 
                         <div className="space-y-3 max-h-96 overflow-y-auto">
                             {selectedRecipe.ingredients.map((recipeIngredient) => {
@@ -693,15 +695,25 @@ export function RecipeCalculatorPanel({
 
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    min="0"
-                                                    value={recipeIngredient.amount}
-                                                    onChange={(e) => updateRecipeIngredient(recipeIngredient.ingredientId, Number(e.target.value) || 0)}
+                                                <CustomNumberInput
+                                                    value={Number(UnitConverter.convertToReadableUnit(recipeIngredient.amount, ingredient.unit).split(' ')[0])}
+                                                    onChange={(displayValue) => {
+                                                        const converted = UnitConverter.convert(
+                                                            { value: displayValue, unit: 'unidad' },
+                                                            ingredient.unit
+                                                        );
+                                                        updateRecipeIngredient(recipeIngredient.ingredientId, converted?.value || 0)
+                                                    }}
+                                                    allowDecimals={false}
                                                     className="w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-semibold text-center"
+                                                    min={0}
+                                                    max={10000}
+                                                    placeholder="20"
                                                 />
-                                                <span className="text-base font-medium text-amber-700">{ingredient.unit}</span>
+
+                                                <span className="text-base font-medium text-amber-700">
+                                                    {UnitConverter.convertToReadableUnit(recipeIngredient.amount, ingredient.unit).split(' ')[1]}23232
+                                                </span>
                                             </div>
 
                                             <button
@@ -1109,16 +1121,18 @@ export function RecipeCalculatorPanel({
                                                 {/* Amount Input */}
                                                 <div className="flex justify-between items-center gap-2 w-full">
                                                     {/* Amount + Unit */}
-                                                    <div className="flex items-center gap-2 bg-white border-2 border-amber-300 rounded-lg px-3 py-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
-                                                        <input
-                                                            type="number"
-                                                            step="0.01"
-                                                            min="0"
-                                                            value={recipeIngredient.amount}
-                                                            onChange={(e) => updateRecipeIngredient(recipeIngredient.ingredientId, Number(e.target.value) || 0)}
+                                                    <div className="flex items-center gap-0.5 bg-white border-2 border-amber-300 rounded-lg px-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
+
+                                                        <CustomNumberInput
                                                             className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
-                                                            placeholder="0.00"
+                                                            value={recipeIngredient.amount}
+                                                            onChange={(value) => updateRecipeIngredient(recipeIngredient.ingredientId, value)}
+                                                            allowDecimals={true}
+                                                            min={0}
+                                                            max={10000}
+                                                            placeholder="20"
                                                         />
+
                                                         <span className="text-md text-amber-700 font-semibold">{ingredient.unit}</span>
                                                     </div>
 
