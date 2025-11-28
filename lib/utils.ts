@@ -3,6 +3,7 @@ import { Product, Recipe, Ingredient } from './types';
 import { products, defaultIngredients } from './data';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { UnitConverter } from './unit-conversion';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -18,8 +19,15 @@ export const calculateRecipeCost = (
 			(i) => i.id === recipeIngredient.ingredientId
 		);
 		if (ingredient) {
-			const costPerUnit = ingredient.price / ingredient.amount;
-			totalCost += costPerUnit * recipeIngredient.amount;
+			const costPerStandardUnit = getIngredientCostPerUnit(ingredient);
+
+			// Convert recipe amount to standard units for calculation
+			const standardAmount = UnitConverter.convertToStandardUnit(
+				recipeIngredient.amount,
+				ingredient.unit
+			);
+
+			totalCost += costPerStandardUnit * standardAmount.value;
 		}
 	});
 	return totalCost;
@@ -65,7 +73,11 @@ export const getIngredientById = (id: string): Ingredient | undefined => {
 };
 
 export const getIngredientCostPerUnit = (ingredient: Ingredient): number => {
-	return ingredient.price / ingredient.amount;
+	const standard = UnitConverter.convertToStandardUnit(
+		ingredient.amount,
+		ingredient.unit
+	);
+	return ingredient.price / standard.value;
 };
 
 // Recipe management helpers
