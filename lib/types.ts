@@ -19,6 +19,8 @@ export interface Ingredient {
 	minAmount: number;
 	category?: IngredientCategory;
 	allergenInfo?: string[];
+	containsAmount?: number; // For non-standard units
+	containsUnit?: string; // For non-standard units
 }
 
 export interface Recipe {
