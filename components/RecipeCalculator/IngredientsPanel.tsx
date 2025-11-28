@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeftRight, Calculator, ChevronDown, CookingPot, Info, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
+import { DEFAULT_UNIT_CONVERSIONS } from '@/lib/unit-conversion'
 import { UnitConverter } from '@/lib/unit-conversion';
 import { EditableIngredientRow } from './EditableIngredientRow'
 import { CustomNumberInput } from './CustomNumberInput';
@@ -41,6 +42,10 @@ export function IngredientsPanel({
     const [showTools, setShowTools] = useState(false);
     const [showIngredientsModal, setShowIngredientsModal] = useState(false);
     const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+    const [specialUnit, setSpecialUnit] = useState({
+        containsAmount: 0,
+        containsUnit: 'g'
+    });
 
 
     // Add new ingredient
@@ -68,12 +73,21 @@ export function IngredientsPanel({
             return
         }
 
+        // For non-standard units, use the package content for calculations
+        if (['paquete', 'sobre', 'caja', 'lata'].includes(newIngredient.unit)) {
+            if (specialUnit.containsAmount <= 0) {
+                setError('La cantidad total del paquete debe ser mayor a 0')
+                return
+            }
+        }
+
         const ingredient: Ingredient = {
             ...newIngredient,
             id: Date.now().toString()
         }
         setIngredients([...ingredients, ingredient])
         setNewIngredient({ name: '', price: 0, unit: '', amount: 0, minAmount: 0 })
+        setSpecialUnit({ containsUnit: 'g', containsAmount: 0 })
     }
 
     // Remove ingredient
@@ -251,10 +265,52 @@ export function IngredientsPanel({
                                                 </label>
                                                 <CustomSelect
                                                     value={newIngredient.unit}
-                                                    onChange={(value) => setNewIngredient({ ...newIngredient, unit: value })}
+                                                    onChange={(value) => {
+                                                        setNewIngredient({ ...newIngredient, unit: value });
+
+                                                        // Set default values immediately
+                                                        if (DEFAULT_UNIT_CONVERSIONS[value]) {
+                                                            setSpecialUnit({
+                                                                containsAmount: DEFAULT_UNIT_CONVERSIONS[value].amount,
+                                                                containsUnit: DEFAULT_UNIT_CONVERSIONS[value].unit
+                                                            });
+                                                        } else {
+                                                            setSpecialUnit({ containsUnit: 'g', containsAmount: 0 });
+                                                        }
+                                                    }}
                                                 />
                                             </div>
                                         </div>
+
+                                        {/* Package Content - Show only for non-standard units */}
+                                        {['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(newIngredient.unit) && (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-amber-700 mb-2">
+                                                        Contiene cantidad
+                                                    </label>
+                                                    <CustomNumberInput
+                                                        value={specialUnit.containsAmount}
+                                                        onChange={(value) => setSpecialUnit({ ...specialUnit, containsAmount: value })}
+                                                        className="w-full border-2 border-amber-300 rounded-lg"
+                                                        min={0}
+                                                        max={10000}
+                                                        placeholder="250"
+                                                        allowDecimals={true}
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <label className="block text-sm font-medium text-amber-700 mb-2">
+                                                        Unidad de contenido
+                                                    </label>
+                                                    <CustomSelect
+                                                        value={specialUnit.containsUnit}
+                                                        onChange={(value) => setSpecialUnit({ ...specialUnit, containsUnit: value })}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Price and Min Amount Row */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -80,6 +80,18 @@ export const INGREDIENT_DENSITIES: Record<string, number> = {
 	'queso crema': 1.1,
 };
 
+export const DEFAULT_UNIT_CONVERSIONS: {
+	[key: string]: { amount: number; unit: string };
+} = {
+	botella: { amount: 1000, unit: 'ml' },
+	bolsa: { amount: 1000, unit: 'g' },
+	docena: { amount: 12, unit: 'unidad' },
+	paquete: { amount: 500, unit: 'g' },
+	sobre: { amount: 50, unit: 'g' },
+	caja: { amount: 1000, unit: 'g' },
+	latas: { amount: 1, unit: 'unidad' },
+};
+
 export class UnitConverter {
 	/**
 	 * Convert a measurement from one unit to another
@@ -311,8 +323,35 @@ export class UnitConverter {
 	 */
 	static convertToStandardUnit(
 		amount: number,
-		unit: string
+		unit: string,
+		containsAmount?: number,
+		containsUnit?: string
 	): { value: number; unit: string } {
+		// If we have package conversion data, use it
+		if (
+			containsAmount &&
+			containsUnit &&
+			[
+				'botella',
+				'bolsa',
+				'docena',
+				'paquete',
+				'sobre',
+				'caja',
+				'latas',
+			].includes(unit)
+		) {
+			// Convert the contained amount to standard units
+			const containedStandard = this.convertToStandardUnit(
+				containsAmount,
+				containsUnit
+			);
+			return {
+				value: amount * containedStandard.value,
+				unit: containedStandard.unit,
+			};
+		}
+
 		// Handle docena conversion for calculations
 		if (unit === 'docena') {
 			return { value: amount * 12, unit: 'unidad' };
@@ -320,13 +359,27 @@ export class UnitConverter {
 
 		// Handle other non-standard units that need conversion
 		if (unit === 'paquete') {
-			// Assume 1 package = standard amount (you can customize this)
-			return { value: amount * 250, unit: 'g' }; // Example: 1 package = 250g
+			return { value: amount * 250, unit: 'g' };
 		}
 
 		if (unit === 'sobre') {
-			// Assume 1 packet = standard amount
-			return { value: amount * 11, unit: 'g' }; // Example: 1 yeast packet = 11g
+			return { value: amount * 11, unit: 'g' };
+		}
+
+		if (unit === 'botella') {
+			return { value: amount * 1000, unit: 'ml' };
+		}
+
+		if (unit === 'bolsa') {
+			return { value: amount * 1000, unit: 'g' };
+		}
+
+		if (unit === 'caja') {
+			return { value: amount * 1000, unit: 'g' };
+		}
+
+		if (unit === 'latas') {
+			return { value: amount * 1, unit: 'unidad' };
 		}
 
 		// For standard units, return as-is

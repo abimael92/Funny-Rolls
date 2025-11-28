@@ -73,6 +73,18 @@ export const getIngredientById = (id: string): Ingredient | undefined => {
 };
 
 export const getIngredientCostPerUnit = (ingredient: Ingredient): number => {
+	// For non-standard units with conversion data
+	if (ingredient.containsAmount && ingredient.containsUnit) {
+		// Calculate cost per contained unit (e.g., cost per gram in a package)
+		const costPerContainedUnit = ingredient.price / ingredient.containsAmount;
+
+		// Convert 1 unit of the ingredient to the contained unit
+		const standard = UnitConverter.convertToStandardUnit(1, ingredient.unit);
+
+		return costPerContainedUnit * standard.value;
+	}
+
+	// Standard calculation for regular units
 	const standard = UnitConverter.convertToStandardUnit(
 		ingredient.amount,
 		ingredient.unit

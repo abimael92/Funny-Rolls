@@ -1,6 +1,7 @@
 // lib/data.ts
 import { Product, Ingredient, Tool } from './types';
 
+// lib/data.ts
 export const defaultIngredients: Ingredient[] = [
 	{ id: '1', name: 'Harina', price: 25, unit: 'kg', amount: 1, minAmount: 0.8 },
 	{ id: '2', name: 'Azúcar', price: 18, unit: 'kg', amount: 1, minAmount: 0.2 },
@@ -28,6 +29,8 @@ export const defaultIngredients: Ingredient[] = [
 		amount: 1,
 		minAmount: 0.03,
 	},
+
+	// Non-standard units with conversion data
 	{
 		id: '6',
 		name: 'Huevos',
@@ -35,6 +38,8 @@ export const defaultIngredients: Ingredient[] = [
 		unit: 'docena',
 		amount: 1,
 		minAmount: 0.3,
+		containsAmount: 12, // 1 dozen contains 12 units
+		containsUnit: 'unidad', // The contained unit is individual units
 	},
 	{
 		id: '7',
@@ -43,64 +48,70 @@ export const defaultIngredients: Ingredient[] = [
 		unit: 'litro',
 		amount: 1,
 		minAmount: 0.3,
+		// No conversion needed for standard metric units
 	},
+
+	// Add more non-standard units as needed
 	{
-		id: '8',
-		name: 'Crema para glaseado',
-		price: 85,
-		unit: 'kg',
+		id: '16',
+		name: 'Levadura en sobre',
+		price: 15,
+		unit: 'sobre',
 		amount: 1,
-		minAmount: 0.1,
+		minAmount: 5,
+		containsAmount: 11, // 1 packet contains 11g
+		containsUnit: 'g', // The contained unit is grams
 	},
 	{
-		id: '9',
-		name: 'Chocolate',
-		price: 150,
-		unit: 'kg',
+		id: '17',
+		name: 'Harina en paquete',
+		price: 18,
+		unit: 'paquete',
 		amount: 1,
-		minAmount: 0.1,
+		minAmount: 2,
+		containsAmount: 1000, // 1 package contains 1000g
+		containsUnit: 'g', // The contained unit is grams
 	},
 	{
-		id: '10',
-		name: 'Fresas',
-		price: 80,
-		unit: 'kg',
-		amount: 1,
-		minAmount: 0.2,
-	},
-	{
-		id: '11',
-		name: 'Arándanos',
-		price: 120,
-		unit: 'kg',
-		amount: 1,
-		minAmount: 0.2,
-	},
-	{
-		id: '12',
-		name: 'Caramelo',
-		price: 95,
-		unit: 'kg',
-		amount: 1,
-		minAmount: 0.1,
-	},
-	{
-		id: '13',
-		name: 'Queso crema',
-		price: 110,
-		unit: 'kg',
-		amount: 1,
-		minAmount: 0.1,
-	},
-	{
-		id: '14',
-		name: 'Esencia de vainilla',
+		id: '18',
+		name: 'Botella de esencia',
 		price: 180,
-		unit: 'litro',
+		unit: 'botella',
 		amount: 1,
-		minAmount: 0.01,
+		minAmount: 0.1,
+		containsAmount: 500, // 1 bottle contains 500ml
+		containsUnit: 'ml', // The contained unit is milliliters
 	},
-	{ id: '15', name: 'Sal', price: 8, unit: 'kg', amount: 1, minAmount: 0.005 },
+	{
+		id: '19',
+		name: 'Bolsa de chocolate',
+		price: 85,
+		unit: 'bolsa',
+		amount: 1,
+		minAmount: 1,
+		containsAmount: 500, // 1 bag contains 500g
+		containsUnit: 'g', // The contained unit is grams
+	},
+	{
+		id: '20',
+		name: 'Caja de fresas',
+		price: 120,
+		unit: 'caja',
+		amount: 1,
+		minAmount: 0.5,
+		containsAmount: 2000, // 1 box contains 2000g
+		containsUnit: 'g', // The contained unit is grams
+	},
+	{
+		id: '21',
+		name: 'Latas de leche condensada',
+		price: 35,
+		unit: 'latas',
+		amount: 1,
+		minAmount: 3,
+		containsAmount: 1, // 1 can = 1 unit (or you could use weight)
+		containsUnit: 'unidad', // The contained unit is individual cans
+	},
 ];
 
 export const products: Product[] = [

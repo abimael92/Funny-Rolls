@@ -191,7 +191,7 @@ export function ProductionTrackerPanel({
     };
 
 
-    console.log(" LOW STOCK ITEMS:", lowStockItems)
+    // console.log(" LOW STOCK ITEMS:", lowStockItems)
 
     // Helper to get combined items for a record
     const getCombinedRecordItems = (recordId: string) => {
