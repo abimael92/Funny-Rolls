@@ -1,5 +1,7 @@
 // lib/unit-conversion.ts
 
+import { Ingredient } from './types';
+
 export interface UnitConversion {
 	fromUnit: string;
 	toUnit: string;
@@ -276,5 +278,91 @@ export class UnitConverter {
 			value: m1.value + m2.value,
 			unit: m1.unit,
 		};
+	}
+
+	/**
+	 * Smart display conversion - shows docenas as units when amount < 1
+	 */
+	static convertToReadableUnit(amount: number, unit: string): string {
+		// Handle docena specifically
+		if (unit === 'docena' && amount < 1) {
+			const individualUnits = amount * 12;
+			return `${individualUnits.toFixed(0)} unidades`;
+		}
+
+		// Keep your existing conversions for other units
+		if (unit === 'kg' && amount < 1) {
+			const converted = this.convert({ value: amount, unit: 'kg' }, 'g');
+			return converted ? `${converted.value.toFixed(0)}g` : `${amount} ${unit}`;
+		}
+
+		if ((unit === 'l' || unit === 'litro') && amount < 1) {
+			const converted = this.convert({ value: amount, unit: 'l' }, 'ml');
+			return converted
+				? `${converted.value.toFixed(0)}ml`
+				: `${amount} ${unit}`;
+		}
+
+		return `${amount} ${unit}`;
+	}
+
+	/**
+	 * Convert amount to standard units for calculations
+	 */
+	static convertToStandardUnit(
+		amount: number,
+		unit: string
+	): { value: number; unit: string } {
+		// Handle docena conversion for calculations
+		if (unit === 'docena') {
+			return { value: amount * 12, unit: 'unidad' };
+		}
+
+		// Handle other non-standard units that need conversion
+		if (unit === 'paquete') {
+			// Assume 1 package = standard amount (you can customize this)
+			return { value: amount * 250, unit: 'g' }; // Example: 1 package = 250g
+		}
+
+		if (unit === 'sobre') {
+			// Assume 1 packet = standard amount
+			return { value: amount * 11, unit: 'g' }; // Example: 1 yeast packet = 11g
+		}
+
+		// For standard units, return as-is
+		return { value: amount, unit };
+	}
+
+	/**
+	 * Convert from standard units back to original unit for display
+	 */
+	static convertFromStandardUnit(
+		amount: number,
+		originalUnit: string
+	): { value: number; unit: string } {
+		if (originalUnit === 'docena') {
+			return { value: amount / 12, unit: originalUnit };
+		}
+
+		if (originalUnit === 'paquete') {
+			return { value: amount / 250, unit: originalUnit };
+		}
+
+		if (originalUnit === 'sobre') {
+			return { value: amount / 11, unit: originalUnit };
+		}
+
+		return { value: amount, unit: originalUnit };
+	}
+
+	/**
+	 * Get cost per standard unit for consistent calculations
+	 */
+	static getCostPerStandardUnit(ingredient: Ingredient): number {
+		const standard = this.convertToStandardUnit(
+			ingredient.amount,
+			ingredient.unit
+		);
+		return ingredient.price / standard.value;
 	}
 }
