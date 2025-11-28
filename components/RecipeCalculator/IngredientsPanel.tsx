@@ -390,8 +390,8 @@ export function IngredientsPanel({
                             {ingredients.map((ingredient) => {
                                 const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id)
                                 const currentStock = inventoryItem?.currentStock || 0
-
                                 const isLowStock = currentStock <= ingredient.minAmount
+                                const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit)
 
                                 return (
                                     <div
@@ -416,17 +416,15 @@ export function IngredientsPanel({
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center justify-between gap-2 mb-3">
                                                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
-
                                                                 <div className="flex items-center gap-2">
                                                                     <div className="font-semibold text-gray-900 text-lg sm:text-xl truncate">{ingredient.name}</div>
                                                                     <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm:px-3 py-1 rounded-full font-medium">
                                                                         {ingredient.unit}
                                                                     </div>
                                                                 </div>
-
                                                             </div>
 
-                                                            {/* Action Buttons - Always visible on mobile */}
+                                                            {/* Action Buttons */}
                                                             <div className="flex items-center gap-1 flex-shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
                                                                 <button
                                                                     onClick={() => setEditingIngredientId(ingredient.id)}
@@ -450,63 +448,42 @@ export function IngredientsPanel({
                                                             <div className="flex items-center gap-2">
                                                                 <div className="text-sm sm:text-md text-amber-700">Costo por unidad:</div>
                                                                 <div className="text-sm sm:text-md font-bold text-amber-800">
-                                                                    ${getIngredientCostPerUnit(ingredient).toFixed(2)} / {ingredient.unit}
+                                                                    {isNonStandardUnit ? (
+                                                                        <>
+                                                                            <span className="line-through text-amber-400/50 mr-2">
+                                                                                ${ingredient.price.toFixed(2)}/{ingredient.unit}
+                                                                            </span>
+                                                                            ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{UnitConverter.convertToStandardUnit(1, ingredient.unit).unit}
+                                                                        </>
+                                                                    ) : (
+                                                                        `$${getIngredientCostPerUnit(ingredient).toFixed(2)}/${ingredient.unit}`
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </div>
 
                                                         {/* Inventory Information */}
-                                                        <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">                                                <div className="flex items-center justify-between text-sm sm:text-md">
-                                                            <span className="text-sm sm:text-md text-gray-800">Stock actual:</span>
+                                                        <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">
 
-                                                            <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-1 sm:px-2 py-1 ml-2 sm:ml-4 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm">
+                                                            <div className="flex items-center justify-between text-sm sm:text-md">
+                                                                <span className="text-sm sm:text-md text-gray-800">Stock actual:</span>
+                                                                <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg px-1 sm:px-2 py-1 ml-2 sm:ml-4 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm">
 
-                                                                {/* Custom Decrement Button */}
-                                                                <button
-                                                                    type="button"
-                                                                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
-                                                                    onClick={() => {
-                                                                        const newValue = Math.max(0, (currentStock - 1) || 0);
-                                                                        updateInventory(ingredient.id, newValue);
-                                                                    }}
-                                                                >
-                                                                    <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                                                                    </svg>
-                                                                </button>
+                                                                    {/* Number Input */}
+                                                                    <CustomNumberInput
+                                                                        value={currentStock || 0}
+                                                                        onChange={(value) => updateInventory(ingredient.id, value)}
+                                                                        min={0}
+                                                                        max={10000}
+                                                                        placeholder="0"
+                                                                        allowDecimals={false}
+                                                                    />
 
-                                                                {/* Number Input */}
-                                                                <input
-                                                                    type="number"
-                                                                    step="0.01"
-                                                                    min="0"
-                                                                    value={currentStock}
-                                                                    className="w-8 sm:w-10 bg-transparent border-none text-center text-xs sm:text-sm font-bold text-amber-900 focus:outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                                    onChange={(e) => {
-                                                                        const value = Math.max(0, Number(e.target.value) || 0)
-                                                                        updateInventory(ingredient.id, value)
-                                                                    }}
-                                                                />
-
-                                                                {/* Custom Increment Button */}
-                                                                <button
-                                                                    type="button"
-                                                                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
-                                                                    onClick={() => {
-                                                                        const newValue = (currentStock + 1) || 1;
-                                                                        updateInventory(ingredient.id, newValue);
-                                                                    }}
-                                                                >
-                                                                    <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                                                    </svg>
-                                                                </button>
-
-                                                                <span className="text-sm sm:text-md text-amber-700 font-semibold ml-1 sm:ml-2 whitespace-nowrap">
-                                                                    {ingredient.unit}
-                                                                </span>
+                                                                    <span className="text-sm sm:text-md text-amber-700 font-semibold ml-1 sm:ml-2 whitespace-nowrap">
+                                                                        {ingredient.unit}
+                                                                    </span>
+                                                                </div>
                                                             </div>
-                                                        </div>
                                                             {isLowStock && inventoryItem && (
                                                                 <div className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded mt-2">
                                                                     <div className="flex items-center gap-2 font-semibold text-xs sm:text-sm mb-1">
@@ -517,18 +494,11 @@ export function IngredientsPanel({
                                                                         <span className="font-bold ml-1 text-red-700">
                                                                             {UnitConverter.convertToReadableUnit(Number((ingredient.minAmount - currentStock).toFixed(2)), ingredient.unit)}
                                                                         </span>
-                                                                        {/* <span className="font-medium">Actual:</span>
-                                                                <span className="font-bold">{currentStock.toFixed(2)} {ingredient.unit}</span>
-                                                                <span className="text-red-600 mx-1">•</span>
-                                                                <span className="font-medium">Mínimo:</span>
-                                                                <span className="font-bold">{ingredient.minAmount} {ingredient.unit}</span> */}
                                                                     </div>
                                                                 </div>
                                                             )}
                                                         </div>
                                                     </div>
-
-
                                                 </div>
                                             </>
                                         )}
