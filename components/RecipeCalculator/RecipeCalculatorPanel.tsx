@@ -55,11 +55,6 @@ export function RecipeCalculatorPanel({
     const [showAddTools, setShowAddTools] = useState(false);
     const [showRecipeTools, setShowRecipeTools] = useState(false);
 
-
-    console.log('selecter recipe: ', selectedRecipe);
-
-
-
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -686,6 +681,7 @@ export function RecipeCalculatorPanel({
 
                                 const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount
 
+
                                 return (
                                     <div key={recipeIngredient.ingredientId} className="bg-white border-2 border-amber-200 rounded-xl p-3">
                                         <div className="flex justify-between items-start mb-2">
@@ -1094,9 +1090,14 @@ export function RecipeCalculatorPanel({
                         <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                             {selectedRecipe.ingredients.map((recipeIngredient) => {
                                 const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
+                                // console.log('ingredient', ingredient);
+
                                 if (!ingredient) return null
 
-                                const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount
+                                const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit)
+
+                                const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount;
+                                const convertedUnit = UnitConverter.convertToStandardUnit(1, ingredient.unit);
                                 const costPercentage = (cost / totalRecipeCost) * 100
 
                                 return (
@@ -1113,15 +1114,28 @@ export function RecipeCalculatorPanel({
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-3 mb-2">
                                                     <div className="font-semibold text-gray-900 text-lg">{ingredient.name}</div>
+
                                                     <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                                                        ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
+                                                        {isNonStandardUnit ? (
+                                                            <span className="line-through text-amber-400/50">
+                                                                ${ingredient.price.toFixed(2)}/{ingredient.unit}
+                                                            </span>
+                                                        ) : (
+                                                            `$${ingredient.price.toFixed(2)}/${ingredient.unit}`
+                                                        )}
                                                     </div>
+
+                                                    {isNonStandardUnit && (
+                                                        <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
+                                                            ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{convertedUnit?.unit || ingredient.unit}
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 {/* Amount Input */}
                                                 <div className="flex justify-between items-center gap-2 w-full">
                                                     {/* Amount + Unit */}
-                                                    <div className="flex items-center gap-0.5 bg-white border-2 border-amber-300 rounded-lg px-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
+                                                    <div className="flex items-center gap-0.5 bg-white border-2 border-amber-300 rounded-lg px-3 py-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
 
                                                         <CustomNumberInput
                                                             className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
@@ -1133,7 +1147,7 @@ export function RecipeCalculatorPanel({
                                                             placeholder="20"
                                                         />
 
-                                                        <span className="text-md text-amber-700 font-semibold">{ingredient.unit}</span>
+                                                        <span className="text-md text-amber-700 font-semibold">{convertedUnit?.unit || ingredient.unit}</span>
                                                     </div>
 
                                                     {/* Cost Display */}
@@ -1440,6 +1454,8 @@ export function RecipeCalculatorPanel({
                                         if (!ingredient) return null;
 
                                         const unitCost = (getIngredientCostPerUnit(ingredient) * recipeIngredient.amount) / selectedRecipe.batchSize;
+
+
                                         const percentage = (unitCost / costPerItem) * 100;
 
                                         return (
