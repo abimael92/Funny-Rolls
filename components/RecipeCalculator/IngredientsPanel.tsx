@@ -47,6 +47,22 @@ export function IngredientsPanel({
         containsUnit: 'g'
     });
 
+    // Add state for completed ingredients
+    const [completedIngredients, setCompletedIngredients] = useState<string[]>([])
+
+    // Toggle ingredient completion
+    const toggleIngredientCompletion = (ingredientId: string) => {
+        if (editingIngredientId === ingredientId) return // Don't allow completion during editing
+
+        setCompletedIngredients(prev =>
+            prev.includes(ingredientId)
+                ? prev.filter(id => id !== ingredientId)
+                : [...prev, ingredientId]
+        )
+    }
+
+    // Check if ingredient is completed
+    const isIngredientCompleted = (ingredientId: string) => completedIngredients.includes(ingredientId)
 
     // Add new ingredient
     const addIngredient = () => {
@@ -396,10 +412,14 @@ export function IngredientsPanel({
                                 return (
                                     <div
                                         key={ingredient.id}
-                                        className={`group relative border-2 rounded-xl p-3 sm:p-4 transition-all duration-300 hover:shadow-lg ${isLowStock
+                                        className={`group relative border-2 rounded-xl p-3 sm:p-4 transition-all duration-300 hover:shadow-lg cursor-pointer ${isLowStock
                                             ? 'bg-red-50 border-red-200 hover:border-red-400'
                                             : 'bg-amber-50 border-amber-200 hover:border-amber-400'
+                                            } ${isIngredientCompleted(ingredient.id)
+                                                ? 'bg-green-50 border-green-200 opacity-75'
+                                                : ''
                                             }`}
+                                        onClick={() => toggleIngredientCompletion(ingredient.id)}
                                     >
                                         {editingIngredientId === ingredient.id ? (
                                             <EditableIngredientRow
