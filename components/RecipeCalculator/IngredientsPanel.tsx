@@ -391,7 +391,7 @@ export function IngredientsPanel({
                                 const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id)
                                 const currentStock = inventoryItem?.currentStock || 0
                                 const isLowStock = currentStock <= ingredient.minAmount
-                                const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit)
+                                // const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit)
 
                                 return (
                                     <div
@@ -446,18 +446,9 @@ export function IngredientsPanel({
                                                         {/* Pricing Information */}
                                                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                                                             <div className="flex items-center gap-2">
-                                                                <div className="text-sm sm:text-md text-amber-700">Costo por unidad:</div>
+                                                                <div className="text-sm sm:text-md text-amber-700">Costo:</div>
                                                                 <div className="text-sm sm:text-md font-bold text-amber-800">
-                                                                    {isNonStandardUnit ? (
-                                                                        <>
-                                                                            <span className="line-through text-amber-400/50 mr-2">
-                                                                                ${ingredient.price.toFixed(2)}/{ingredient.unit}
-                                                                            </span>
-                                                                            ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{UnitConverter.convertToStandardUnit(1, ingredient.unit).unit}
-                                                                        </>
-                                                                    ) : (
-                                                                        `$${getIngredientCostPerUnit(ingredient).toFixed(2)}/${ingredient.unit}`
-                                                                    )}
+                                                                    ${(ingredient.price).toFixed(2)}
                                                                 </div>
                                                             </div>
                                                         </div>
