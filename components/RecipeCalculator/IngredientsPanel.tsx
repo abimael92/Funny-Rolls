@@ -391,7 +391,7 @@ export function IngredientsPanel({
                                 const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id)
                                 const currentStock = inventoryItem?.currentStock || 0
                                 const isLowStock = currentStock <= ingredient.minAmount
-                                // const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit)
+                                const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit)
 
                                 return (
                                     <div
@@ -419,7 +419,7 @@ export function IngredientsPanel({
                                                                 <div className="flex items-center gap-2">
                                                                     <div className="font-semibold text-gray-900 text-lg sm:text-xl truncate">{ingredient.name}</div>
                                                                     <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm:px-3 py-1 rounded-full font-medium">
-                                                                        {ingredient.unit}
+                                                                        ${(ingredient.price).toFixed(2)} / {ingredient.unit}
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -443,15 +443,24 @@ export function IngredientsPanel({
                                                             </div>
                                                         </div>
 
-                                                        {/* Pricing Information */}
-                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="text-sm sm:text-md text-amber-700">Costo:</div>
-                                                                <div className="text-sm sm:text-md font-bold text-amber-800">
-                                                                    ${(ingredient.price).toFixed(2)}
+                                                        {isNonStandardUnit && (
+                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="text-sm sm:text-md text-amber-700">
+                                                                        {ingredient?.containsUnit?.toLowerCase() === 'g' || ingredient?.containsUnit?.toLowerCase() === 'ml'
+                                                                            ? `Costo por 100${ingredient.containsUnit}:`
+                                                                            : `Costo por ${UnitConverter.convertToStandardUnit(1, ingredient.unit).unit}:`
+                                                                        }
+                                                                    </div>
+                                                                    <div className="text-sm sm:text-md font-bold text-amber-800">
+                                                                        ${getIngredientCostPerUnit(ingredient).toFixed(2)}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
+                                                        )}
+
+                                                        {/* Pricing Information */}
+
 
                                                         {/* Inventory Information */}
                                                         <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">
