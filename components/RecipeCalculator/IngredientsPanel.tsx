@@ -418,10 +418,12 @@ export function IngredientsPanel({
                                                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
                                                                 <div className="flex items-center gap-2">
                                                                     <div className="font-semibold text-gray-900 text-lg sm:text-xl truncate">{ingredient.name}</div>
-                                                                    <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm:px-3 py-1 rounded-full font-medium">
+                                                                    <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm: py-1 rounded-full font-medium">
                                                                         ${(ingredient.price).toFixed(2)} / {ingredient.unit}
                                                                     </div>
+
                                                                 </div>
+
                                                             </div>
 
                                                             {/* Action Buttons */}
@@ -443,8 +445,19 @@ export function IngredientsPanel({
                                                             </div>
                                                         </div>
 
+                                                        {/* Special Unit Cost Info */}
                                                         {isNonStandardUnit && (
-                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                                            <div className="flex flex-col gap-2 mt-2">
+                                                                {/* Line 1: Package content info */}
+                                                                <div className="flex items-center">
+                                                                    <div className="text-xs sm:text-sm text-amber-800 border-2 border-amber-500 bg-amber-50 px-2 py-1 rounded-full font-medium">
+                                                                        {ingredient.containsAmount === 1
+                                                                            ? `un/una ${ingredient.containsUnit}`
+                                                                            : `${ingredient.containsAmount} ${ingredient.containsUnit === 'unidad' ? 'unidades' : ingredient.containsUnit + 's'}`} por {ingredient.unit}
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Line 2: Cost info */}
                                                                 <div className="flex items-center gap-2">
                                                                     <div className="text-sm sm:text-md text-amber-700">
                                                                         {ingredient?.containsUnit?.toLowerCase() === 'g' || ingredient?.containsUnit?.toLowerCase() === 'ml'
@@ -458,9 +471,6 @@ export function IngredientsPanel({
                                                                 </div>
                                                             </div>
                                                         )}
-
-                                                        {/* Pricing Information */}
-
 
                                                         {/* Inventory Information */}
                                                         <div className="mt-3 pt-3 border-t-2 border-gray-400 gap-4">
