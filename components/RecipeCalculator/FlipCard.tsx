@@ -6,6 +6,7 @@ import { ChefHat, Edit, FlipHorizontal, Plus, Save, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { products } from "@/lib/data"
 import { Recipe } from '@/lib/types'
+import { CustomNumberInput } from './CustomNumberInput'
 
 interface FlipCardProps {
     selectedRecipe: Recipe
@@ -140,7 +141,21 @@ export function FlipCard({
                                             <span className="text-gray-700 font-medium">Precio:</span>
                                             <div className="flex items-center gap-1">
                                                 <span className="text-green-600 text-xs sm:text-sm md:text-base">$</span>
+
                                                 <div className="flex items-center bg-white border-2 border-green-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-green-400 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-200 transition-all duration-200 shadow-sm">
+                                                    <CustomNumberInput
+                                                        value={selectedRecipe.sellingPrice}
+                                                        onChange={(value) => updateRecipeSellingPrice(value)}
+                                                        allowDecimals={false}
+                                                        className="w-full"
+                                                        min={0}
+                                                        max={10000}
+                                                        placeholder="Cantidad"
+                                                        color='green'
+                                                    />
+                                                </div>
+
+                                                {/* <div className="flex items-center bg-white border-2 border-green-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-green-400 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-200 transition-all duration-200 shadow-sm">
                                                     <button
                                                         type="button"
                                                         className="w-4 h-6 sm:w-5 sm:h-7 md:w-6 md:h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-l-md border-r border-green-200 hover:bg-green-100 active:bg-green-200 transition-colors duration-150 group"
@@ -177,7 +192,7 @@ export function FlipCard({
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                                         </svg>
                                                     </button>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
 
