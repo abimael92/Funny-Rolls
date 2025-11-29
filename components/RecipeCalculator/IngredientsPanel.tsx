@@ -487,6 +487,7 @@ export function IngredientsPanel({
                                                                         max={10000}
                                                                         placeholder="0"
                                                                         allowDecimals={false}
+                                                                        color='amber'
                                                                     />
 
                                                                     <span className="text-sm sm:text-md text-amber-700 font-semibold ml-1 sm:ml-2 whitespace-nowrap">

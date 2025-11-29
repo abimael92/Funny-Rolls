@@ -46,6 +46,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                         min={0}
                         max={10000}
                         placeholder="Cantidad"
+                        color='gray'
                     />
                 </div>
 
@@ -98,6 +99,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                         min={0}
                         max={10000}
                         placeholder="Stock mínimo"
+                        color='gray'
                     />
                 </div>
             </div>

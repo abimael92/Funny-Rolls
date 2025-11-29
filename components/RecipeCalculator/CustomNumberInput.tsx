@@ -245,11 +245,11 @@ export function CustomNumberInput({
                     className="w-full h-full flex items-center justify-center px-2 py-1 overflow-hidden"
                 >
                     {displayValue || (isFocused && '0') ? (
-                        <span className={`font-mono text-${color}-900 select-none pointer-events-none text-sm sm:text-base truncate`}>
+                        <span className={`font-bold text-${color}-800  select-none pointer-events-none text-sm sm:text-base truncate`}>
                             {renderDisplayValue()}
                         </span>
                     ) : (
-                        <span className={`text-gray-400 select-none pointer-events-none text-sm sm:text-base truncate`}>{placeholder}</span>
+                        <span className={`text-gray-800/50 select-none pointer-events-none text-sm sm:text-base truncate`}>{placeholder}</span>
                     )}
                 </div>
             </div>
