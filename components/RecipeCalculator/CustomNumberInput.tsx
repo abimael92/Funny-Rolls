@@ -10,6 +10,7 @@ interface CustomNumberInputProps {
     placeholder?: string
     className?: string
     allowDecimals?: boolean  // Add this prop
+    color?: string  // Single color prop for all styling
 }
 
 export function CustomNumberInput({
@@ -19,7 +20,8 @@ export function CustomNumberInput({
     max = 10000,
     placeholder,
     className,
-    allowDecimals = true  // Default to true for backward compatibility
+    allowDecimals = true,  // Default to true for backward compatibility
+    color = "amber"  // Default color
 }: CustomNumberInputProps) {
     const [displayValue, setDisplayValue] = useState(
         value && value !== 0 ? value.toString() : ''
@@ -180,7 +182,7 @@ export function CustomNumberInput({
             // Don't highlight decimal point if it's not allowed (shouldn't happen but just in case)
             if (index === cursorPosition && /\d/.test(char) && isFocused) {
                 return (
-                    <span key={index} className="underline decoration-2 decoration-amber-500 bg-amber-200 text-amber-900 px-0.5 rounded">
+                    <span key={index} className={`underline decoration-2 decoration-${color}-500 bg-${color}-200 text-${color}-900 px-0.5 rounded`}>
                         {char}
                     </span>
                 )
@@ -194,12 +196,12 @@ export function CustomNumberInput({
     }, [value])
 
     return (
-        <div className={`flex items-center h-12 w-full ${className || ''}`}>
+        <div className={`flex items-center max-h-10 w-full ${className || ''}`}>
             <button
                 type="button"
-                className="w-6 h-6 sm:w-6 flex items-center justify-center bg-amber-50 text-amber-700 
-                rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 
-                transition-colors duration-150 group"
+                className={`w-6 h-6 sm:w-6 flex items-center justify-center bg-${color}-50 text-${color}-700 
+                rounded-l-md border-r border-${color}-200 hover:bg-${color}-100 active:bg-${color}-200 
+                transition-colors duration-150 group`}
                 onClick={(e) => {
                     e.preventDefault();
                     const currentStr = displayValue || '0';
@@ -243,18 +245,18 @@ export function CustomNumberInput({
                     className="w-full h-full flex items-center justify-center px-2 py-1 overflow-hidden"
                 >
                     {displayValue || (isFocused && '0') ? (
-                        <span className="font-mono text-gray-900 select-none pointer-events-none text-sm sm:text-base truncate">
+                        <span className={`font-mono text-${color}-900 select-none pointer-events-none text-sm sm:text-base truncate`}>
                             {renderDisplayValue()}
                         </span>
                     ) : (
-                        <span className="text-gray-400 select-none pointer-events-none text-sm sm:text-base truncate">{placeholder}</span>
+                        <span className={`text-gray-400 select-none pointer-events-none text-sm sm:text-base truncate`}>{placeholder}</span>
                     )}
                 </div>
             </div>
 
             <button
                 type="button"
-                className="w-6 h-8 sm:w-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
+                className={`w-6 h-8 sm:w-8 flex items-center justify-center bg-${color}-50 text-${color}-700 rounded-r-md border-l border-${color}-200 hover:bg-${color}-100 active:bg-${color}-200 transition-colors duration-150 group`}
                 onClick={(e) => {
                     e.preventDefault();
                     const currentStr = displayValue || '0';
