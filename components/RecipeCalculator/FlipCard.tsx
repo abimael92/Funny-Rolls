@@ -2,11 +2,12 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ChefHat, Edit, FlipHorizontal, Plus, Save, Trash2 } from "lucide-react"
+import { ChefHat, Edit, FlipHorizontal, Plus, Save, Trash2, CheckCircle } from "lucide-react"
 import Image from "next/image"
 import { products } from "@/lib/data"
 import { Recipe } from '@/lib/types'
 import { CustomNumberInput } from './CustomNumberInput'
+import { useState } from "react"  // Add this import
 
 interface FlipCardProps {
     selectedRecipe: Recipe
@@ -44,8 +45,24 @@ export function FlipCard({
     saveSteps
 }: FlipCardProps) {
     const product = products.find(p => p.name === selectedRecipe.name)
-
     const steps = selectedRecipe.steps || []
+
+    // Add state for completed steps
+    const [completedSteps, setCompletedSteps] = useState<number[]>([])
+
+    // Toggle step completion
+    const toggleStepCompletion = (index: number) => {
+        if (isEditingSteps) return // Don't allow completion during editing
+
+        setCompletedSteps(prev =>
+            prev.includes(index)
+                ? prev.filter(i => i !== index)
+                : [...prev, index]
+        )
+    }
+
+    // Check if step is completed
+    const isStepCompleted = (index: number) => completedSteps.includes(index)
 
     return (
         <div className="relative w-full h-64 sm:h-72 md:h-80 lg:h-96 perspective-1000 flip-card-container">
@@ -99,41 +116,18 @@ export function FlipCard({
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-700 text-left font-medium">Lote:<br className="hidden sm:block" />(unidades)</span>
                                             <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm">
-                                                <button
-                                                    type="button"
-                                                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
-                                                    onClick={() => {
-                                                        const newValue = Math.max(0, (selectedRecipe.batchSize - 1) || 0);
-                                                        updateRecipeBatchSize(newValue);
-                                                    }}
-                                                >
-                                                    <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                                                    </svg>
-                                                </button>
-                                                <input
-                                                    type="number"
+
+                                                <CustomNumberInput
                                                     value={selectedRecipe.batchSize}
-                                                    onChange={(e) => {
-                                                        const value = Math.max(1, Math.min(1000, Number(e.target.value) || 1))
-                                                        updateRecipeBatchSize(value)
-                                                    }}
-                                                    className="w-8 sm:w-10 md:w-12 lg:w-14 px-1 sm:px-2 py-1 text-xs sm:text-sm md:text-base text-center font-bold flip-card-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                    min="1"
-                                                    max="1000"
+                                                    onChange={(value) => updateRecipeBatchSize(value)}
+                                                    allowDecimals={false}
+                                                    className="w-full"
+                                                    min={0}
+                                                    max={10000}
+                                                    placeholder="Lote"
+                                                    color='amber'
                                                 />
-                                                <button
-                                                    type="button"
-                                                    className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
-                                                    onClick={() => {
-                                                        const newValue = (selectedRecipe.batchSize + 1) || 1;
-                                                        updateRecipeBatchSize(newValue);
-                                                    }}
-                                                >
-                                                    <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                                    </svg>
-                                                </button>
+
                                             </div>
                                         </div>
 
@@ -150,49 +144,10 @@ export function FlipCard({
                                                         className="w-full"
                                                         min={0}
                                                         max={10000}
-                                                        placeholder="Cantidad"
+                                                        placeholder="Precio"
                                                         color='green'
                                                     />
                                                 </div>
-
-                                                {/* <div className="flex items-center bg-white border-2 border-green-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-green-400 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-200 transition-all duration-200 shadow-sm">
-                                                    <button
-                                                        type="button"
-                                                        className="w-4 h-6 sm:w-5 sm:h-7 md:w-6 md:h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-l-md border-r border-green-200 hover:bg-green-100 active:bg-green-200 transition-colors duration-150 group"
-                                                        onClick={() => {
-                                                            const newValue = Math.max(0, (selectedRecipe.sellingPrice - 1) || 0);
-                                                            updateRecipeSellingPrice(newValue);
-                                                        }}
-                                                    >
-                                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                                                        </svg>
-                                                    </button>
-                                                    <input
-                                                        type="number"
-                                                        value={selectedRecipe.sellingPrice}
-                                                        onChange={(e) => {
-                                                            const value = Math.max(0, Math.min(10000, Number(e.target.value) || 0))
-                                                            updateRecipeSellingPrice(value)
-                                                        }}
-                                                        className="w-12 sm:w-14 md:w-16 p-1 text-xs sm:text-sm md:text-base text-center text-green-600 font-bold flip-card-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                        min="0"
-                                                        max="10000"
-                                                        step="0.01"
-                                                    />
-                                                    <button
-                                                        type="button"
-                                                        className="w-4 h-6 sm:w-5 sm:h-7 md:w-6 md:h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-r-md border-l border-green-200 hover:bg-green-100 active:bg-green-200 transition-colors duration-150 group"
-                                                        onClick={() => {
-                                                            const newValue = (selectedRecipe.sellingPrice + 1) || 1;
-                                                            updateRecipeSellingPrice(newValue);
-                                                        }}
-                                                    >
-                                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                                        </svg>
-                                                    </button>
-                                                </div> */}
                                             </div>
                                         </div>
 
@@ -252,9 +207,29 @@ export function FlipCard({
 
                             <div className="space-y-1 sm:space-y-2 flex-1 overflow-y-auto max-h-20 sm:max-h-24 md:max-h-32 lg:max-h-44 steps-container flip-card-steps">
                                 {steps.map((step, index) => (
-                                    <div key={index} className="flex items-start justify-between p-1 sm:p-2 md:p-3 border rounded-lg bg-white step-item-mobile">
+                                    <div
+                                        key={index}
+                                        className={`flex items-start justify-between p-1 sm:p-2 md:p-3 border rounded-lg bg-white step-item-mobile transition-all duration-200 cursor-pointer ${isStepCompleted(index)
+                                            ? 'bg-blue-50 border-blue-200 opacity-75'
+                                            : 'hover:bg-blue-50 hover:border-blue-300'
+                                            } ${!isEditingSteps ? 'hover:shadow-sm' : ''}`}
+                                        onClick={() => !isEditingSteps && toggleStepCompletion(index)}
+                                    >
                                         <div className="flex-1 flex items-start gap-1 sm:gap-2 min-w-0">
-                                            <span className="text-xs font-medium text-blue-600 mt-0.5 flex-shrink-0">{index + 1}.</span>
+                                            <div className="flex items-center gap-1 sm:gap-2">
+                                                {!isEditingSteps && (
+                                                    <div className={`flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-colors ${isStepCompleted(index)
+                                                        ? 'bg-blue-500 border-blue-500 text-white'
+                                                        : 'border-blue-400 text-transparent hover:border-blue-500'
+                                                        }`}>
+                                                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                    </div>
+                                                )}
+                                                <span className={`text-xs font-medium mt-0.5 flex-shrink-0 ${isStepCompleted(index) ? 'text-blue-600' : 'text-blue-600'
+                                                    }`}>
+                                                    {index + 1}.
+                                                </span>
+                                            </div>
                                             {isEditingSteps ? (
                                                 <input
                                                     type="text"
@@ -264,7 +239,12 @@ export function FlipCard({
                                                     className="flex-1 px-1 sm:px-2 py-1 border rounded text-xs sm:text-sm bg-white min-w-0 flip-card-input"
                                                 />
                                             ) : (
-                                                <span className="text-xs sm:text-sm break-words step-text-mobile">{step}</span>
+                                                <span className={`text-xs sm:text-sm break-words step-text-mobile transition-all ${isStepCompleted(index)
+                                                    ? 'line-through text-gray-500'
+                                                    : 'text-gray-800'
+                                                    }`}>
+                                                    {step}
+                                                </span>
                                             )}
                                         </div>
                                         {isEditingSteps && (
