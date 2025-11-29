@@ -81,7 +81,17 @@ export const getIngredientCostPerUnit = (ingredient: Ingredient): number => {
 		// Convert 1 unit of the ingredient to the contained unit
 		const standard = UnitConverter.convertToStandardUnit(1, ingredient.unit);
 
-		return costPerContainedUnit * standard.value;
+		let result = costPerContainedUnit * standard.value;
+
+		// Multiply by 100 for grams and milliliters
+		if (
+			ingredient.unit.toLowerCase() === 'g' ||
+			ingredient.unit.toLowerCase() === 'ml'
+		) {
+			result *= 100;
+		}
+
+		return result;
 	}
 
 	// Standard calculation for regular units
@@ -89,7 +99,18 @@ export const getIngredientCostPerUnit = (ingredient: Ingredient): number => {
 		ingredient.amount,
 		ingredient.unit
 	);
-	return ingredient.price / standard.value;
+
+	let result = ingredient.price / standard.value;
+
+	// Multiply by 100 for grams and milliliters
+	if (
+		ingredient.unit.toLowerCase() === 'g' ||
+		ingredient.unit.toLowerCase() === 'ml'
+	) {
+		result *= 100;
+	}
+
+	return result;
 };
 
 // Recipe management helpers
