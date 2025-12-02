@@ -48,7 +48,27 @@ export function IngredientsPanel({
     });
 
     // Add state for completed ingredients
-    const [completedIngredients, setCompletedIngredients] = useState<string[]>([])
+    const [completedIngredients, setCompletedIngredients] = useState<string[]>([]);
+
+    const units = [
+        { value: '', label: 'Unidad', fullName: '' },
+        { value: 'kg', label: 'kg', fullName: 'kilogramo' },
+        { value: 'g', label: 'g', fullName: 'gramo' },
+        { value: 'lb', label: 'lb', fullName: 'libra' },
+        { value: 'oz', label: 'oz', fullName: 'onza' },
+        { value: 'l', label: 'l', fullName: 'litro' },
+        { value: 'ml', label: 'ml', fullName: 'mililitro' },
+        { value: 'cup', label: 'cup', fullName: 'taza' },
+        { value: 'tbsp', label: 'tbsp', fullName: 'cucharada' },
+        { value: 'tsp', label: 'tsp', fullName: 'cucharadita' },
+        { value: 'unidad', label: 'unidad', fullName: '' },
+        { value: 'docena', label: 'docena', fullName: '' },
+        { value: 'paquete', label: 'paquete', fullName: '' },
+        { value: 'sobre', label: 'sobre', fullName: '' },
+        { value: 'latas', label: 'latas', fullName: '' },
+        { value: 'botella', label: 'botella', fullName: '' },
+        { value: 'bolsa', label: 'bolsa', fullName: '' },
+    ]
 
     // Toggle ingredient completion
     const toggleIngredientCompletion = (ingredientId: string) => {
@@ -294,7 +314,25 @@ export function IngredientsPanel({
                                                             setSpecialUnit({ containsUnit: 'g', containsAmount: 0 });
                                                         }
                                                     }}
+                                                    options={units}
+                                                    color="amber"
                                                 />
+                                                {/* <CustomSelect
+                                                    value={newIngredient.unit}
+                                                    onChange={(value) => {
+                                                        setNewIngredient({ ...newIngredient, unit: value });
+
+                                                        // Set default values immediately
+                                                        if (DEFAULT_UNIT_CONVERSIONS[value]) {
+                                                            setSpecialUnit({
+                                                                containsAmount: DEFAULT_UNIT_CONVERSIONS[value].amount,
+                                                                containsUnit: DEFAULT_UNIT_CONVERSIONS[value].unit
+                                                            });
+                                                        } else {
+                                                            setSpecialUnit({ containsUnit: 'g', containsAmount: 0 });
+                                                        }
+                                                    }}
+                                                /> */}
                                             </div>
                                         </div>
 
@@ -323,6 +361,8 @@ export function IngredientsPanel({
                                                     <CustomSelect
                                                         value={specialUnit.containsUnit}
                                                         onChange={(value) => setSpecialUnit({ ...specialUnit, containsUnit: value })}
+                                                        options={units}
+                                                        color="amber"
                                                     />
                                                 </div>
                                             </div>
