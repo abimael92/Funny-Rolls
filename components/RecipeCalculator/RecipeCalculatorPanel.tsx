@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Trash2, Download, Upload, Wrench } from "lucide-react"
+import { Calculator, } from "lucide-react"
+
 import { products, toolCategories } from '@/lib/data'
 import { Ingredient, Recipe, Tool } from '@/lib/types'
 import {
@@ -234,7 +236,10 @@ export function RecipeCalculatorPanel({
     return (
         <Card className="w-full">
             <CardHeader className="pb-4">
-                <CardTitle className="text-xl text-center">Calculadora de Receta</CardTitle>
+                <div className="flex items-center justify-center gap-2">
+                    <Calculator className="h-5 w-5 sm:h-6 sm:w-6 text-black-600" />
+                    <CardTitle className="text-xl sm:text-2xl text-center">Calculadora de Receta</CardTitle>
+                </div>
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* Custom Mobile Recipe Dropdown */}
