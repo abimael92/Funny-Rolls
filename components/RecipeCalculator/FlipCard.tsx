@@ -73,11 +73,11 @@ export function FlipCard({
                 {/* Front Side - Roll Info */}
                 <div className="absolute inset-0 w-full h-full backface-hidden">
                     <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 h-full">
-                        <CardContent className="p-2 sm:p-3 md:p-4 h-full flex flex-col flip-card-content">
-                            <div className="flex items-center justify-between mb-1 sm:mb-2">
-                                <div className="flex items-center gap-1 sm:gap-2 md:gap-3">
-                                    <ChefHat className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-amber-600" />
-                                    <h3 className="font-semibold text-amber-800 text-xs sm:text-sm md:text-base flip-card-header-text">Vista del Rollo</h3>
+                        <CardContent className="p-3 sm:p-4 md:p-6 h-full flex flex-col flip-card-content">
+                            <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
+                                <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
+                                    <ChefHat className="h-7 w-7 sm:h-9 sm:w-9 md:h-11 md:w-11 text-amber-600" />
+                                    <h3 className="font-semibold text-amber-800 text-lg sm:text-xl md:text-2xl flip-card-header-text">Vista del Rollo</h3>
                                 </div>
                                 <Button
                                     variant="outline"
@@ -89,9 +89,9 @@ export function FlipCard({
                                 </Button>
                             </div>
 
-                            <div className="flex flex-col lg:flex-row items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 flex-1">
+                            <div className="flex flex-col mx-16 px-8 lg:flex-row items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 flex-1">
                                 {/* Roll Image */}
-                                <div className="flex-1 flex justify-center">
+                                <div className="flex-shrink-0 mr-8 lg:mr-4">
                                     <div className="relative">
                                         {product?.image ? (
                                             <Image

@@ -28,24 +28,6 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
             role="tablist"
             aria-label="Mobile navigation tabs">
 
-            <button
-                role="tab"
-                onClick={() => setMobileView('calculator')}
-                onKeyDown={(e) => handleKeyPress(e, 'calculator')}
-                aria-selected={mobileView === 'calculator'}
-                aria-label={getAriaLabel('Calculator', mobileView === 'calculator')}
-                tabIndex={mobileView === 'calculator' ? 0 : -1}
-                className={`flex-1 flex flex-col items-center justify-center py-1.5 sm:py-3 px-0.5 sm:px-0 text-xs sm:text-sm font-medium
-                    transition-all duration-200 ${mobileView === 'calculator'
-                        ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
-                        : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25 active:bg-amber-100'
-                    }`}
-            >
-                <ChefHat className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
-                <span className="mt-0.5 sm:mt-1">Calculadora</span>
-            </button>
-
-            <div className="flex-shrink-0 w-px bg-amber-300 my-1 sm:my-2"></div>
 
             <button
                 role="tab"
@@ -60,9 +42,30 @@ export function MobileViewSwitcher({ mobileView, setMobileView }: MobileViewSwit
                         : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25'
                     }`}
             >
-                <Calculator className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                <ChefHat className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+
                 <span className="mt-0.5 sm:mt-1">Ingredientes</span>
             </button>
+
+            <div className="flex-shrink-0 w-px bg-amber-300 my-1 sm:my-2"></div>
+
+            <button
+                role="tab"
+                onClick={() => setMobileView('calculator')}
+                onKeyDown={(e) => handleKeyPress(e, 'calculator')}
+                aria-selected={mobileView === 'calculator'}
+                aria-label={getAriaLabel('Calculator', mobileView === 'calculator')}
+                tabIndex={mobileView === 'calculator' ? 0 : -1}
+                className={`flex-1 flex flex-col items-center justify-center py-1.5 sm:py-3 px-0.5 sm:px-0 text-xs sm:text-sm font-medium
+                    transition-all duration-200 ${mobileView === 'calculator'
+                        ? 'text-amber-700 border-b-2 border-amber-600 bg-amber-50'
+                        : 'text-gray-500 hover:text-amber-600 hover:bg-amber-25 active:bg-amber-100'
+                    }`}
+            >
+                <Calculator className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
+                <span className="mt-0.5 sm:mt-1">Calculadora</span>
+            </button>
+
 
             <div className="flex-shrink-0 w-px bg-amber-300 my-1 sm:my-2"></div>
 
