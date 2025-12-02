@@ -209,6 +209,7 @@ export function RecipeCalculator() {
         <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-0">
             {/* Header */}
             <div className="text-center">
+                {/* <Calculator className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" /> */}
                 <h1 className="font-cursive text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#C48A6A] mb-2 sm:mb-3">
                     Calculadora de Costos
                 </h1>
