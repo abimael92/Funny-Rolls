@@ -90,6 +90,19 @@ export function CustomSelect({
                     text900: 'text-violet-900',
                     text600: 'text-violet-600'
                 }
+            case 'gray':
+                return {
+                    bg50: 'bg-gray-50',
+                    border300: 'border-gray-300',
+                    hoverBorder400: 'hover:border-gray-400',
+                    focusBorder500: 'focus:border-gray-500',
+                    focusRing100: 'focus:ring-gray-100',
+                    bg100: 'bg-gray-100',
+                    border200: 'border-gray-200',
+                    bg50hover: 'bg-gray-50',
+                    text900: 'text-gray-900',
+                    text600: 'text-gray-600'
+                }
             default: // amber
                 return {
                     bg50: 'bg-amber-50',
@@ -168,7 +181,7 @@ export function CustomSelect({
 
 // Units array for your specific use case
 export const units = [
-    { value: '', label: 'Unidad', fullName: '' },
+    { value: '', label: 'Unidad de Medida', fullName: '' },
     { value: 'kg', label: 'kg', fullName: 'kilogramo' },
     { value: 'g', label: 'g', fullName: 'gramo' },
     { value: 'lb', label: 'lb', fullName: 'libra' },
