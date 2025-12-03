@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Save } from "lucide-react"
 import { Ingredient } from '@/lib/types'
 import { CustomNumberInput } from './CustomNumberInput';
+import { CustomSelect } from './CustomSelect'
 
 interface EditableIngredientRowProps {
     ingredient: Ingredient
@@ -13,7 +14,27 @@ interface EditableIngredientRowProps {
 }
 
 export function EditableIngredientRow({ ingredient, onSave, onCancel }: EditableIngredientRowProps) {
-    const [localIngredient, setLocalIngredient] = useState(ingredient)
+    const [localIngredient, setLocalIngredient] = useState(ingredient);
+
+    const units = [
+        { value: '', label: 'Seleccionar unidad', fullName: '' },
+        { value: 'kg', label: 'kg', fullName: 'kilogramo' },
+        { value: 'g', label: 'g', fullName: 'gramo' },
+        { value: 'lb', label: 'lb', fullName: 'libra' },
+        { value: 'oz', label: 'oz', fullName: 'onza' },
+        { value: 'l', label: 'l', fullName: 'litro' },
+        { value: 'ml', label: 'ml', fullName: 'mililitro' },
+        { value: 'cup', label: 'cup', fullName: 'taza' },
+        { value: 'tbsp', label: 'tbsp', fullName: 'cucharada' },
+        { value: 'tsp', label: 'tsp', fullName: 'cucharadita' },
+        { value: 'unidad', label: 'unidad', fullName: '' },
+        { value: 'docena', label: 'docena', fullName: '' },
+        { value: 'paquete', label: 'paquete', fullName: '' },
+        { value: 'sobre', label: 'sobre', fullName: '' },
+        { value: 'latas', label: 'latas', fullName: '' },
+        { value: 'botella', label: 'botella', fullName: '' },
+        { value: 'bolsa', label: 'bolsa', fullName: '' },
+    ]
 
     const handleSave = () => {
         onSave(localIngredient)
@@ -67,26 +88,15 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                 {/* Unit Field */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Unidad</label>
-                    <select
+                    <CustomSelect
                         value={localIngredient.unit}
-                        onChange={(e) => setLocalIngredient(prev => ({ ...prev, unit: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-                    >
-                        <option value="" className="text-gray-500">Seleccionar unidad</option>
-                        <option value="kg" className="text-gray-900">kg</option>
-                        <option value="g" className="text-gray-900">g</option>
-                        <option value="lb" className="text-gray-900">lb</option>
-                        <option value="oz" className="text-gray-900">oz</option>
-                        <option value="l" className="text-gray-900">l</option>
-                        <option value="ml" className="text-gray-900">ml</option>
-                        <option value="cup" className="text-gray-900">cup</option>
-                        <option value="tbsp" className="text-gray-900">tbsp</option>
-                        <option value="tsp" className="text-gray-900">tsp</option>
-                        <option value="unidad" className="text-gray-900">unidad</option>
-                        <option value="docena" className="text-gray-900">docena</option>
-                        <option value="paquete" className="text-gray-900">paquete</option>
-                        <option value="sobre" className="text-gray-900">sobre</option>
-                    </select>
+                        onChange={(value) => setLocalIngredient(prev => ({ ...prev, unit: value }))}
+                        options={units} // Use the imported units array
+                        placeholder="Seleccionar unidad"
+                        color="gray"
+                        className="w-full"
+                        showFullName={true}
+                    />
                 </div>
 
                 {/* Minimum Stock Field */}

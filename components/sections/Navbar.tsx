@@ -77,7 +77,7 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
             )}
           </Button>
 
-          <div className="flex items-center gap-1 ">
+          <div className="flex items-center gap-2 ">
             <button
               onClick={() => handleNavigation('#home')}
               className="text-warm-brown hover:text-amber-600 transition-colors"

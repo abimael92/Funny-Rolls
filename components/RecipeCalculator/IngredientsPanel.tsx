@@ -51,7 +51,7 @@ export function IngredientsPanel({
     const [completedIngredients, setCompletedIngredients] = useState<string[]>([]);
 
     const units = [
-        { value: '', label: 'Unidad', fullName: '' },
+        { value: '', label: 'Seleccionar unidad', fullName: '' },
         { value: 'kg', label: 'kg', fullName: 'kilogramo' },
         { value: 'g', label: 'g', fullName: 'gramo' },
         { value: 'lb', label: 'lb', fullName: 'libra' },
@@ -68,7 +68,7 @@ export function IngredientsPanel({
         { value: 'latas', label: 'latas', fullName: '' },
         { value: 'botella', label: 'botella', fullName: '' },
         { value: 'bolsa', label: 'bolsa', fullName: '' },
-    ]
+    ];
 
     // Toggle ingredient completion
     const toggleIngredientCompletion = (ingredientId: string) => {
