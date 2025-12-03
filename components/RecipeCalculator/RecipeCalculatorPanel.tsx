@@ -21,6 +21,7 @@ import { FlipCard } from './FlipCard';
 import { CloseButton, ActionButton } from './ModalHelpers';
 import { UnitConverter } from '@/lib/unit-conversion';
 import { CustomNumberInput } from './CustomNumberInput';
+import { CustomSelect } from './CustomSelect';
 
 interface RecipeCalculatorPanelProps {
     selectedRecipe: Recipe
@@ -69,7 +70,9 @@ export function RecipeCalculatorPanel({
         return () => {
             document.removeEventListener('mousedown', handleClickOutside)
         }
-    }, [])
+    }, []);
+
+
 
     // Update recipe ingredient amount
     const updateRecipeIngredient = (ingredientId: string, amount: number) => {
@@ -251,55 +254,28 @@ export function RecipeCalculatorPanel({
                                 <p className="text-amber-700">No hay recetas disponibles</p>
                             </div>
                         ) : (
-                            <div className="relative" ref={dropdownRef}>
-                                {/* Custom dropdown trigger */}
-                                <button
-                                    onClick={() => setIsMobileDropdownOpen(!isMobileDropdownOpen)}
-                                    className="w-full px-4 py-4 border-2 border-amber-500 rounded-xl text-lg font-medium text-amber-700 bg-white flex justify-between items-center shadow-sm hover:shadow-md transition-shadow"
-                                >
-                                    <span className="truncate">{selectedRecipe.name}</span>
-                                    <svg
-                                        className={`w-6 h-6 text-amber-600 transition-transform duration-200 ${isMobileDropdownOpen ? 'rotate-180' : ''}`}
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-
-                                {/* Dropdown menu */}
-                                {isMobileDropdownOpen && (
-                                    <div className="absolute top-full left-0 right-0 bg-white border-2 border-amber-500 rounded-xl mt-2 max-h-80 overflow-y-auto z-50 shadow-xl custom-dropdown">
-                                        {products
-                                            .filter(product => product.available)
-                                            .map(product => (
-                                                <button
-                                                    key={product.recipe.id}
-                                                    onClick={() => {
-                                                        setSelectedRecipe(product.recipe)
-                                                        setIsMobileDropdownOpen(false)
-                                                        setIsCardFlipped(false)
-                                                        setIsEditingSteps(false)
-                                                    }}
-                                                    className={`w-full px-4 py-4 text-left text-lg border-b border-amber-100 last:border-b-0 hover:bg-amber-50 active:bg-amber-100 transition-colors ${selectedRecipe.id === product.recipe.id
-                                                        ? 'bg-amber-100 text-amber-800 font-semibold'
-                                                        : 'text-gray-800'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center justify-between">
-                                                        <span>{product.recipe.name}</span>
-                                                        {selectedRecipe.id === product.recipe.id && (
-                                                            <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                            </svg>
-                                                        )}
-                                                    </div>
-                                                </button>
-                                            ))}
-                                    </div>
-                                )}
-                            </div>
+                            <CustomSelect
+                                value={selectedRecipe.id}
+                                onChange={(value) => {
+                                    const product = products.find(p => p.recipe.id === value)
+                                    if (product) {
+                                        setSelectedRecipe(product.recipe)
+                                        setIsCardFlipped(false)
+                                        setIsEditingSteps(false)
+                                    }
+                                }}
+                                options={products
+                                    .filter(product => product.available)
+                                    .map(product => ({
+                                        value: product.recipe.id,
+                                        label: product.recipe.name,
+                                    }))
+                                }
+                                placeholder="Seleccionar receta"
+                                color="amber"
+                                className="w-full"
+                                showFullName={false}
+                            />
                         )}
                     </div>
 
@@ -343,86 +319,42 @@ export function RecipeCalculatorPanel({
 
                         {/* Price Section */}
                         <div className="space-y-3">
+                            {/* Batch Size Field */}
                             <div className="flex justify-between items-center py-2 border-b border-blue-200">
                                 <span className="text-lg font-semibold text-blue-700">Lote (unidades)</span>
-                                <div className="flex items-center bg-white border-2 border-amber-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm">
-                                    <button
-                                        type="button"
-                                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-l-md border-r border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
-                                        onClick={() => {
-                                            const newValue = Math.max(0, (selectedRecipe.batchSize - 1) || 0);
-                                            updateRecipeBatchSize(newValue);
-                                        }}
-                                    >
-                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                                        </svg>
-                                    </button>
-                                    <input
-                                        type="number"
+                                <div className="bg-white border-2 border-amber-300 rounded-lg hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200 shadow-sm ml-2 sm:ml-4">
+                                    <CustomNumberInput
                                         value={selectedRecipe.batchSize}
-                                        onChange={(e) => {
-                                            const value = Math.max(1, Math.min(1000, Number(e.target.value) || 1))
-                                            updateRecipeBatchSize(value)
+                                        onChange={(value) => {
+                                            const clampedValue = Math.max(1, Math.min(1000, value || 1));
+                                            updateRecipeBatchSize(clampedValue);
                                         }}
-                                        className="w-8 sm:w-10 md:w-12 lg:w-14 px-1 sm:px-2 py-1 text-xs sm:text-sm md:text-base text-center font-bold flip-card-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                        min="1"
-                                        max="1000"
+                                        min={1}
+                                        max={1000}
+                                        allowDecimals={false}
+                                        color="amber"
+                                        className="h-full w-full"
                                     />
-                                    <button
-                                        type="button"
-                                        className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex items-center justify-center bg-amber-50 text-amber-700 rounded-r-md border-l border-amber-200 hover:bg-amber-100 active:bg-amber-200 transition-colors duration-150 group"
-                                        onClick={() => {
-                                            const newValue = (selectedRecipe.batchSize + 1) || 1;
-                                            updateRecipeBatchSize(newValue);
-                                        }}
-                                    >
-                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                    </button>
                                 </div>
                             </div>
 
+                            {/* Selling Price Field */}
                             <div className="flex justify-between items-center py-2 border-b border-blue-200">
                                 <span className="text-lg font-semibold text-blue-700">Precio de venta</span>
-                                <div className="flex items-center bg-white border-2 border-green-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-green-400 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-200 transition-all duration-200 shadow-sm">
-                                    <button
-                                        type="button"
-                                        className="w-4 h-6 sm:w-5 sm:h-7 md:w-6 md:h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-l-md border-r border-green-200 hover:bg-green-100 active:bg-green-200 transition-colors duration-150 group"
-                                        onClick={() => {
-                                            const newValue = Math.max(0, (selectedRecipe.sellingPrice - 1) || 0);
-                                            updateRecipeSellingPrice(newValue);
-                                        }}
-                                    >
-                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                                        </svg>
-                                    </button>
-                                    <input
-                                        type="number"
+                                <div className="bg-white border-2 border-green-300 rounded-lg hover:border-green-400 focus-within:border-green-500 focus-within:ring-2 focus-within:ring-green-200 transition-all duration-200 shadow-sm ml-2 sm:ml-4">
+                                    <CustomNumberInput
                                         value={selectedRecipe.sellingPrice}
-                                        onChange={(e) => {
-                                            const value = Math.max(0, Math.min(10000, Number(e.target.value) || 0))
-                                            updateRecipeSellingPrice(value)
+                                        onChange={(value) => {
+                                            const clampedValue = Math.max(0, Math.min(10000, value || 0));
+                                            updateRecipeSellingPrice(clampedValue);
                                         }}
-                                        className="w-12 sm:w-14 md:w-16 p-1 text-xs sm:text-sm md:text-base text-center text-green-600 font-bold flip-card-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                        min="0"
-                                        max="10000"
-                                        step="0.01"
+                                        min={0}
+                                        max={10000}
+                                        allowDecimals={true} // Allow decimals for price
+                                        color="green"
+                                        className="h-full w-full"
+                                        placeholder="0.00"
                                     />
-                                    <button
-                                        type="button"
-                                        className="w-4 h-6 sm:w-5 sm:h-7 md:w-6 md:h-8 flex items-center justify-center bg-green-50 text-green-700 rounded-r-md border-l border-green-200 hover:bg-green-100 active:bg-green-200 transition-colors duration-150 group"
-                                        onClick={() => {
-                                            const newValue = (selectedRecipe.sellingPrice + 1) || 1;
-                                            updateRecipeSellingPrice(newValue);
-                                        }}
-                                    >
-                                        <svg className="w-3 h-3 sm:w-4 sm:h-4 group-active:scale-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                    </button>
                                 </div>
                             </div>
 
@@ -445,13 +377,19 @@ export function RecipeCalculatorPanel({
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <span className="text-lg font-semibold text-purple-700">Lotes producidos</span>
-                                <input
-                                    type="number"
-                                    value={productionBatchCount}
-                                    onChange={(e) => setProductionBatchCount(Number(e.target.value) || 1)}
-                                    className="w-20 px-3 py-2 border-2 border-purple-300 rounded-lg text-lg font-bold text-center"
-                                    min="1"
-                                />
+
+                                <div className="flex items-center bg-white border-2 border-purple-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-purple-400 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-200 transition-all duration-200 shadow-sm">
+                                    <CustomNumberInput
+                                        value={productionBatchCount}
+                                        onChange={(value) => setProductionBatchCount(value || 1)}
+                                        min={1}
+                                        max={10000}
+                                        allowDecimals={false}
+                                        color="purple"
+                                        className="h-full w-full"
+                                    />
+                                </div>
+
                             </div>
                             <Button
                                 onClick={handleRecordProduction}
@@ -809,26 +747,28 @@ export function RecipeCalculatorPanel({
                                     <p className="text-amber-700">No hay recetas disponibles</p>
                                 </div>
                             ) : (
-                                <select
-                                    className="w-full px-4 py-4 border-2 border-amber-500 rounded-xl text-lg font-medium text-amber-700 bg-white flex justify-between items-center shadow-sm hover:bg-amber-200 hover:shadow-md transition-all"
+                                <CustomSelect
                                     value={selectedRecipe.id}
-                                    onChange={(e) => {
-                                        const recipe = recipes.find(r => r.id === e.target.value)
-                                        if (recipe) {
-                                            setSelectedRecipe(recipe)
+                                    onChange={(value) => {
+                                        const product = products.find(p => p.recipe.id === value)
+                                        if (product) {
+                                            setSelectedRecipe(product.recipe)
                                             setIsCardFlipped(false)
                                             setIsEditingSteps(false)
                                         }
                                     }}
-                                >
-                                    {products
+                                    options={products
                                         .filter(product => product.available)
-                                        .map(product => (
-                                            <option key={product.recipe.id} value={product.recipe.id}>
-                                                {product.recipe.name}
-                                            </option>
-                                        ))}
-                                </select>
+                                        .map(product => ({
+                                            value: product.recipe.id,
+                                            label: product.recipe.name,
+                                        }))
+                                    }
+                                    placeholder="Seleccionar receta"
+                                    color="amber"
+                                    className="w-full"
+                                    showFullName={false}
+                                />
                             )}
                         </div>
                     </div>
@@ -844,13 +784,17 @@ export function RecipeCalculatorPanel({
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <input
-                                    type="number"
-                                    value={productionBatchCount}
-                                    onChange={(e) => setProductionBatchCount(Number(e.target.value) || 1)}
-                                    className="w-20 px-3 py-2 border-2 border-purple-300 rounded-lg text-lg font-bold text-center"
-                                    min="1"
-                                />
+                                <div className="flex items-center bg-white border-2 border-purple-300 rounded-lg p-1 ml-2 sm:ml-4 hover:border-purple-400 focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-200 transition-all duration-200 shadow-sm">
+                                    <CustomNumberInput
+                                        value={productionBatchCount}
+                                        onChange={(value) => setProductionBatchCount(value || 1)}
+                                        min={1}
+                                        max={10000}
+                                        allowDecimals={false}
+                                        color="purple"
+                                        className="h-full w-full"
+                                    />
+                                </div>
                                 <Button
                                     onClick={handleRecordProduction}
                                     className="bg-purple-600 hover:bg-purple-700 text-lg py-2"
