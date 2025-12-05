@@ -226,7 +226,7 @@ export function RecipeCalculatorPanel({
         const validIngredients = selectedRecipe.ingredients.filter(recipeIngredient => {
             const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
             if (!ingredient) {
-                console.warn(`Missing ingredient with ID: ${recipeIngredient.ingredientId} in recipe: ${selectedRecipe.name}`)
+                console.warn(`Missing ingredient with ID: ${recipeIngredient.ingredientId} in recipe: ${selectedRecipe.name}`);
                 return (
                     <div key={recipeIngredient.ingredientId} className="bg-red-50 border border-red-200 rounded-xl p-4">
                         <div className="flex justify-between items-center">
@@ -294,23 +294,16 @@ export function RecipeCalculatorPanel({
         console.log("Missing Ingredients:", lowStockNames);
 
         if (lowStockNames.length > 0) {
-            toast.error(
-                <div>
-                    <div className="font-semibold">⚠️ Stock Insuficiente</div>
-                    <div className="text-sm mt-1">
-                        Te falta: {lowStockNames.join(', ')}
+            toast.custom(
+                () => (
+                    <div className="bg-red-50 border border-red-300 rounded-lg p-4">
+                        <div className="font-semibold text-red-800">⚠️ Stock Insuficiente</div>
+                        <div className="text-sm text-red-600 mt-1">
+                            Te falta: {lowStockNames.join(', ')}
+                        </div>
                     </div>
-                </div>,
-                {
-                    duration: 5000,
-                    style: {
-                        background: '#fef2f2',
-                        color: '#991b1b',
-                        border: '1px solid #fca5a5',
-                        padding: '12px 16px',
-                        borderRadius: '8px',
-                    },
-                }
+                ),
+                { duration: 5000 }
             );
             return;
         }
