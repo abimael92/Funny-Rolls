@@ -7,6 +7,8 @@ import { Tool, TOOL_CATEGORY_CONFIGS } from '@/lib/types';
 import { toolCategories } from '@/lib/data';
 import { CloseButton, ActionButton } from './ModalHelpers';
 import { EditableToolRow } from './EditableToolRow';
+import { CustomSelect } from './CustomSelect';
+import { CustomNumberInput } from './CustomNumberInput';
 
 interface ToolsPanelProps {
     tools: Tool[]
@@ -219,12 +221,15 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                             )}
                                         </span>
                                     </label>
-                                    <select
+                                    {/* Type Selector */}
+                                    <CustomSelect
                                         value={newTool.type}
-                                        onChange={(e) => {
-                                            const newType = e.target.value as 'consumible' | 'herramienta' | 'equipo';
+                                        onChange={(selectedValue) => {
+                                            const newType = selectedValue as 'consumible' | 'herramienta' | 'equipo';
 
-                                            const defaultCategory = toolCategories[newType]?.[0]?.value || 'general';
+                                            // FIX: Use type assertion to access toolCategories
+                                            const categories = (toolCategories as Record<string, Array<{ value: string; label: string }>>)[newType] || [];
+                                            const defaultCategory = categories[0]?.value || 'general';
 
                                             const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
                                             const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
@@ -240,12 +245,15 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 costPerBatch: 0,
                                             });
                                         }}
-                                        className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    >
-                                        <option value="consumible">Consumible</option>
-                                        <option value="herramienta">Utensilio</option>
-                                        <option value="equipo">Equipo</option>
-                                    </select>
+                                        options={[
+                                            { value: 'consumible', label: 'Consumible' },
+                                            { value: 'herramienta', label: 'Utensilio' }, // UI shows "Utensilio" but value is "herramienta"
+                                            { value: 'equipo', label: 'Equipo' }
+                                        ]}
+                                        placeholder="Seleccionar tipo"
+                                        color="blue"
+                                        className="w-full"
+                                    />
                                 </div>
 
                                 <div>
@@ -264,10 +272,10 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                             )}
                                         </span>
                                     </label>
-                                    <select
+                                    {/* Category Selector */}
+                                    <CustomSelect
                                         value={newTool.category}
-                                        onChange={(e) => {
-                                            const newCategory = e.target.value;
+                                        onChange={(newCategory) => {
                                             const categoryConfig = TOOL_CATEGORY_CONFIGS[newCategory] || TOOL_CATEGORY_CONFIGS.general;
                                             const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
 
@@ -284,67 +292,76 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                                 })
                                             });
                                         }}
-                                        className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                    >
-                                        {toolCategories[newTool.type as keyof typeof toolCategories]?.map(category => (
-                                            <option key={category.value} value={category.value}>
-                                                {category.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        options={
+                                            // FIX: Use type assertion (toolCategories as any)[newTool.type]
+                                            ((toolCategories as Record<string, Array<{ value: string; label: string }>>)[newTool.type] || []).map((category) => ({
+                                                value: category.value,
+                                                label: category.label
+                                            }))
+                                        }
+                                        placeholder={
+                                            !newTool.type
+                                                ? "Primero selecciona un tipo"
+                                                : (toolCategories[newTool.type as keyof typeof toolCategories]?.length > 0)
+                                                    ? "Seleccionar categoría"
+                                                    : "No hay categorías disponibles"
+                                        }
+                                        color="blue"
+                                        className="w-full"
+                                        disabled={!newTool.type}
+                                    />
                                 </div>
                             </div>
 
                             {/* Cost Input with Helper */}
                             <div>
-                                <div>
-                                    <label className="block text-sm font-medium text-blue-700 mb-1">
-                                        Inversión total (MXN)
-                                        <span className="ml-1 relative">
-                                            <Info
-                                                className="h-4 w-4 inline text-blue-500 cursor-help tooltip-icon"
-                                                onClick={() => toggleTooltip('investment')}
-                                            />
-                                            {activeTooltip === 'investment' && (
-                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-nowrap">
-                                                    Costo total de compra de la herramienta
-                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-                                                </div>
-                                            )}
-                                        </span>
-                                    </label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                                        <input
-                                            type="number"
-                                            step="1"
-                                            min="0"
-                                            placeholder="0"
-                                            value={newTool.totalInvestment || ''}
-                                            onChange={(e) => {
-                                                const investment = Number(e.target.value) || 0;
-                                                const updatedTool = { ...newTool, totalInvestment: investment };
-
-                                                if (newTool.type !== 'consumible') {
-                                                    const categoryConfig = TOOL_CATEGORY_CONFIGS[newTool.category] || TOOL_CATEGORY_CONFIGS.general;
-
-                                                    const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
-                                                    const recoveryValue = Math.round(investment * categoryConfig.recoveryRate);
-
-                                                    const costPerBatch = investment > 0 ?
-                                                        Number(((investment - recoveryValue) / totalBatches).toFixed(2)) : 0;
-
-                                                    updatedTool.recoveryValue = recoveryValue;
-                                                    updatedTool.totalBatches = totalBatches;
-                                                    updatedTool.costPerBatch = costPerBatch;
-                                                    updatedTool.lifetime = `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`;
-                                                }
-
-                                                setNewTool(updatedTool);
-                                            }}
-                                            className="w-full pl-8 pr-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                <label className="block text-sm font-medium text-blue-700 mb-1">
+                                    Inversión total (MXN)
+                                    <span className="ml-1 relative">
+                                        <Info
+                                            className="h-4 w-4 inline text-blue-500 cursor-help tooltip-icon"
+                                            onClick={() => toggleTooltip('investment')}
                                         />
+                                        {activeTooltip === 'investment' && (
+                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-nowrap">
+                                                Costo total de compra de la herramienta
+                                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                            </div>
+                                        )}
+                                    </span>
+                                </label>
+                                <div className="relative">
+                                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10 pointer-events-none">
+                                        $
                                     </div>
+                                    <CustomNumberInput
+                                        value={newTool.totalInvestment || 0}
+                                        onChange={(investment) => {
+                                            const updatedTool = { ...newTool, totalInvestment: investment };
+
+                                            if (newTool.type !== 'consumible') {
+                                                const categoryConfig = TOOL_CATEGORY_CONFIGS[newTool.category] || TOOL_CATEGORY_CONFIGS.general;
+                                                const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
+                                                const recoveryValue = Math.round(investment * categoryConfig.recoveryRate);
+
+                                                const costPerBatch = investment > 0 ?
+                                                    Number(((investment - recoveryValue) / totalBatches).toFixed(2)) : 0;
+
+                                                updatedTool.recoveryValue = recoveryValue;
+                                                updatedTool.totalBatches = totalBatches;
+                                                updatedTool.costPerBatch = costPerBatch;
+                                                updatedTool.lifetime = `${categoryConfig.yearsLifespan} años (${totalBatches} lotes)`;
+                                            }
+
+                                            setNewTool(updatedTool);
+                                        }}
+                                        min={0}
+                                        max={1000000}
+                                        placeholder="0"
+                                        allowDecimals={false}
+                                        color="blue"
+                                        className="w-full pl-8 pr-3 h-10 sm:h-11 border-2 border-blue-300 rounded-lg bg-blue-50 shadow-sm" // Changed height and bg
+                                    />
                                 </div>
                             </div>
 
@@ -480,7 +497,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
 
             {/* Quick Add Default Tools */}
             {/* {availableDefaultTools.length > 0 && (
@@ -653,162 +670,165 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             </div>
 
             {/* Total Tools Count Modal */}
-            {showTotalToolsModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowTotalToolsModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+            {
+                showTotalToolsModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowTotalToolsModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
-                        {/* Header */}
-                        <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-purple-800">Todas las Herramientas</h3>
-                                        <p className="text-sm text-purple-600">Inventario completo ({tools.length} herramientas)</p>
-                                    </div>
-                                </div>
-                                <CloseButton onClose={() => setShowTotalToolsModal(false)} />
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-6 overflow-y-auto max-h-96">
-                            <div className="space-y-3">
-                                {tools.map((tool) => {
-                                    const categoryLabel = (toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General';
-
-                                    return (
-                                        <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-gray-900">{tool.name}</div>
-                                                <div className="text-sm text-gray-600 mt-1 capitalize">
-                                                    {tool.type} • {categoryLabel}
-                                                </div>
-                                                {tool.description && (
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        {tool.description}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="text-right">
-                                                {tool.costPerBatch && (
-                                                    <div className="text-sm font-bold text-purple-700">
-                                                        ${tool.costPerBatch.toFixed(2)}
-                                                    </div>
-                                                )}
-                                                <div className="text-xs text-gray-500 capitalize">
-                                                    {tool.type}
-                                                </div>
-                                            </div>
+                            {/* Header */}
+                            <div className="p-6 border-b border-purple-100 bg-gradient-to-r from-purple-50 to-indigo-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
                                         </div>
-                                    );
-                                })}
+                                        <div>
+                                            <h3 className="text-xl font-bold text-purple-800">Todas las Herramientas</h3>
+                                            <p className="text-sm text-purple-600">Inventario completo ({tools.length} herramientas)</p>
+                                        </div>
+                                    </div>
+                                    <CloseButton onClose={() => setShowTotalToolsModal(false)} />
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Footer */}
-                        <div className="p-6 border-t bg-gray-50">
-                            <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
-                                <span className="font-bold text-gray-900">Total de Herramientas:</span>
-                                <span className="text-xl font-bold text-purple-700">{tools.length}</span>
+                            {/* Content */}
+                            <div className="p-6 overflow-y-auto max-h-96">
+                                <div className="space-y-3">
+                                    {tools.map((tool) => {
+                                        const categoryLabel = (toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General';
+
+                                        return (
+                                            <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                <div className="flex-1">
+                                                    <div className="font-semibold text-gray-900">{tool.name}</div>
+                                                    <div className="text-sm text-gray-600 mt-1 capitalize">
+                                                        {tool.type} • {categoryLabel}
+                                                    </div>
+                                                    {tool.description && (
+                                                        <div className="text-xs text-gray-500 mt-1">
+                                                            {tool.description}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="text-right">
+                                                    {tool.costPerBatch && (
+                                                        <div className="text-sm font-bold text-purple-700">
+                                                            ${tool.costPerBatch.toFixed(2)}
+                                                        </div>
+                                                    )}
+                                                    <div className="text-xs text-gray-500 capitalize">
+                                                        {tool.type}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                            <ActionButton
-                                onClick={() => setShowTotalToolsModal(false)}
-                                color="purple"
-                                fullWidth
-                            >
-                                Cerrar
-                            </ActionButton>
+
+                            {/* Footer */}
+                            <div className="p-6 border-t bg-gray-50">
+                                <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
+                                    <span className="font-bold text-gray-900">Total de Herramientas:</span>
+                                    <span className="text-xl font-bold text-purple-700">{tools.length}</span>
+                                </div>
+                                <ActionButton
+                                    onClick={() => setShowTotalToolsModal(false)}
+                                    color="purple"
+                                    fullWidth
+                                >
+                                    Cerrar
+                                </ActionButton>
+                            </div>
                         </div>
-                    </div>
-                </div>)}
+                    </div>)
+            }
 
             {/* Tools Cost Breakdown Modal */}
-            {showToolsCostModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div
-                        className="fixed inset-0"
-                        onClick={() => setShowToolsCostModal(false)}
-                    />
-                    <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+            {
+                showToolsCostModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div
+                            className="fixed inset-0"
+                            onClick={() => setShowToolsCostModal(false)}
+                        />
+                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
-                        {/* Header */}
-                        <div className="p-6 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                            {/* Header */}
+                            <div className="p-6 border-b border-orange-100 bg-gradient-to-r from-orange-50 to-amber-50">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                            <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-orange-800">Costo de Herramientas</h3>
+                                            <p className="text-sm text-orange-600">Desglose de inversión en herramientas</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-orange-800">Costo de Herramientas</h3>
-                                        <p className="text-sm text-orange-600">Desglose de inversión en herramientas</p>
-                                    </div>
+                                    <CloseButton onClose={() => setShowToolsCostModal(false)} />
                                 </div>
-                                <CloseButton onClose={() => setShowToolsCostModal(false)} />
                             </div>
-                        </div>
 
-                        {/* Content */}
-                        <div className="p-6 overflow-y-auto max-h-96">
-                            <div className="space-y-3">
-                                {tools
-                                    .filter(tool => tool?.costPerBatch)
-                                    .map((tool) => (
-                                        <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-gray-900">{tool.name}</div>
-                                                <div className="text-sm text-gray-600 mt-1 capitalize">
-                                                    {tool.type} • {(toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General'}
+                            {/* Content */}
+                            <div className="p-6 overflow-y-auto max-h-96">
+                                <div className="space-y-3">
+                                    {tools
+                                        .filter(tool => tool?.costPerBatch)
+                                        .map((tool) => (
+                                            <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                <div className="flex-1">
+                                                    <div className="font-semibold text-gray-900">{tool.name}</div>
+                                                    <div className="text-sm text-gray-600 mt-1 capitalize">
+                                                        {tool.type} • {(toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General'}
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="font-bold text-orange-700">
+                                                        ${tool.costPerBatch && tool.costPerBatch.toFixed(2)}</div>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
-                                                <div className="font-bold text-orange-700">
-                                                    ${tool.costPerBatch && tool.costPerBatch.toFixed(2)}</div>
+                                        ))
+                                    }
+
+                                    {tools.length === 0 && (
+                                        <div className="text-center py-8 text-gray-500">
+                                            <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                <DollarSign className="h-6 w-6 text-gray-400" />
                                             </div>
+                                            <div>No hay herramientas registradas</div>
                                         </div>
-                                    ))
-                                }
+                                    )}
+                                </div>
+                            </div>
 
-                                {tools.length === 0 && (
-                                    <div className="text-center py-8 text-gray-500">
-                                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <DollarSign className="h-6 w-6 text-gray-400" />
-                                        </div>
-                                        <div>No hay herramientas registradas</div>
-                                    </div>
-                                )}
+                            {/* Footer */}
+                            <div className="p-6 border-t bg-gray-50">
+                                <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
+                                    <span className="font-bold text-gray-900">Costo Total:</span>
+                                    <span className="text-xl font-bold text-orange-700">
+                                        ${tools.reduce((total, tool) => total + (tool.costPerBatch || 0), 0).toFixed(2)}
+                                    </span>
+                                </div>
+                                <ActionButton
+                                    onClick={() => setShowToolsCostModal(false)}
+                                    color="red"
+                                    fullWidth
+                                >
+                                    Cerrar
+                                </ActionButton>
                             </div>
                         </div>
-
-                        {/* Footer */}
-                        <div className="p-6 border-t bg-gray-50">
-                            <div className="flex justify-between items-center mb-4 p-3 bg-white rounded-lg border">
-                                <span className="font-bold text-gray-900">Costo Total:</span>
-                                <span className="text-xl font-bold text-orange-700">
-                                    ${tools.reduce((total, tool) => total + (tool.costPerBatch || 0), 0).toFixed(2)}
-                                </span>
-                            </div>
-                            <ActionButton
-                                onClick={() => setShowToolsCostModal(false)}
-                                color="red"
-                                fullWidth
-                            >
-                                Cerrar
-                            </ActionButton>
-                        </div>
-                    </div>
-                </div>)
+                    </div>)
             }
         </div >)
 }
