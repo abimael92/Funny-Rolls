@@ -219,19 +219,23 @@ export function RecipeCalculator() {
             </div>
 
             {/* Error Display */}
-            {/* {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded mx-2 sm:mx-4 lg:mx-0">
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm sm:text-base">{error}</span>
+            {error && (
+                <div className="mx-2 sm:mx-4 lg:mx-0 rounded-xl border border-red-300 bg-red-50 px-4 py-3 shadow-sm animate-in fade-in duration-150">
+                    <div className="flex items-start justify-between gap-3">
+                        <span className="text-sm sm:text-base font-medium text-red-700 leading-snug">
+                            {error}
+                        </span>
+
                         <button
                             onClick={() => setError(null)}
-                            className="text-red-700 hover:text-red-900 font-bold"
+                            className="text-red-500 hover:text-red-700 transition font-bold text-lg leading-none"
                         >
                             ×
                         </button>
                     </div>
                 </div>
-            )} */}
+            )}
+
 
             {/* Mobile View Switcher */}
             <MobileViewSwitcher
