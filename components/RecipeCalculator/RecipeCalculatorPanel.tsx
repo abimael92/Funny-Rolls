@@ -22,6 +22,7 @@ import { CloseButton, ActionButton } from './ModalHelpers';
 import { UnitConverter } from '@/lib/unit-conversion';
 import { CustomNumberInput } from './CustomNumberInput';
 import { CustomSelect } from './CustomSelect';
+import toast, { Toaster } from 'react-hot-toast';
 
 interface RecipeCalculatorPanelProps {
     selectedRecipe: Recipe
@@ -57,6 +58,7 @@ export function RecipeCalculatorPanel({
     const [showProfitGoalModal, setShowProfitGoalModal] = useState(false);
     const [showAddTools, setShowAddTools] = useState(false);
     const [showRecipeTools, setShowRecipeTools] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -211,12 +213,111 @@ export function RecipeCalculatorPanel({
         event.target.value = ''
     }
 
+    // const handleRecordProduction = () => {
+    //     if (productionBatchCount > 0) {
+    //         setShowConfirmModal(true)
+    //     }
+    // }
+
     const handleRecordProduction = () => {
-        if (productionBatchCount > 0) {
-            recordProduction(selectedRecipe.id, productionBatchCount) // ✅ NOW THIS WILL WORK
-            setProductionBatchCount(1)
-            // Show success message or notification
-            alert(`Producción registrada: ${productionBatchCount} lote(s) de ${selectedRecipe.name}`)
+        console.log("--- Starting Stock Check ---");
+
+        // First, filter out any ingredients that don't exist
+        const validIngredients = selectedRecipe.ingredients.filter(recipeIngredient => {
+            const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
+            if (!ingredient) {
+                console.warn(`Missing ingredient with ID: ${recipeIngredient.ingredientId} in recipe: ${selectedRecipe.name}`)
+                return (
+                    <div key={recipeIngredient.ingredientId} className="bg-red-50 border border-red-200 rounded-xl p-4">
+                        <div className="flex justify-between items-center">
+                            <span className="font-semibold text-red-800">
+                                ⚠️ Ingrediente no encontrado (ID: {recipeIngredient.ingredientId})
+                            </span>
+                            <button
+                                onClick={() => removeIngredientFromRecipe(recipeIngredient.ingredientId)}
+                                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-lg"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </button>
+                        </div>
+                        <div className="text-sm text-red-600 mt-1">
+                            Este ingrediente ya no existe en la base de datos
+                        </div>
+                    </div>
+                )
+            }
+            return true;
+        });
+
+        // If there are missing ingredients, show a warning
+        if (validIngredients.length !== selectedRecipe.ingredients.length) {
+            const missingCount = selectedRecipe.ingredients.length - validIngredients.length;
+            toast(
+                <div>
+                    <div className="font-semibold">⚠️ Receta Incompleta</div>
+                    <div className="text-sm mt-1">
+                        {missingCount} ingrediente(s) no existen en la base de datos
+                    </div>
+                </div>,
+                {
+                    duration: 5000,
+                    style: {
+                        background: '#fffbeb',
+                        color: '#92400e',
+                        border: '1px solid #fbbf24',
+                    },
+                }
+            );
+            // Continue with valid ingredients only
+        }
+
+        // Now check stock for valid ingredients only
+        const lowStockNames = validIngredients
+            .map(recipeIngredient => {
+                const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
+
+                // This should always find the ingredient since we filtered above
+                if (!ingredient) return null;
+
+                const currentStock = Number(ingredient.minAmount ?? 0);
+                const totalRequired = Number(recipeIngredient.amount) * Number(productionBatchCount);
+
+                console.log(`${ingredient.name}: Have ${currentStock} | Need ${totalRequired}`);
+
+                if (currentStock < totalRequired) {
+                    return ingredient.name;
+                }
+                return null;
+            })
+            .filter((name): name is string => name !== null);
+
+        console.log("Missing Ingredients:", lowStockNames);
+
+        if (lowStockNames.length > 0) {
+            toast.error(
+                <div>
+                    <div className="font-semibold">⚠️ Stock Insuficiente</div>
+                    <div className="text-sm mt-1">
+                        Te falta: {lowStockNames.join(', ')}
+                    </div>
+                </div>,
+                {
+                    duration: 5000,
+                    style: {
+                        background: '#fef2f2',
+                        color: '#991b1b',
+                        border: '1px solid #fca5a5',
+                        padding: '12px 16px',
+                        borderRadius: '8px',
+                    },
+                }
+            );
+            return;
+        }
+
+        // This part is only reached if lowStockNames is empty []
+        if (productionBatchCount > 0 && validIngredients.length > 0) {
+            setShowConfirmModal(true);
         }
     }
 
@@ -238,6 +339,7 @@ export function RecipeCalculatorPanel({
 
     return (
         <Card className="w-full">
+            <Toaster position="top-right" />
             <CardHeader className="pb-4">
                 <div className="flex items-center justify-center gap-2">
                     <Calculator className="h-5 w-5 sm:h-6 sm:w-6 text-black-600" />
@@ -615,12 +717,33 @@ export function RecipeCalculatorPanel({
 
                     {/* Mobile Ingredients Section */}
                     <div className="bg-gradient-to-br from-amber-50 to-cyan-50 border-2 border-amber-300 rounded-2xl p-4">
-                        <h3 className="text-xl font-bold text-amber-800 mb-4 text-center">Ingredientesss</h3>
+                        <h3 className="text-xl font-bold text-amber-800 mb-4 text-center">Ingredientes</h3>
 
                         <div className="space-y-3 max-h-96 overflow-y-auto">
                             {selectedRecipe.ingredients.map((recipeIngredient) => {
                                 const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
-                                if (!ingredient) return null
+
+                                if (!ingredient) {
+                                    console.warn(`Missing ingredient with ID: ${recipeIngredient.ingredientId} in recipe: ${selectedRecipe.name}`)
+                                    return (
+                                        <div key={recipeIngredient.ingredientId} className="bg-red-50 border-2 border-red-200 rounded-xl p-3">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="text-lg font-semibold text-red-800">
+                                                    ⚠️ Ingrediente no encontrado (ID: {recipeIngredient.ingredientId})
+                                                </span>
+                                                <button
+                                                    onClick={() => removeIngredientFromRecipe(recipeIngredient.ingredientId)}
+                                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-lg"
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </button>
+                                            </div>
+                                            <div className="text-sm text-red-600">
+                                                Este ingrediente ya no existe en la base de datos
+                                            </div>
+                                        </div>
+                                    )
+                                }
 
                                 const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount
 
@@ -651,7 +774,7 @@ export function RecipeCalculatorPanel({
                                                 />
 
                                                 <span className="text-base font-medium text-amber-700">
-                                                    {UnitConverter.convertToReadableUnit(recipeIngredient.amount, ingredient.unit).split(' ')[1]}23232
+                                                    {UnitConverter.convertToReadableUnit(recipeIngredient.amount, ingredient.unit).split(' ')[1]}
                                                 </span>
                                             </div>
 
@@ -2020,6 +2143,91 @@ export function RecipeCalculatorPanel({
                     </div>
                 )
             }
+
+            {/* Confirmation Modal */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
+                        <div className="p-6 border-b border-green-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-800">Confirmar Producción</h3>
+                                    <p className="text-sm text-gray-600">Registrar producción</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6">
+                            <div className="text-center mb-4">
+                                <div className="text-lg font-semibold text-gray-800">{selectedRecipe.name}</div>
+                                <div className="text-3xl font-bold text-purple-600 my-2">
+                                    {productionBatchCount} lote{productionBatchCount !== 1 ? 's' : ''}
+                                </div>
+                                <div className="text-gray-600">
+                                    = {productionBatchCount * selectedRecipe.batchSize} unidades
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span className="text-gray-600">Costo total:</span>
+                                    <span className="font-medium">${(totalRecipeCost * productionBatchCount).toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-gray-600">Ingresos estimados:</span>
+                                    <span className="font-medium text-green-600">
+                                        ${(selectedRecipe.sellingPrice * selectedRecipe.batchSize * productionBatchCount).toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowConfirmModal(false)}
+                                    className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        recordProduction(selectedRecipe.id, productionBatchCount)
+                                        setProductionBatchCount(1)
+                                        setShowConfirmModal(false)
+
+                                        // Add toast success message
+                                        toast.success(
+                                            <div>
+                                                <div className="font-semibold">✅ Producción Registrada</div>
+                                                <div className="text-sm">
+                                                    {productionBatchCount} lote(s) de {selectedRecipe.name}
+                                                </div>
+                                            </div>,
+                                            {
+                                                duration: 3000,
+                                                style: {
+                                                    background: '#f0fdf4',
+                                                    color: '#166534',
+                                                    border: '1px solid #86efac',
+                                                    padding: '12px 16px',
+                                                    borderRadius: '8px',
+                                                },
+                                            }
+                                        )
+                                    }}
+                                    className="flex-1 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                                >
+                                    Confirmar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </Card >
     )
 }
