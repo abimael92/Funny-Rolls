@@ -219,7 +219,7 @@ export function RecipeCalculator() {
             </div>
 
             {/* Error Display */}
-            {error && (
+            {/* {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-3 sm:px-4 py-2 sm:py-3 rounded mx-2 sm:mx-4 lg:mx-0">
                     <div className="flex justify-between items-center">
                         <span className="text-sm sm:text-base">{error}</span>
@@ -231,7 +231,7 @@ export function RecipeCalculator() {
                         </button>
                     </div>
                 </div>
-            )}
+            )} */}
 
             {/* Mobile View Switcher */}
             <MobileViewSwitcher
