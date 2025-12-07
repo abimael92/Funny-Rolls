@@ -8,6 +8,10 @@ import { IngredientsPanel } from './IngredientsPanel'
 import { RecipeCalculatorPanel } from './RecipeCalculatorPanel'
 import { ProductionTrackerPanel } from './ProductionTrackerPanel'
 
+import { RecipeManagerModal } from './RecipeManagerModal' // Add this import
+import { PlusCircle, Edit, Database, BookOpen, ChevronDown } from "lucide-react" // Add these imports
+import { supabase } from "@/lib/supabase"
+
 export function RecipeCalculator() {
     // Ingredients management
     const [ingredients, setIngredients] = useState<Ingredient[]>(defaultIngredients);
@@ -18,6 +22,17 @@ export function RecipeCalculator() {
     const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>([])
     const [inventory, setInventory] = useState<InventoryItem[]>([])
     const [error, setError] = useState<string | null>(null)
+    const [databaseRecipes, setDatabaseRecipes] = useState<Recipe[]>([])
+    const [loadingDatabase, setLoadingDatabase] = useState(false)
+    const [showDatabaseRecipes, setShowDatabaseRecipes] = useState(false)
+    const [recipeModal, setRecipeModal] = useState<{
+        isOpen: boolean;
+        mode: 'add' | 'edit' | 'view';
+        recipe?: Recipe;
+    }>({
+        isOpen: false,
+        mode: 'add'
+    })
 
     // Safe localStorage functions
     const safeSetLocalStorage = (key: string, data: unknown) => {
@@ -40,6 +55,39 @@ export function RecipeCalculator() {
         }
     }
 
+    // Add this function to load recipes from database:
+    const loadDatabaseRecipes = async () => {
+        setLoadingDatabase(true)
+        try {
+            const { data, error } = await supabase
+                .from('recipes')
+                .select('*')
+                .order('created_at', { ascending: false })
+
+            if (error) throw error
+
+            const transformedRecipes: Recipe[] = data.map(dbRecipe => ({
+                id: dbRecipe.id,
+                name: dbRecipe.name,
+                ingredients: dbRecipe.ingredients,
+                tools: dbRecipe.tools || [],
+                batchSize: dbRecipe.batch_size,
+                sellingPrice: dbRecipe.selling_price,
+                profitMargin: dbRecipe.profit_margin,
+                available: dbRecipe.available,
+                steps: dbRecipe.steps || [],
+                image: dbRecipe.image || ''
+            }))
+
+            setDatabaseRecipes(transformedRecipes)
+        } catch (err: unknown) {
+            console.error('Error loading recipes from database:', err)
+            setError(err instanceof Error ? err.message : 'Failed to load recipes from database')
+        } finally {
+            setLoadingDatabase(false)
+        }
+    }
+
     // Input validation
     const validateNumber = (value: string, min: number = 0, max: number = 10000): number => {
         const num = parseFloat(value)
@@ -47,6 +95,44 @@ export function RecipeCalculator() {
         if (num < min) return min
         if (num > max) return max
         return Math.round(num * 100) / 100
+    }
+
+    // Add this function to handle recipe saved:
+    const handleRecipeSaved = (recipe: Recipe) => {
+        // Update local recipes
+        const existingIndex = recipes.findIndex(r => r.id === recipe.id)
+
+        if (existingIndex >= 0) {
+            // Update existing recipe
+            const updatedRecipes = [...recipes]
+            updatedRecipes[existingIndex] = recipe
+            setRecipes(updatedRecipes)
+
+            // Update selected recipe if it's the one being edited
+            if (selectedRecipe.id === recipe.id) {
+                setSelectedRecipe(recipe)
+            }
+        } else {
+            // Add new recipe
+            setRecipes(prev => [...prev, recipe])
+        }
+
+        // Reload database recipes
+        loadDatabaseRecipes()
+    }
+
+    // Add this function to handle recipe deleted:
+    const handleRecipeDeleted = (recipeId: string) => {
+        // Remove from local recipes
+        setRecipes(prev => prev.filter(r => r.id !== recipeId))
+
+        // If deleted recipe was selected, select first recipe
+        if (selectedRecipe.id === recipeId && recipes.length > 1) {
+            setSelectedRecipe(recipes[0])
+        }
+
+        // Reload database recipes
+        loadDatabaseRecipes()
     }
 
     // Load data from localStorage
@@ -118,6 +204,10 @@ export function RecipeCalculator() {
     useEffect(() => {
         safeSetLocalStorage('recipe-calculator-tools', tools)
     }, [tools])
+
+    useEffect(() => {
+        loadDatabaseRecipes()
+    }, [])
 
     // Enhanced record production with validation
     const recordProduction = (recipeId: string, batchCount: number, date: Date = new Date()) => {
@@ -218,6 +308,133 @@ export function RecipeCalculator() {
                 </p>
             </div>
 
+            {/* Recipe Management Button Group */}
+            <div className="flex justify-center gap-2 sm:gap-3">
+                <div className="relative group">
+                    <button
+                        onClick={() => setRecipeModal({ isOpen: true, mode: 'add' })}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-[#C48A6A] text-white rounded-lg hover:bg-[#B37959] transition-all shadow-md hover:shadow-lg"
+                    >
+                        <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-sm sm:text-base font-medium">Add New Recipe</span>
+                    </button>
+                </div>
+
+                <div className="relative">
+                    <button
+                        onClick={() => setShowDatabaseRecipes(!showDatabaseRecipes)}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50 transition-all shadow-sm"
+                    >
+                        <Database className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-sm sm:text-base font-medium">Manage Recipes</span>
+                        <ChevronDown className={`h-4 w-4 transition-transform ${showDatabaseRecipes ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Recipe Management Dropdown */}
+                    {showDatabaseRecipes && (
+                        <div className="absolute right-0 mt-2 w-64 sm:w-72 bg-white rounded-xl shadow-lg border border-amber-200 z-50 animate-in fade-in slide-in-from-top-2">
+                            <div className="p-3 border-b border-amber-100">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-semibold text-amber-800">Recipes</h3>
+                                    <button
+                                        onClick={loadDatabaseRecipes}
+                                        disabled={loadingDatabase}
+                                        className="text-xs text-amber-600 hover:text-amber-800 px-2 py-1 hover:bg-amber-50 rounded"
+                                    >
+                                        {loadingDatabase ? 'Loading...' : 'Refresh'}
+                                    </button>
+                                </div>
+                                <div className="flex gap-1 mt-2">
+                                    <button
+                                        onClick={() => {
+                                            setRecipeModal({ isOpen: true, mode: 'add' })
+                                            setShowDatabaseRecipes(false)
+                                        }}
+                                        className="flex-1 text-xs px-3 py-1.5 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition-colors"
+                                    >
+                                        + New Recipe
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="max-h-60 overflow-y-auto">
+                                {/* Database Recipes */}
+                                {databaseRecipes.length > 0 && (
+                                    <div className="p-2 border-b border-gray-100">
+                                        <div className="text-xs font-medium text-gray-500 px-2 py-1">Database Recipes</div>
+                                        {databaseRecipes.map(recipe => (
+                                            <div
+                                                key={recipe.id}
+                                                className="flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <BookOpen className="h-3 w-3 text-amber-500" />
+                                                    <span className="text-sm truncate">{recipe.name}</span>
+                                                    {!recipe.available && (
+                                                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">Off</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => {
+                                                            setRecipeModal({ isOpen: true, mode: 'edit', recipe })
+                                                            setShowDatabaseRecipes(false)
+                                                        }}
+                                                        className="p-1 text-amber-600 hover:bg-amber-100 rounded"
+                                                        title="Edit"
+                                                    >
+                                                        <Edit className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Local Recipes */}
+                                <div className="p-2">
+                                    <div className="text-xs font-medium text-gray-500 px-2 py-1">Local Recipes ({recipes.length})</div>
+                                    {recipes.map(recipe => (
+                                        <div
+                                            key={recipe.id}
+                                            className="flex items-center justify-between p-2 hover:bg-blue-50 rounded-lg group"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm truncate">{recipe.name}</span>
+                                                {recipe.id === selectedRecipe.id && (
+                                                    <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">Active</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => {
+                                                        setRecipeModal({ isOpen: true, mode: 'edit', recipe })
+                                                        setShowDatabaseRecipes(false)
+                                                    }}
+                                                    className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                                                    title="Edit"
+                                                >
+                                                    <Edit className="h-3 w-3" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="p-3 bg-gray-50 rounded-b-xl border-t">
+                                <button
+                                    onClick={() => setShowDatabaseRecipes(false)}
+                                    className="text-sm text-gray-600 hover:text-gray-800 w-full text-center"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {/* Error Display */}
             {error && (
                 <div className="mx-2 sm:mx-4 lg:mx-0 rounded-xl border border-red-300 bg-red-50 px-4 py-3 shadow-sm animate-in fade-in duration-150">
@@ -279,6 +496,19 @@ export function RecipeCalculator() {
                     />
                 </div>
             </div>
+
+            {/* Recipe Manager Modal */}
+            <RecipeManagerModal
+                isOpen={recipeModal.isOpen}
+                onClose={() => setRecipeModal({ isOpen: false, mode: 'add' })}
+                mode={recipeModal.mode}
+                recipes={recipes}
+                ingredients={ingredients}
+                tools={tools}
+                onRecipeSaved={handleRecipeSaved}
+                onRecipeDeleted={handleRecipeDeleted}
+                initialRecipe={recipeModal.recipe}
+            />
         </div>
     )
 }
