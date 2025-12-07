@@ -9,7 +9,7 @@ import { RecipeCalculatorPanel } from './RecipeCalculatorPanel'
 import { ProductionTrackerPanel } from './ProductionTrackerPanel'
 
 import { RecipeManagerModal } from './RecipeManagerModal'
-import { Edit, Database, BookOpen, ChevronDown } from "lucide-react"
+import { Database, BookOpen, ChevronDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 export function RecipeCalculator() {
@@ -353,63 +353,59 @@ export function RecipeCalculator() {
                                 {/* Database Recipes */}
                                 {databaseRecipes.length > 0 && (
                                     <div className="p-2 border-b border-gray-100">
-                                        <div className="text-xs font-medium text-gray-500 px-2 py-1">Recetas en Base de Datos</div>
+                                        <div className="text-xs font-medium text-gray-500 px-2 py-1">
+                                            Recetas en Base de Datos
+                                        </div>
                                         {databaseRecipes.map(recipe => (
-                                            <div
+                                            <button
                                                 key={recipe.id}
-                                                className="flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg group"
+                                                onClick={() => {
+                                                    setRecipeModal({ isOpen: true, mode: 'edit', recipe })
+                                                    setShowDatabaseRecipes(false)
+                                                }}
+                                                className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg transition-colors active:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-inset"
                                             >
-                                                <div className="flex items-center gap-2">
-                                                    <BookOpen className="h-3 w-3 text-amber-500" />
-                                                    <span className="text-sm truncate">{recipe.name}</span>
+                                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                    <BookOpen className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                                                    <span className="text-sm font-medium text-gray-900 truncate">
+                                                        {recipe.name}
+                                                    </span>
                                                     {!recipe.available && (
-                                                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">Inactivo</span>
+                                                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded flex-shrink-0">
+                                                            Inactivo
+                                                        </span>
                                                     )}
                                                 </div>
-                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <button
-                                                        onClick={() => {
-                                                            setRecipeModal({ isOpen: true, mode: 'edit', recipe })
-                                                            setShowDatabaseRecipes(false)
-                                                        }}
-                                                        className="p-1 text-amber-600 hover:bg-amber-100 rounded"
-                                                        title="Edit"
-                                                    >
-                                                        <Edit className="h-3 w-3" />
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            </button>
                                         ))}
                                     </div>
                                 )}
 
                                 {/* Local Recipes */}
                                 <div className="p-2">
-                                    <div className="text-xs font-medium text-gray-500 px-2 py-1">Recetas en Local ({recipes.length})</div>
+                                    <div className="text-xs font-medium text-gray-500 px-2 py-1">
+                                        Recetas Locales ({recipes.length})
+                                    </div>
                                     {recipes.map(recipe => (
-                                        <div
+                                        <button
                                             key={recipe.id}
-                                            className="flex items-center justify-between p-2 hover:bg-blue-50 rounded-lg group"
+                                            onClick={() => {
+                                                setRecipeModal({ isOpen: true, mode: 'edit', recipe })
+                                                setShowDatabaseRecipes(false)
+                                            }}
+                                            className="w-full text-left flex items-center justify-between p-2 hover:bg-blue-50 rounded-lg transition-colors active:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-inset"
                                         >
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm truncate">{recipe.name}</span>
+                                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                <span className="text-sm font-medium text-gray-900 truncate">
+                                                    {recipe.name}
+                                                </span>
                                                 {recipe.id === selectedRecipe.id && (
-                                                    <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">Activo</span>
+                                                    <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded flex-shrink-0">
+                                                        Seleccionada
+                                                    </span>
                                                 )}
                                             </div>
-                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() => {
-                                                        setRecipeModal({ isOpen: true, mode: 'edit', recipe })
-                                                        setShowDatabaseRecipes(false)
-                                                    }}
-                                                    className="p-1 text-blue-600 hover:bg-blue-100 rounded"
-                                                    title="Edit"
-                                                >
-                                                    <Edit className="h-3 w-3" />
-                                                </button>
-                                            </div>
-                                        </div>
+                                        </button>
                                     ))}
                                 </div>
                             </div>
