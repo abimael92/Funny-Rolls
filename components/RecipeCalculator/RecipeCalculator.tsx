@@ -8,8 +8,8 @@ import { IngredientsPanel } from './IngredientsPanel'
 import { RecipeCalculatorPanel } from './RecipeCalculatorPanel'
 import { ProductionTrackerPanel } from './ProductionTrackerPanel'
 
-import { RecipeManagerModal } from './RecipeManagerModal' // Add this import
-import { PlusCircle, Edit, Database, BookOpen, ChevronDown } from "lucide-react" // Add these imports
+import { RecipeManagerModal } from './RecipeManagerModal'
+import { Edit, Database, BookOpen, ChevronDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 export function RecipeCalculator() {
@@ -40,7 +40,7 @@ export function RecipeCalculator() {
             localStorage.setItem(key, JSON.stringify(data))
         } catch (err) {
             console.error(`Failed to save data. \n ${err}`);
-            setError('Failed to save data. Storage might be full.')
+            setError('Error al guardar datos. El almacenamiento puede estar lleno.')
         }
     }
 
@@ -50,7 +50,7 @@ export function RecipeCalculator() {
             return item ? JSON.parse(item) : fallback
         } catch (err) {
             console.error(`Failed to save data. \n ${err}`);
-            setError('Failed to load saved data.')
+            setError('Error al cargar datos guardados.')
             return fallback
         }
     }
@@ -82,7 +82,7 @@ export function RecipeCalculator() {
             setDatabaseRecipes(transformedRecipes)
         } catch (err: unknown) {
             console.error('Error loading recipes from database:', err)
-            setError(err instanceof Error ? err.message : 'Failed to load recipes from database')
+            setError(err instanceof Error ? err.message : 'Error al cargar recetas de la base de datos')
         } finally {
             setLoadingDatabase(false)
         }
@@ -215,13 +215,13 @@ export function RecipeCalculator() {
 
         const validBatchCount = validateNumber(batchCount.toString(), 1, 1000)
         if (validBatchCount <= 0) {
-            setError('Batch count must be at least 1')
+            setError('El número de lotes debe ser al menos 1')
             return
         }
 
         const recipe = recipes.find(r => r.id === recipeId)
         if (!recipe) {
-            setError('Recipe not found')
+            setError('La receta no fue encontrada')
             return
         }
 
@@ -237,7 +237,7 @@ export function RecipeCalculator() {
         })
 
         if (lowStockIngredients.length > 0) {
-            setError(`Low stock: ${lowStockIngredients.join(', ')}`)
+            setError(`Inventario bajo en: ${lowStockIngredients.join(', ')}`)
             return
         }
 
@@ -279,7 +279,7 @@ export function RecipeCalculator() {
     const addInventoryItem = (ingredientId: string, minimumStock: number = 0) => {
         const ingredient = ingredients.find(ing => ing.id === ingredientId)
         if (!ingredient || inventory.find(item => item.ingredientId === ingredientId)) {
-            setError('Ingredient already in inventory or not found')
+            setError('Ese ingrediente ya está en el inventario o no existe')
             return
         }
 
@@ -310,23 +310,15 @@ export function RecipeCalculator() {
 
             {/* Recipe Management Button Group */}
             <div className="flex justify-center gap-2 sm:gap-3">
-                <div className="relative group">
-                    <button
-                        onClick={() => setRecipeModal({ isOpen: true, mode: 'add' })}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-[#C48A6A] text-white rounded-lg hover:bg-[#B37959] transition-all shadow-md hover:shadow-lg"
-                    >
-                        <PlusCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-                        <span className="text-sm sm:text-base font-medium">Add New Recipe</span>
-                    </button>
-                </div>
+
 
                 <div className="relative">
                     <button
                         onClick={() => setShowDatabaseRecipes(!showDatabaseRecipes)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-amber-300 text-amber-700 rounded-lg hover:bg-amber-50 transition-all shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2.5  bg-[#C48A6A] text-white rounded-lg hover:bg-[#B37959]  border border-amber-300 transition-all shadow-sm"
                     >
                         <Database className="h-4 w-4 sm:h-5 sm:w-5" />
-                        <span className="text-sm sm:text-base font-medium">Manage Recipes</span>
+                        <span className="text-sm sm:text-base font-medium">Gestionar Recetas</span>
                         <ChevronDown className={`h-4 w-4 transition-transform ${showDatabaseRecipes ? 'rotate-180' : ''}`} />
                     </button>
 
@@ -335,13 +327,13 @@ export function RecipeCalculator() {
                         <div className="absolute right-0 mt-2 w-64 sm:w-72 bg-white rounded-xl shadow-lg border border-amber-200 z-50 animate-in fade-in slide-in-from-top-2">
                             <div className="p-3 border-b border-amber-100">
                                 <div className="flex items-center justify-between">
-                                    <h3 className="font-semibold text-amber-800">Recipes</h3>
+                                    <h3 className="font-semibold text-amber-800">Recetas</h3>
                                     <button
                                         onClick={loadDatabaseRecipes}
                                         disabled={loadingDatabase}
                                         className="text-xs text-amber-600 hover:text-amber-800 px-2 py-1 hover:bg-amber-50 rounded"
                                     >
-                                        {loadingDatabase ? 'Loading...' : 'Refresh'}
+                                        {loadingDatabase ? 'Cargando...' : 'Actualizar'}
                                     </button>
                                 </div>
                                 <div className="flex gap-1 mt-2">
@@ -352,7 +344,7 @@ export function RecipeCalculator() {
                                         }}
                                         className="flex-1 text-xs px-3 py-1.5 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition-colors"
                                     >
-                                        + New Recipe
+                                        + Nueva Receta
                                     </button>
                                 </div>
                             </div>
@@ -361,7 +353,7 @@ export function RecipeCalculator() {
                                 {/* Database Recipes */}
                                 {databaseRecipes.length > 0 && (
                                     <div className="p-2 border-b border-gray-100">
-                                        <div className="text-xs font-medium text-gray-500 px-2 py-1">Database Recipes</div>
+                                        <div className="text-xs font-medium text-gray-500 px-2 py-1">Recetas en Base de Datos</div>
                                         {databaseRecipes.map(recipe => (
                                             <div
                                                 key={recipe.id}
@@ -371,7 +363,7 @@ export function RecipeCalculator() {
                                                     <BookOpen className="h-3 w-3 text-amber-500" />
                                                     <span className="text-sm truncate">{recipe.name}</span>
                                                     {!recipe.available && (
-                                                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">Off</span>
+                                                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">Inactivo</span>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -393,7 +385,7 @@ export function RecipeCalculator() {
 
                                 {/* Local Recipes */}
                                 <div className="p-2">
-                                    <div className="text-xs font-medium text-gray-500 px-2 py-1">Local Recipes ({recipes.length})</div>
+                                    <div className="text-xs font-medium text-gray-500 px-2 py-1">Recetas en Local ({recipes.length})</div>
                                     {recipes.map(recipe => (
                                         <div
                                             key={recipe.id}
@@ -402,7 +394,7 @@ export function RecipeCalculator() {
                                             <div className="flex items-center gap-2">
                                                 <span className="text-sm truncate">{recipe.name}</span>
                                                 {recipe.id === selectedRecipe.id && (
-                                                    <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">Active</span>
+                                                    <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">Activo</span>
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -427,7 +419,7 @@ export function RecipeCalculator() {
                                     onClick={() => setShowDatabaseRecipes(false)}
                                     className="text-sm text-gray-600 hover:text-gray-800 w-full text-center"
                                 >
-                                    Close
+                                    Cerrar
                                 </button>
                             </div>
                         </div>
