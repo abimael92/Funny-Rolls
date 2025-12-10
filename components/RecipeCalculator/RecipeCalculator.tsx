@@ -342,7 +342,7 @@ export function RecipeCalculator() {
                                             setRecipeModal({ isOpen: true, mode: 'add' })
                                             setShowDatabaseRecipes(false)
                                         }}
-                                        className="flex-1 text-xs px-3 py-1.5 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition-colors"
+                                        className="flex-1 text-md px-3 py-1.5 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 transition-colors"
                                     >
                                         + Nueva Receta
                                     </button>
@@ -353,7 +353,7 @@ export function RecipeCalculator() {
                                 {/* Database Recipes */}
                                 {databaseRecipes.length > 0 && (
                                     <div className="p-2 border-b border-gray-100">
-                                        <div className="text-xs font-medium text-gray-500 px-2 py-1">
+                                        <div className="text-sm font-medium text-gray-500 px-2 py-1">
                                             Recetas en Base de Datos
                                         </div>
                                         {databaseRecipes.map(recipe => (
@@ -383,7 +383,7 @@ export function RecipeCalculator() {
 
                                 {/* Local Recipes */}
                                 <div className="p-2">
-                                    <div className="text-xs font-medium text-gray-500 px-2 py-1">
+                                    <div className="text-sm font-medium text-gray-500 px-2 py-1">
                                         Recetas Locales ({recipes.length})
                                     </div>
                                     {recipes.map(recipe => (
@@ -393,14 +393,14 @@ export function RecipeCalculator() {
                                                 setRecipeModal({ isOpen: true, mode: 'edit', recipe })
                                                 setShowDatabaseRecipes(false)
                                             }}
-                                            className="w-full text-left flex items-center justify-between p-2 hover:bg-blue-50 rounded-lg transition-colors active:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-inset"
+                                            className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg transition-colors active:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-inset"
                                         >
                                             <div className="flex items-center gap-2 flex-1 min-w-0">
                                                 <span className="text-sm font-medium text-gray-900 truncate">
                                                     {recipe.name}
                                                 </span>
                                                 {recipe.id === selectedRecipe.id && (
-                                                    <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded flex-shrink-0">
+                                                    <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-600 rounded flex-shrink-0">
                                                         Seleccionada
                                                     </span>
                                                 )}

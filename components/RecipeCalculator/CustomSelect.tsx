@@ -125,7 +125,7 @@ export function CustomSelect({
         <Listbox value={value} onChange={onChange} disabled={disabled}>
             <div className={`relative ${className}`}>
                 <Listbox.Button
-                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3.5 ${colors.bg50} border-2 ${colors.border300} rounded-xl text-gray-400 text-sm sm:text-base font-medium transition-all duration-200 ease-in-out cursor-pointer shadow-sm ${colors.hoverBorder400} hover:shadow-md ${colors.focusBorder500} focus:ring-4 ${colors.focusRing100} focus:shadow-lg outline-none text-left pr-10 sm:pr-12 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3.5 ${colors.bg50} border-2 ${colors.border300} rounded-xl text-gray-400 text-sm sm:text-base font-medium transition-all duration-200 ease-in-out cursor-pointer shadow-sm ${colors.hoverBorder400} hover:shadow-md ${colors.focusBorder500} focus:ring-2 ${colors.focusRing100} focus:shadow-md outline-none text-left pr-10 sm:pr-12 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     <span className={`block truncate ${colors.text900} font-medium`}>
                         {selectedOption?.label || placeholder}

@@ -390,7 +390,7 @@ export function RecipeManagerModal({
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as 'basic' | 'ingredients' | 'tools' | 'steps')}
-                                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all ${activeTab === tab.id ? 'border-[#C48A6A] text-[#C48A6A]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                className={`flex items-center gap-2 px-4 py-3 text-md font-medium whitespace-nowrap border-b-2 transition-all ${activeTab === tab.id ? 'border-[#C48A6A] text-[#C48A6A]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                             >
                                 {tab.icon}
                                 {tab.label}
@@ -405,7 +405,11 @@ export function RecipeManagerModal({
                 </div>
 
                 {/* Content */}
-                <div className="overflow-y-auto max-h-[calc(90vh-180px)]">
+                <div className={`overflow-y-auto max-h-[calc(90vh-180px)] ${activeTab === 'basic' ? 'bg-slate-50' :
+                    activeTab === 'ingredients' ? 'bg-amber-50' :
+                        activeTab === 'tools' ? 'bg-blue-50' :
+                            'bg-green-50' // steps tab
+                    }`}>
                     <form onSubmit={handleSubmit} className="p-6 space-y-6 pb-20">
                         {/* Messages */}
                         {error && (
@@ -442,7 +446,7 @@ export function RecipeManagerModal({
                                             type="text"
                                             value={formData.name}
                                             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                            className="w-full px-4 py-2.5 border border-amber-200 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent transition-all"
+                                            className="w-full px-4 py-2.5 bg-white border border-amber-200 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent transition-all"
                                             placeholder="Ej: Rollo de Canela Clásico"
                                             required
                                             disabled={mode === 'view'}
@@ -457,7 +461,7 @@ export function RecipeManagerModal({
                                             type="url"
                                             value={formData.image || ''}
                                             onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                                            className="w-full px-4 py-2.5 border border-amber-200 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent"
+                                            className="w-full px-4 py-2.5 bg-white  border border-amber-200 rounded-lg focus:ring-2 focus:ring-[#C48A6A] focus:border-transparent"
                                             placeholder="https://ejemplo.com/imagen.jpg"
                                             disabled={mode === 'view'}
                                         />
@@ -468,19 +472,23 @@ export function RecipeManagerModal({
                                             Tamaño del Lote *
                                         </label>
                                         <div className="relative">
-                                            <CustomNumberInput
-                                                value={formData.batchSize}
-                                                onChange={(value) => setFormData(prev => ({ ...prev, batchSize: value }))}
-                                                min={1}
-                                                max={1000}
-                                                placeholder="12"
-                                                allowDecimals={false}
-                                                className="w-full"
-                                                color="amber"
-                                            />
-                                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-                                                unidades
-                                            </span>
+                                            <div className="grid grid-cols-12 items-center">
+                                                <div className="col-span-10">
+                                                    <CustomNumberInput
+                                                        value={formData.batchSize}
+                                                        onChange={(value) => setFormData(prev => ({ ...prev, batchSize: value }))}
+                                                        min={1}
+                                                        max={1000}
+                                                        placeholder="12"
+                                                        allowDecimals={false}
+                                                        className="w-full"
+                                                        color="amber"
+                                                    />
+                                                </div>
+                                                <div className="col-span-2 pl-2 text-gray-500 text-sm">
+                                                    unidades
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -488,18 +496,20 @@ export function RecipeManagerModal({
                                         <label className="block text-sm font-medium text-gray-700">
                                             Precio de Venta por Unidad *
                                         </label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                                            <CustomNumberInput
-                                                value={formData.sellingPrice}
-                                                onChange={(value) => setFormData(prev => ({ ...prev, sellingPrice: value }))}
-                                                min={0.01}
-                                                max={10000}
-                                                placeholder="50.00"
-                                                allowDecimals={true}
-                                                className="w-full pl-8"
-                                                color="amber"
-                                            />
+                                        <div className="grid grid-cols-12 items-center">
+                                            <div className="col-span-1 text-gray-500">$</div>
+                                            <div className="col-span-11">
+                                                <CustomNumberInput
+                                                    value={formData.sellingPrice}
+                                                    onChange={(value) => setFormData(prev => ({ ...prev, sellingPrice: value }))}
+                                                    min={0.01}
+                                                    max={10000}
+                                                    placeholder="50.00"
+                                                    allowDecimals={true}
+                                                    className="w-full"
+                                                    color="amber"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -508,19 +518,23 @@ export function RecipeManagerModal({
                                             Margen de Ganancia Objetivo *
                                         </label>
                                         <div className="relative">
-                                            <CustomNumberInput
-                                                value={formData.profitMargin}
-                                                onChange={(value) => setFormData(prev => ({ ...prev, profitMargin: value }))}
-                                                min={0}
-                                                max={100}
-                                                placeholder="60"
-                                                allowDecimals={true}
-                                                className="w-full"
-                                                color="amber"
-                                            />
-                                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                                %
-                                            </span>
+                                            <div className="grid grid-cols-12 items-center">
+                                                <div className="col-span-10">
+                                                    <CustomNumberInput
+                                                        value={formData.profitMargin}
+                                                        onChange={(value) => setFormData(prev => ({ ...prev, profitMargin: value }))}
+                                                        min={0}
+                                                        max={100}
+                                                        placeholder="60"
+                                                        allowDecimals={true}
+                                                        className="w-full"
+                                                        color="amber"
+                                                    />
+                                                </div>
+                                                <div className="col-span-2 pl-2 text-gray-500">
+                                                    %
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -584,8 +598,8 @@ export function RecipeManagerModal({
 
                         {/* Ingredients Tab */}
                         {activeTab === 'ingredients' && (
-                            <div className="space-y-6">
-                                <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
+                            <div className="space-y-6 ">
+                                <div className="bg-amber-100 rounded-xl p-4 border border-amber-200">
                                     <h3 className="font-semibold text-amber-800 mb-3">Agregar Ingredientes</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div>
@@ -613,7 +627,7 @@ export function RecipeManagerModal({
                                                     max={1000}
                                                     placeholder="0.5"
                                                     allowDecimals={true}
-                                                    className="w-full"
+                                                    className="w-full h-15 shadow-sm border-2 border-amber-200 focus:border-amber-300 focus:ring-4 focus:ring-amber-200 rounded-lg"
                                                     color="amber"
                                                 />
                                                 {selectedIngredient && (
@@ -623,17 +637,22 @@ export function RecipeManagerModal({
                                                 )}
                                             </div>
                                         </div>
-                                        <div className="flex items-end">
+                                        <div className="flex items-end ">
                                             <button
                                                 type="button"
                                                 onClick={addIngredient}
-                                                className="w-full px-4 py-2 bg-[#C48A6A] text-white rounded-lg hover:bg-[#B37959] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="w-full px-4 py-2 rounded-lg bg-[#C48A6A] text-white 
+                                                           hover:bg-[#B37959] transition-colors
+                                                           focus:ring-2 focus:ring-amber-200 focus:outline-none
+                                                           disabled:opacity-50 disabled:cursor-not-allowed
+                                                           flex items-center justify-center gap-2"
                                                 disabled={mode === 'view' || !selectedIngredient || !ingredientAmount}
                                             >
                                                 <Plus className="h-4 w-4" />
-                                                Agregar Ingrediente
+                                                Agregar
                                             </button>
                                         </div>
+
                                     </div>
                                 </div>
 
@@ -695,7 +714,7 @@ export function RecipeManagerModal({
                         {/* Tools Tab */}
                         {activeTab === 'tools' && (
                             <div className="space-y-6">
-                                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                                <div className="bg-blue-100 rounded-xl p-4 border border-blue-200">
                                     <h3 className="font-semibold text-blue-800 mb-3">Agregar Herramientas y Equipo</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         <div>
@@ -719,7 +738,7 @@ export function RecipeManagerModal({
                                                 disabled={mode === 'view' || !selectedTool}
                                             >
                                                 <Plus className="h-4 w-4" />
-                                                Agregar Herramienta
+                                                Agregar
                                             </button>
                                         </div>
                                     </div>
@@ -774,7 +793,7 @@ export function RecipeManagerModal({
                         {/* Steps Tab */}
                         {activeTab === 'steps' && (
                             <div className="space-y-6">
-                                <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                                <div className="bg-green-100 rounded-xl p-4 border border-green-200">
                                     <h3 className="font-semibold text-green-800 mb-3">Agregar Paso de Preparación</h3>
                                     <div className="flex gap-2">
                                         <input

@@ -196,10 +196,10 @@ export function CustomNumberInput({
     }, [value])
 
     return (
-        <div className={`flex items-center max-h-10 w-full ${className || ''}`}>
+        <div className={`flex items-center max-h-12.5 w-full  rounded-md bg-${color}-50 ${className || ''}`}>
             <button
                 type="button"
-                className={`w-6 h-6 sm:w-6 flex items-center justify-center bg-${color}-50 text-${color}-700 
+                className={`w-6 h-full flex items-center justify-center bg-${color}-50 text-${color}-700 
                 rounded-l-md border-r border-${color}-200 hover:bg-${color}-100 active:bg-${color}-200 
                 transition-colors duration-150 group`}
                 onClick={(e) => {
@@ -256,7 +256,7 @@ export function CustomNumberInput({
 
             <button
                 type="button"
-                className={`w-6 h-8 sm:w-8 flex items-center justify-center bg-${color}-50 text-${color}-700 rounded-r-md border-l border-${color}-200 hover:bg-${color}-100 active:bg-${color}-200 transition-colors duration-150 group`}
+                className={`w-6 h-full flex items-center justify-center bg-${color}-50 text-${color}-700 rounded-r-md border-l border-${color}-200 hover:bg-${color}-100 active:bg-${color}-200 transition-colors duration-150 group`}
                 onClick={(e) => {
                     e.preventDefault();
                     const currentStr = displayValue || '0';
