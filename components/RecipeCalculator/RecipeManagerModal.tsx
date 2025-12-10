@@ -390,7 +390,7 @@ export function RecipeManagerModal({
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as 'basic' | 'ingredients' | 'tools' | 'steps')}
-                                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-all ${activeTab === tab.id ? 'border-[#C48A6A] text-[#C48A6A]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                                className={`flex items-center gap-2 px-4 py-3 text-md font-medium whitespace-nowrap border-b-2 transition-all ${activeTab === tab.id ? 'border-[#C48A6A] text-[#C48A6A]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
                             >
                                 {tab.icon}
                                 {tab.label}
@@ -468,19 +468,23 @@ export function RecipeManagerModal({
                                             Tamaño del Lote *
                                         </label>
                                         <div className="relative">
-                                            <CustomNumberInput
-                                                value={formData.batchSize}
-                                                onChange={(value) => setFormData(prev => ({ ...prev, batchSize: value }))}
-                                                min={1}
-                                                max={1000}
-                                                placeholder="12"
-                                                allowDecimals={false}
-                                                className="w-full"
-                                                color="amber"
-                                            />
-                                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">
-                                                unidades
-                                            </span>
+                                            <div className="grid grid-cols-12 items-center">
+                                                <div className="col-span-10">
+                                                    <CustomNumberInput
+                                                        value={formData.batchSize}
+                                                        onChange={(value) => setFormData(prev => ({ ...prev, batchSize: value }))}
+                                                        min={1}
+                                                        max={1000}
+                                                        placeholder="12"
+                                                        allowDecimals={false}
+                                                        className="w-full"
+                                                        color="amber"
+                                                    />
+                                                </div>
+                                                <div className="col-span-2 pl-2 text-gray-500 text-sm">
+                                                    unidades
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -488,18 +492,20 @@ export function RecipeManagerModal({
                                         <label className="block text-sm font-medium text-gray-700">
                                             Precio de Venta por Unidad *
                                         </label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                                            <CustomNumberInput
-                                                value={formData.sellingPrice}
-                                                onChange={(value) => setFormData(prev => ({ ...prev, sellingPrice: value }))}
-                                                min={0.01}
-                                                max={10000}
-                                                placeholder="50.00"
-                                                allowDecimals={true}
-                                                className="w-full pl-8"
-                                                color="amber"
-                                            />
+                                        <div className="grid grid-cols-12 items-center">
+                                            <div className="col-span-1 text-gray-500">$</div>
+                                            <div className="col-span-11">
+                                                <CustomNumberInput
+                                                    value={formData.sellingPrice}
+                                                    onChange={(value) => setFormData(prev => ({ ...prev, sellingPrice: value }))}
+                                                    min={0.01}
+                                                    max={10000}
+                                                    placeholder="50.00"
+                                                    allowDecimals={true}
+                                                    className="w-full"
+                                                    color="amber"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -508,19 +514,23 @@ export function RecipeManagerModal({
                                             Margen de Ganancia Objetivo *
                                         </label>
                                         <div className="relative">
-                                            <CustomNumberInput
-                                                value={formData.profitMargin}
-                                                onChange={(value) => setFormData(prev => ({ ...prev, profitMargin: value }))}
-                                                min={0}
-                                                max={100}
-                                                placeholder="60"
-                                                allowDecimals={true}
-                                                className="w-full"
-                                                color="amber"
-                                            />
-                                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                                %
-                                            </span>
+                                            <div className="grid grid-cols-12 items-center">
+                                                <div className="col-span-10">
+                                                    <CustomNumberInput
+                                                        value={formData.profitMargin}
+                                                        onChange={(value) => setFormData(prev => ({ ...prev, profitMargin: value }))}
+                                                        min={0}
+                                                        max={100}
+                                                        placeholder="60"
+                                                        allowDecimals={true}
+                                                        className="w-full"
+                                                        color="amber"
+                                                    />
+                                                </div>
+                                                <div className="col-span-2 pl-2 text-gray-500">
+                                                    %
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
