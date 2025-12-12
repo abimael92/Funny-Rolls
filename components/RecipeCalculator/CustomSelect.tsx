@@ -125,7 +125,7 @@ export function CustomSelect({
         <Listbox value={value} onChange={onChange} disabled={disabled}>
             <div className={`relative ${className}`}>
                 <Listbox.Button
-                    className={`w-full px-3 py-2.5 sm:px-4 sm:py-3.5 ${colors.bg50} border-2 ${colors.border300} rounded-xl text-gray-400 text-sm sm:text-base font-medium transition-all duration-200 ease-in-out cursor-pointer shadow-sm ${colors.hoverBorder400} hover:shadow-md ${colors.focusBorder500} focus:ring-2 ${colors.focusRing100} focus:shadow-md outline-none text-left pr-10 sm:pr-12 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`group w-full px-3 py-2.5 sm:px-4 sm:py-3.5 ${colors.bg50} border-2 ${colors.border300} rounded-xl text-gray-400 text-sm sm:text-base font-medium transition-all duration-200 ease-in-out cursor-pointer shadow-sm ${colors.hoverBorder400} hover:shadow-md ${colors.focusBorder500} focus:ring-2 ${colors.focusRing100} focus:shadow-md outline-none text-left pr-10 sm:pr-12 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     <span className={`block truncate ${colors.text900} font-medium`}>
                         {selectedOption?.label || placeholder}
@@ -136,7 +136,7 @@ export function CustomSelect({
                         )}
                     </span>
                     <span className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-4 pointer-events-none">
-                        <ChevronDown className={`w-4 h-4 sm:w-5 sm:h-5 ${colors.text600} transition-transform duration-200 ui-open:rotate-180`} />
+                        <ChevronDown className={`w-4 h-4 sm:w-5 sm:h-5 ${colors.text600} transition-transform duration-200 group-data-open:rotate-180`} />
                     </span>
                 </Listbox.Button>
 
@@ -146,7 +146,7 @@ export function CustomSelect({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <Listbox.Options className={`absolute z-[9999] w-full py-1 sm:py-2 mt-1 overflow-auto text-sm sm:text-base ${colors.bg100} rounded-xl shadow-lg max-h-28 sm:max-h-32 ring-1 ring-black ring-opacity-5 focus:outline-none border ${colors.border200} top-full`}>
+                    <Listbox.Options className={`absolute z-[99999] w-full py-1 sm:py-2 mt-1 overflow-auto text-sm sm:text-base ${colors.bg100} rounded-xl shadow-lg max-h-28 sm:max-h-32 ring-1 ring-black ring-opacity-5 focus:outline-none border ${colors.border200} top-full`}>
                         {options.map((option) => (
                             <Listbox.Option
                                 key={option.value}
