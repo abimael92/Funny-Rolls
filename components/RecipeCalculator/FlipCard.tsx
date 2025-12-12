@@ -75,8 +75,8 @@ export function FlipCard({
                     <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 h-full">
                         <CardContent className="p-3 sm:p-4 md:p-6 h-full flex flex-col flip-card-content">
                             <div className="flex items-center justify-between mb-2 sm:mb-3 md:mb-4">
-                                <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                                    <ChefHat className="h-7 w-7 sm:h-9 sm:w-9 md:h-11 md:w-11 text-amber-600" />
+                                <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2">
+                                    <ChefHat className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 text-amber-800" />
                                     <h3 className="font-semibold text-amber-800 text-lg sm:text-xl md:text-2xl flip-card-header-text">Vista del Rollo</h3>
                                 </div>
                                 <Button
@@ -89,7 +89,7 @@ export function FlipCard({
                                 </Button>
                             </div>
 
-                            <div className="flex flex-col mx-16 px-8 lg:flex-row items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 flex-1">
+                            <div className="flex flex-col mx-12 px-8 lg:flex-row items-center gap-2 sm:gap-3 md:gap-4 lg:gap-6 flex-1">
                                 {/* Roll Image */}
                                 <div className="flex-shrink-0 mr-8 lg:mr-4">
                                     <div className="relative">
@@ -97,12 +97,14 @@ export function FlipCard({
                                             <Image
                                                 src={product.image}
                                                 alt={product.name}
-                                                width={160}
-                                                height={160}
-                                                className="rounded-full shadow-lg border-4 border-amber-300 object-cover w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 flip-card-image"
+                                                width={184}
+                                                height={184}
+                                                fill={false}
+                                                className="rounded-full border-4 border-amber-300 object-cover w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-48 lg:h-48 flip-card-image focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-50 shadow-2xl"
+                                                sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, (max-width: 1024px) 112px, 144px"
                                             />
                                         ) : (
-                                            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-36 lg:h-36 bg-amber-200 rounded-full flex items-center justify-center text-amber-700 border-4 border-amber-300 text-xs flip-card-image">
+                                            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 lg:w-48 lg:h-48 bg-amber-200 rounded-full flex items-center justify-center text-amber-700 border-4 border-amber-300 text-xs flip-card-image">
                                                 Sin imagen
                                             </div>
                                         )}
@@ -110,7 +112,7 @@ export function FlipCard({
                                 </div>
 
                                 {/* Roll Details */}
-                                <div className="flex-1 w-full text-center lg:text-left">
+                                <div className="flex-1 w-full text-center px-8 lg:text-left">
                                     <h4 className="font-cursive text-base sm:text-lg md:text-xl lg:text-2xl text-amber-700 mb-2 sm:mb-3 md:mb-4">{selectedRecipe.name}</h4>
                                     <div className="space-y-1 sm:space-y-2 md:space-y-3 text-xs sm:text-sm md:text-base">
                                         <div className="flex justify-between items-center">
