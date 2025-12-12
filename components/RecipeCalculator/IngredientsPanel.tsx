@@ -51,7 +51,7 @@ export function IngredientsPanel({
     const [completedIngredients, setCompletedIngredients] = useState<string[]>([]);
 
     const units = [
-        { value: '', label: 'Seleccionar unidad', fullName: '' },
+        { value: '', label: 'Selecciona...', fullName: '' },
         { value: 'kg', label: 'kg', fullName: 'kilogramo' },
         { value: 'g', label: 'g', fullName: 'gramo' },
         { value: 'lb', label: 'lb', fullName: 'libra' },
@@ -452,9 +452,10 @@ export function IngredientsPanel({
                                 return (
                                     <div
                                         key={ingredient.id}
-                                        className={`group relative border-2 rounded-xl p-3 sm:p-4 transition-all duration-300 hover:shadow-lg cursor-pointer ${isLowStock
-                                            ? 'bg-red-50 border-red-200 hover:border-red-400'
-                                            : 'bg-amber-50 border-amber-200 hover:border-amber-400'
+                                        className={`group relative border-2 rounded-xl p-3 sm:p-4 transition-all duration-300 
+                                        hover:shadow-lg cursor-pointer overflow-visible ${isLowStock
+                                                ? 'bg-red-50 border-red-200 hover:border-red-400'
+                                                : 'bg-amber-50 border-amber-200 hover:border-amber-400'
                                             } ${isIngredientCompleted(ingredient.id)
                                                 ? 'bg-green-50 border-green-200 opacity-75'
                                                 : ''
@@ -471,7 +472,7 @@ export function IngredientsPanel({
                                         ) : (
                                             <>
                                                 {/* Main Content */}
-                                                <div className="flex items-start justify-between">
+                                                <div className="flex items-start justify-between overflow-visible">
                                                     {/* Ingredient Info */}
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center justify-between gap-2 mb-3">
