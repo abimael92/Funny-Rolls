@@ -31,6 +31,79 @@ export function CustomNumberInput({
     const inputRef = useRef<HTMLInputElement>(null)
     const displayRef = useRef<HTMLDivElement>(null)
 
+    const getColorClasses = (color: string) => {
+        switch (color) {
+            case 'blue':
+                return {
+                    bg50: 'bg-blue-50',
+                    bg100: 'bg-blue-100',
+                    bg200: 'bg-blue-200',
+                    text700: 'text-blue-700',
+                    text800: 'text-blue-800',
+                    text900: 'text-blue-900',
+                    border200: 'border-blue-200',
+                    decoration500: 'decoration-blue-500'
+                }
+            case 'purple':
+                return {
+                    bg50: 'bg-purple-50',
+                    bg100: 'bg-purple-100',
+                    bg200: 'bg-purple-200',
+                    text700: 'text-purple-700',
+                    text800: 'text-purple-800',
+                    text900: 'text-purple-900',
+                    border200: 'border-purple-200',
+                    decoration500: 'decoration-purple-500'
+                }
+            case 'gray':
+                return {
+                    bg50: 'bg-gray-50',
+                    bg100: 'bg-gray-100',
+                    bg200: 'bg-gray-200',
+                    text700: 'text-gray-700',
+                    text800: 'text-gray-800',
+                    text900: 'text-gray-900',
+                    border200: 'border-gray-200',
+                    decoration500: 'decoration-gray-500'
+                }
+            case 'red':
+                return {
+                    bg50: 'bg-red-50',
+                    bg100: 'bg-red-100',
+                    bg200: 'bg-red-200',
+                    text700: 'text-red-700',
+                    text800: 'text-red-800',
+                    text900: 'text-red-900',
+                    border200: 'border-red-200',
+                    decoration500: 'decoration-red-500'
+                }
+            case 'green':
+                return {
+                    bg50: 'bg-green-50',
+                    bg100: 'bg-green-100',
+                    bg200: 'bg-green-200',
+                    text700: 'text-green-700',
+                    text800: 'text-green-800',
+                    text900: 'text-green-900',
+                    border200: 'border-green-200',
+                    decoration500: 'decoration-green-500'
+                }
+            default: // amber
+                return {
+                    bg50: 'bg-amber-50',
+                    bg100: 'bg-amber-100',
+                    bg200: 'bg-amber-200',
+                    text700: 'text-amber-700',
+                    text800: 'text-amber-800',
+                    text900: 'text-amber-900',
+                    border200: 'border-amber-200',
+                    decoration500: 'decoration-amber-500'
+                }
+        }
+    }
+
+    const colors = getColorClasses(color)
+
     const modifyDigitAtPosition = (str: string, pos: number, increment: number): string => {
         if (!str || pos < 0 || pos >= str.length) return str
 
@@ -182,7 +255,7 @@ export function CustomNumberInput({
             // Don't highlight decimal point if it's not allowed (shouldn't happen but just in case)
             if (index === cursorPosition && /\d/.test(char) && isFocused) {
                 return (
-                    <span key={index} className={`underline decoration-2 decoration-${color}-500 bg-${color}-200 text-${color}-900 px-0.5 rounded`}>
+                    <span key={index} className={`underline decoration-2 ${colors.decoration500} ${colors.bg200} ${colors.text900} px-0.5 rounded`}>
                         {char}
                     </span>
                 )
@@ -196,12 +269,12 @@ export function CustomNumberInput({
     }, [value])
 
     return (
-        <div className={`flex items-center max-h-12.5 w-full  rounded-md bg-${color}-50 ${className || ''}`}>
+        <div className={`flex items-center min-h-12.5 w-full rounded-md ${colors.bg50} ${className || ''}`}>
             <button
                 type="button"
-                className={`w-6 h-full flex items-center justify-center bg-${color}-50 text-${color}-700 
-                rounded-l-md border-r border-${color}-200 hover:bg-${color}-100 active:bg-${color}-200 
-                transition-colors duration-150 group`}
+                className={`w-6 h-full min-h-12.5 min-w-8 flex items-center justify-center ${colors.bg200} ${colors.text700} 
+                            rounded-l-md border-r-2 ${colors.border200} hover:${colors.bg100} active:${colors.bg200} 
+                            transition-colors duration-150 group`}
                 onClick={(e) => {
                     e.preventDefault();
                     const currentStr = displayValue || '0';
@@ -224,11 +297,11 @@ export function CustomNumberInput({
                 </svg>
             </button>
 
-            <div className="relative flex-1 h-8 min-w-0" onClick={handleDisplayClick}>
+            <div className="relative flex-1 min-w-10 " onClick={handleDisplayClick}>
                 <input
                     ref={inputRef}
                     type="text"
-                    inputMode={allowDecimals ? "decimal" : "numeric"}  // Change inputMode based on allowDecimals
+                    inputMode={allowDecimals ? "decimal" : "numeric"}
                     placeholder={placeholder}
                     value={displayValue}
                     onChange={handleChange}
@@ -245,7 +318,7 @@ export function CustomNumberInput({
                     className="w-full h-full flex items-center justify-center px-2 py-1 overflow-hidden"
                 >
                     {displayValue || (isFocused && '0') ? (
-                        <span className={`font-bold text-${color}-800  select-none pointer-events-none text-sm sm:text-base truncate`}>
+                        <span className={`font-bold ${colors.text800} select-none pointer-events-none text-sm sm:text-base truncate`}>
                             {renderDisplayValue()}
                         </span>
                     ) : (
@@ -256,7 +329,9 @@ export function CustomNumberInput({
 
             <button
                 type="button"
-                className={`w-6 h-full flex items-center justify-center bg-${color}-50 text-${color}-700 rounded-r-md border-l border-${color}-200 hover:bg-${color}-100 active:bg-${color}-200 transition-colors duration-150 group`}
+                className={`w-6 h-full min-h-12.5 min-w-8 flex items-center justify-center 
+                ${colors.bg200} ${colors.text700} rounded-r-md border-l-2 ${colors.border200} 
+                hover:${colors.bg100} active:${colors.bg200} transition-colors duration-150 group`}
                 onClick={(e) => {
                     e.preventDefault();
                     const currentStr = displayValue || '0';

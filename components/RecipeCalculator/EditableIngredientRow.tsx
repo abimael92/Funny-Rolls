@@ -17,7 +17,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
     const [localIngredient, setLocalIngredient] = useState(ingredient);
 
     const units = [
-        { value: '', label: 'Seleccionar unidad', fullName: '' },
+        { value: '', label: 'Selecciona...', fullName: '' },
         { value: 'kg', label: 'kg', fullName: 'kilogramo' },
         { value: 'g', label: 'g', fullName: 'gramo' },
         { value: 'lb', label: 'lb', fullName: 'libra' },
@@ -56,14 +56,14 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
             </div>
 
             {/* Grid for other fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 items-start">
                 {/* Amount Field */}
-                <div>
+                <div className="relative z-[99999]">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
                     <CustomNumberInput
                         value={localIngredient.amount ?? ''}
                         onChange={(value) => setLocalIngredient({ ...localIngredient, amount: value })}
-                        className="w-full"
+                        className="w-full h-[42px] sm:h-[52px]"
                         min={0}
                         max={10000}
                         placeholder="Cantidad"
@@ -77,7 +77,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                     <CustomNumberInput
                         value={localIngredient.price ?? ''}
                         onChange={(value) => setLocalIngredient({ ...localIngredient, price: value })}
-                        className="w-full"
+                        className="w-full h-[42px] sm:h-[52px]"
                         min={0}
                         max={10000}
                         placeholder="Precio ($)"
@@ -92,7 +92,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                         value={localIngredient.unit}
                         onChange={(value) => setLocalIngredient(prev => ({ ...prev, unit: value }))}
                         options={units} // Use the imported units array
-                        placeholder="Seleccionar unidad"
+                        placeholder="Selecciona..."
                         color="gray"
                         className="w-full"
                         showFullName={true}
@@ -105,7 +105,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                     <CustomNumberInput
                         value={localIngredient.minAmount || 0}
                         onChange={(value) => setLocalIngredient({ ...localIngredient, minAmount: value })}
-                        className="w-full"
+                        className="w-full h-[42px] sm:h-[52px]"
                         min={0}
                         max={10000}
                         placeholder="Stock mínimo"

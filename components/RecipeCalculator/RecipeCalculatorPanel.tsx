@@ -59,6 +59,8 @@ export function RecipeCalculatorPanel({
     const [showAddTools, setShowAddTools] = useState(false);
     const [showRecipeTools, setShowRecipeTools] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showAddIngredients, setShowAddIngredients] = useState(true);
+    const [showRecipeIngredients, setShowRecipeIngredients] = useState(true);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -673,39 +675,55 @@ export function RecipeCalculatorPanel({
 
                     {/*    Agregar Ingredientes*/}
                     <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-4">
+                        <div
+                            className={`flex items-center justify-between ${showAddIngredients ? "mb-4" : ""}`}
+                            onClick={() => setShowAddIngredients(!showAddIngredients)}
+                        >
                             <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
                                 Agregar Ingredientes
                             </h3>
-                            <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
-                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
+                            <div className="flex items-center">
+                                <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
+                                    {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
+                                </div>
+                                <svg
+                                    className={`w-5 h-5 text-amber-700 transition-transform duration-300 ${showAddIngredients ? "rotate-180" : ""}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
-                            {ingredients
-                                .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
-                                .map(ingredient => (
-                                    <button
-                                        key={ingredient.id}
-                                        onClick={() => addIngredientToRecipe(ingredient.id)}
-                                        className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
-                                            <span className="text-base font-medium text-amber-800 group-hover:text-amber-900">
-                                                {ingredient.name}
-                                            </span>
-                                        </div>
-                                    </button>
-                                ))}
+                        {showAddIngredients && (
 
-                            {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
-                                <div className="w-full text-center py-2">
-                                    <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
-                                </div>
-                            )}
-                        </div>
+                            <div className="flex flex-wrap gap-2">
+                                {ingredients
+                                    .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
+                                    .map(ingredient => (
+                                        <button
+                                            key={ingredient.id}
+                                            onClick={() => addIngredientToRecipe(ingredient.id)}
+                                            className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
+                                                <span className="text-base font-medium text-amber-800 group-hover:text-amber-900">
+                                                    {ingredient.name}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    ))}
+
+                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
+                                    <div className="w-full text-center py-2">
+                                        <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Mobile Ingredients Section */}
@@ -922,8 +940,8 @@ export function RecipeCalculatorPanel({
                         </div>
                     </div>
 
-                    {/* Add Tools Section - Desktop */}
-                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-1">
+                    {/* Add Tools */} {/* Desktop */}
+                    <div className="bg-linear-to-br from-blue-100 to-cyan-50 border border-blue-200 rounded-xl p-4">
 
                         <div
                             className={`flex items-center justify-between ${showAddTools ? "mb-4" : ""}`}
@@ -937,14 +955,14 @@ export function RecipeCalculatorPanel({
                                 </svg>
                                 Agregar Herramientas
                             </h3>
-                            <div className="flex items-center " >
-                                <div className="text-sm text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+                            <div className="flex items-center gap-2" >
+                                <div className="text-sm text-blue-700 bg-blue-200/60 px-3 py-1 rounded-full">
                                     {tools.filter(tool => !selectedRecipe.tools?.find(rt => rt.toolId === tool.id)).length} disponibles
                                 </div>
 
                                 {/* CHEVRON */}
                                 <svg
-                                    className={`w-5 h-5 text-blue-700 transition-transform duration-300 ${showAddTools ? "rotate-180" : ""
+                                    className={`w-5 h-5 text-blue-700 transition-transform duration-300 ${!showAddTools ? "rotate-180" : ""
                                         }`}
                                     fill="none"
                                     stroke="currentColor"
@@ -990,9 +1008,9 @@ export function RecipeCalculatorPanel({
                     </div>
 
 
-                    {/* Recipe Tools */}
+                    {/* Recipe Tools */} {/* Desktop */}
                     <div
-                        className={`bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-1 
+                        className={`bg-linear-to-br from-blue-100 to-cyan-50 border border-blue-200 rounded-xl p-4
                             }`}
                     >
 
@@ -1004,14 +1022,14 @@ export function RecipeCalculatorPanel({
 
                                 Herramientas de la Receta
                             </h3>
-                            <div className="flex items-center " >
-                                <div className="text-sm text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+                            <div className="flex items-center gap-2" >
+                                <div className="text-sm text-blue-700 bg-blue-200/60 px-3 py-1 rounded-full">
                                     {selectedRecipe.tools?.length || 0} herramientas
                                 </div>
 
                                 {/* CHEVRON */}
                                 <svg
-                                    className={`w-5 h-5 text-blue-700 transition-transform duration-300 ${showAddTools ? "rotate-180" : ""
+                                    className={`w-5 h-5 text-blue-700 transition-transform duration-300 ${!showRecipeTools ? "rotate-180" : ""
                                         }`}
                                     fill="none"
                                     stroke="currentColor"
@@ -1103,155 +1121,188 @@ export function RecipeCalculatorPanel({
                         )}
                     </div>
 
-                    {/* Add Ingredients Section - Desktop */}
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-4">
+                    {/* Add Ingredients */} {/* Desktop */}
+                    <div className="bg-linear-to-br from-amber-100 to-amber-50 border  border-amber-200 rounded-xl p-4">
+                        <div
+                            className={`flex items-center justify-between ${showAddIngredients ? "mb-4" : ""}`}
+                            onClick={() => setShowAddIngredients(!showAddIngredients)}
+                        >
                             <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
                                 Agregar Ingredientes
                             </h3>
-                            <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
-                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
+                            <div className="flex items-center gap-2">
+                                <div className="text-sm text-amber-700 bg-amber-200/60 px-3 py-1 rounded-full">
+                                    {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
+                                </div>
+                                <svg
+                                    className={`w-5 h-5 text-amber-700 transition-transform duration-300 ${showAddIngredients ? "rotate-180" : ""}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
                             </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
-                            {ingredients
-                                .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
-                                .map(ingredient => (
-                                    <button
-                                        key={ingredient.id}
-                                        onClick={() => addIngredientToRecipe(ingredient.id)}
-                                        className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
-                                            <span className="text-base font-medium text-amber-800 group-hover:text-amber-900">
-                                                {ingredient.name}
-                                            </span>
-                                        </div>
-                                    </button>
-                                ))}
+                        {showAddIngredients && (
+                            <div className="flex flex-wrap gap-2">
+                                {ingredients
+                                    .filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id))
+                                    .map(ingredient => (
+                                        <button
+                                            key={ingredient.id}
+                                            onClick={() => addIngredientToRecipe(ingredient.id)}
+                                            className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
+                                                <span className="text-base font-medium text-amber-800 group-hover:text-amber-900">
+                                                    {ingredient.name}
+                                                </span>
+                                            </div>
+                                        </button>
+                                    ))}
 
-                            {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
-                                <div className="w-full text-center py-2">
-                                    <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
-                                </div>
-                            )}
-                        </div>
+                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
+                                    <div className="w-full text-center py-2">
+                                        <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Recipe Ingredients */}
-                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
-
-                        <div className="flex items-center mb-4">
-                            <h3 className="w-full font-semibold text-amber-800 text-xl flex items-center justify-between">
-                                <span>Ingredientes de la Receta</span>
-                                <span className=" text-sm text-amber-700 bg-amber-100 px-2 py-1 rounded-full font-normal">
-                                    {selectedRecipe.ingredients.length} ingredientes
-                                </span>
+                    {/* Recipe Ingredients */} {/* Desktop */}
+                    <div className="bg-linear-to-br from-amber-100 to-amber-50 border border-amber-200 rounded-xl p-4">
+                        <div
+                            className={`flex items-center justify-between ${showRecipeIngredients ? "mb-4" : ""}`}
+                            onClick={() => setShowRecipeIngredients(!showRecipeIngredients)}
+                        >
+                            <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
+                                Ingredientes de la Receta
                             </h3>
+                            <div className="flex items-center gap-2">
+                                <div className="text-sm text-amber-700 bg-amber-200/60 px-2 py-1 rounded-full font-normal">
+                                    {selectedRecipe.ingredients.length} ingredientes
+                                </div>
+                                <svg
+                                    className={`w-5 h-5 text-amber-700 transition-transform duration-300 ${showRecipeIngredients ? "rotate-180" : ""}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
                         </div>
 
-                        <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
-                            {selectedRecipe.ingredients.map((recipeIngredient) => {
-                                const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
-                                // console.log('ingredient', ingredient);
+                        {showRecipeIngredients && (
 
-                                if (!ingredient) return null
+                            <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
+                                {selectedRecipe.ingredients.map((recipeIngredient) => {
+                                    const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
+                                    // console.log('ingredient', ingredient);
 
-                                const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit)
+                                    if (!ingredient) return null
 
-                                const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount;
-                                const convertedUnit = UnitConverter.convertToStandardUnit(1, ingredient.unit);
-                                const costPercentage = (cost / totalRecipeCost) * 100
+                                    const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit)
 
-                                return (
-                                    <div
-                                        key={recipeIngredient.ingredientId}
-                                        className="group relative bg-white hover:bg-amber-50 border border-amber-200 hover:border-amber-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md"
-                                    >
-                                        {/* Cost percentage bar */}
-                                        <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-amber-400 to-orange-400 rounded-t-xl"
-                                            style={{ width: `${Math.min(costPercentage, 100)}%` }}></div>
+                                    const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount;
+                                    const convertedUnit = UnitConverter.convertToStandardUnit(1, ingredient.unit);
+                                    const costPercentage = (cost / totalRecipeCost) * 100
 
-                                        <div className="flex items-center justify-between">
-                                            {/* Ingredient Info */}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center gap-3 mb-2">
-                                                    <div className="font-semibold text-gray-900 text-lg">{ingredient.name}</div>
+                                    return (
+                                        <div
+                                            key={recipeIngredient.ingredientId}
+                                            className="group relative bg-white hover:bg-amber-50 border border-amber-200 hover:border-amber-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md"
+                                        >
+                                            {/* Cost percentage bar */}
+                                            <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-amber-400 to-orange-400 rounded-t-xl"
+                                                style={{ width: `${Math.min(costPercentage, 100)}%` }}></div>
 
-                                                    <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                                                        {isNonStandardUnit ? (
-                                                            <span className="line-through text-amber-400/50">
-                                                                ${ingredient.price.toFixed(2)}/{ingredient.unit}
-                                                            </span>
-                                                        ) : (
-                                                            `$${ingredient.price.toFixed(2)}/${ingredient.unit}`
+                                            <div className="flex items-center justify-between">
+                                                {/* Ingredient Info */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <div className="font-semibold text-gray-900 text-lg">{ingredient.name}</div>
+
+                                                        <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
+                                                            {isNonStandardUnit ? (
+                                                                <span className="line-through text-amber-400/50">
+                                                                    ${ingredient.price.toFixed(2)}/{ingredient.unit}
+                                                                </span>
+                                                            ) : (
+                                                                `$${ingredient.price.toFixed(2)}/${ingredient.unit}`
+                                                            )}
+                                                        </div>
+
+                                                        {isNonStandardUnit && (
+                                                            <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
+                                                                ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{convertedUnit?.unit || ingredient.unit}
+                                                            </div>
                                                         )}
                                                     </div>
 
-                                                    {isNonStandardUnit && (
-                                                        <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                                                            ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{convertedUnit?.unit || ingredient.unit}
+                                                    {/* Amount Input */}
+                                                    <div className="flex justify-between items-center gap-2 w-full">
+                                                        {/* Amount + Unit */}
+                                                        <div className="flex items-center gap-0.5 bg-white border-2 border-amber-300 rounded-lg px-3 py-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
+
+                                                            <CustomNumberInput
+                                                                className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
+                                                                value={recipeIngredient.amount}
+                                                                onChange={(value) => updateRecipeIngredient(recipeIngredient.ingredientId, value)}
+                                                                allowDecimals={true}
+                                                                min={0}
+                                                                max={10000}
+                                                                placeholder="20"
+                                                            />
+
+                                                            <span className="text-md text-amber-700 font-semibold">{convertedUnit?.unit || ingredient.unit}</span>
                                                         </div>
-                                                    )}
-                                                </div>
 
-                                                {/* Amount Input */}
-                                                <div className="flex justify-between items-center gap-2 w-full">
-                                                    {/* Amount + Unit */}
-                                                    <div className="flex items-center gap-0.5 bg-white border-2 border-amber-300 rounded-lg px-3 py-2 min-w-[140px] hover:border-amber-400 focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-200 transition-all duration-200">
-
-                                                        <CustomNumberInput
-                                                            className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
-                                                            value={recipeIngredient.amount}
-                                                            onChange={(value) => updateRecipeIngredient(recipeIngredient.ingredientId, value)}
-                                                            allowDecimals={true}
-                                                            min={0}
-                                                            max={10000}
-                                                            placeholder="20"
-                                                        />
-
-                                                        <span className="text-md text-amber-700 font-semibold">{convertedUnit?.unit || ingredient.unit}</span>
+                                                        {/* Cost Display */}
+                                                        <div className="text-lg font-bold text-amber-700 bg-amber-50 border-2 border-amber-200 rounded-lg px-4 py-2 min-w-[80px] text-center shadow-sm">
+                                                            ${cost.toFixed(2)}
+                                                        </div>
                                                     </div>
 
-                                                    {/* Cost Display */}
-                                                    <div className="text-lg font-bold text-amber-700 bg-amber-50 border-2 border-amber-200 rounded-lg px-4 py-2 min-w-[80px] text-center shadow-sm">
-                                                        ${cost.toFixed(2)}
-                                                    </div>
                                                 </div>
 
+                                                {/* Remove Button */}
+                                                <button
+                                                    onClick={() => removeIngredientFromRecipe(recipeIngredient.ingredientId)}
+                                                    className="opacity-0 group-hover:opacity-100 ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                    title="Eliminar ingrediente"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
                                             </div>
 
-                                            {/* Remove Button */}
-                                            <button
-                                                onClick={() => removeIngredientFromRecipe(recipeIngredient.ingredientId)}
-                                                className="opacity-0 group-hover:opacity-100 ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                title="Eliminar ingrediente"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
+                                            {/* Cost percentage indicator */}
+                                            <div className="mt-2 flex items-center justify-between text-xs">
+                                                <span className="text-gray-500">Porcentaje del costo total:</span>
+                                                <span className="font-medium text-amber-700">{costPercentage.toFixed(1)}%</span>
+                                            </div>
                                         </div>
+                                    )
+                                })}
 
-                                        {/* Cost percentage indicator */}
-                                        <div className="mt-2 flex items-center justify-between text-xs">
-                                            <span className="text-gray-500">Porcentaje del costo total:</span>
-                                            <span className="font-medium text-amber-700">{costPercentage.toFixed(1)}%</span>
-                                        </div>
+                                {selectedRecipe.ingredients.length === 0 && (
+                                    <div className="text-center py-8">
+                                        <div className="text-amber-500 text-sm mb-2">No hay ingredientes en esta receta</div>
+                                        <div className="text-amber-400 text-xs">Agrega ingredientes usando la sección de arriba</div>
                                     </div>
-                                )
-                            })}
+                                )}
+                            </div>
+                        )}
+                    </div>
 
-                            {selectedRecipe.ingredients.length === 0 && (
-                                <div className="text-center py-8">
-                                    <div className="text-amber-500 text-sm mb-2">No hay ingredientes en esta receta</div>
-                                    <div className="text-amber-400 text-xs">Agrega ingredientes usando la sección de arriba</div>
-                                </div>
-                            )}
-                        </div>
 
-                        {/* Quick Stats */}
-                        <div className="grid grid-cols-2 gap-4 mt-10 lg:grid-cols-4">
+                    {/* Quick Stats */}
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
+                        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                             <div
                                 className="bg-white border-2 border-red-200 rounded-xl p-3 text-center cursor-pointer hover:bg-red-50 transition-colors"
                                 onClick={() => setShowUnitCostModal(true)}
@@ -2138,89 +2189,91 @@ export function RecipeCalculatorPanel({
             }
 
             {/* Confirmation Modal */}
-            {showConfirmModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
-                        <div className="p-6 border-b border-green-100">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-800">Confirmar Producción</h3>
-                                    <p className="text-sm text-gray-600">Registrar producción</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-6">
-                            <div className="text-center mb-4">
-                                <div className="text-lg font-semibold text-gray-800">{selectedRecipe.name}</div>
-                                <div className="text-3xl font-bold text-purple-600 my-2">
-                                    {productionBatchCount} lote{productionBatchCount !== 1 ? 's' : ''}
-                                </div>
-                                <div className="text-gray-600">
-                                    = {productionBatchCount * selectedRecipe.batchSize} unidades
+            {
+                showConfirmModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
+                            <div className="p-6 border-b border-green-100">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-800">Confirmar Producción</h3>
+                                        <p className="text-sm text-gray-600">Registrar producción</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                                <div className="flex justify-between text-sm mb-1">
-                                    <span className="text-gray-600">Costo total:</span>
-                                    <span className="font-medium">${(totalRecipeCost * productionBatchCount).toFixed(2)}</span>
+                            <div className="p-6">
+                                <div className="text-center mb-4">
+                                    <div className="text-lg font-semibold text-gray-800">{selectedRecipe.name}</div>
+                                    <div className="text-3xl font-bold text-purple-600 my-2">
+                                        {productionBatchCount} lote{productionBatchCount !== 1 ? 's' : ''}
+                                    </div>
+                                    <div className="text-gray-600">
+                                        = {productionBatchCount * selectedRecipe.batchSize} unidades
+                                    </div>
                                 </div>
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-gray-600">Ingresos estimados:</span>
-                                    <span className="font-medium text-green-600">
-                                        ${(selectedRecipe.sellingPrice * selectedRecipe.batchSize * productionBatchCount).toFixed(2)}
-                                    </span>
+
+                                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                                    <div className="flex justify-between text-sm mb-1">
+                                        <span className="text-gray-600">Costo total:</span>
+                                        <span className="font-medium">${(totalRecipeCost * productionBatchCount).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">Ingresos estimados:</span>
+                                        <span className="font-medium text-green-600">
+                                            ${(selectedRecipe.sellingPrice * selectedRecipe.batchSize * productionBatchCount).toFixed(2)}
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setShowConfirmModal(false)}
-                                    className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        recordProduction(selectedRecipe.id, productionBatchCount)
-                                        setProductionBatchCount(1)
-                                        setShowConfirmModal(false)
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowConfirmModal(false)}
+                                        className="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            recordProduction(selectedRecipe.id, productionBatchCount)
+                                            setProductionBatchCount(1)
+                                            setShowConfirmModal(false)
 
-                                        // Add toast success message
-                                        toast.success(
-                                            <div>
-                                                <div className="font-semibold">✅ Producción Registrada</div>
-                                                <div className="text-sm">
-                                                    {productionBatchCount} lote(s) de {selectedRecipe.name}
-                                                </div>
-                                            </div>,
-                                            {
-                                                duration: 3000,
-                                                style: {
-                                                    background: '#f0fdf4',
-                                                    color: '#166534',
-                                                    border: '1px solid #86efac',
-                                                    padding: '12px 16px',
-                                                    borderRadius: '8px',
-                                                },
-                                            }
-                                        )
-                                    }}
-                                    className="flex-1 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
-                                >
-                                    Confirmar
-                                </button>
+                                            // Add toast success message
+                                            toast.success(
+                                                <div>
+                                                    <div className="font-semibold">✅ Producción Registrada</div>
+                                                    <div className="text-sm">
+                                                        {productionBatchCount} lote(s) de {selectedRecipe.name}
+                                                    </div>
+                                                </div>,
+                                                {
+                                                    duration: 3000,
+                                                    style: {
+                                                        background: '#f0fdf4',
+                                                        color: '#166534',
+                                                        border: '1px solid #86efac',
+                                                        padding: '12px 16px',
+                                                        borderRadius: '8px',
+                                                    },
+                                                }
+                                            )
+                                        }}
+                                        className="flex-1 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                                    >
+                                        Confirmar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
         </Card >
     )
 }

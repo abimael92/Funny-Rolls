@@ -51,6 +51,15 @@ export const defaultIngredients: Ingredient[] = [
 		// No conversion needed for standard metric units
 	},
 
+	{
+		id: '8',
+		name: 'Sal',
+		price: 15,
+		unit: 'g', // Change from kg to g!
+		amount: 1000, // 1kg in grams
+		minAmount: 20,
+	},
+
 	// Add more non-standard units as needed
 	{
 		id: '16',
@@ -71,6 +80,22 @@ export const defaultIngredients: Ingredient[] = [
 		minAmount: 2,
 		containsAmount: 1000, // 1 package contains 1000g
 		containsUnit: 'g', // The contained unit is grams
+	},
+	{
+		id: '14',
+		name: 'Esencia de Vainilla',
+		price: 180,
+		unit: 'ml', // Change from bottle to ml
+		amount: 500, // 500ml bottle
+		minAmount: 50,
+	},
+	{
+		id: '15',
+		name: 'Azúcar Glass',
+		price: 22,
+		unit: 'kg',
+		amount: 1,
+		minAmount: 0.5,
 	},
 	{
 		id: '18',
