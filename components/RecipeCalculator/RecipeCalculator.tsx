@@ -363,7 +363,7 @@ export function RecipeCalculator() {
                                                     setRecipeModal({ isOpen: true, mode: 'edit', recipe })
                                                     setShowDatabaseRecipes(false)
                                                 }}
-                                                className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg transition-colors active:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-inset"
+                                                className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-200 rounded-lg transition-colors active:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-inset"
                                             >
                                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                                     <BookOpen className="h-3 w-3 text-amber-500 flex-shrink-0" />
@@ -393,7 +393,7 @@ export function RecipeCalculator() {
                                                 setRecipeModal({ isOpen: true, mode: 'edit', recipe })
                                                 setShowDatabaseRecipes(false)
                                             }}
-                                            className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-50 rounded-lg transition-colors active:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-inset"
+                                            className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-200 rounded-lg transition-colors active:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-inset"
                                         >
                                             <div className="flex items-center gap-2 flex-1 min-w-0">
                                                 <span className="text-sm font-medium text-gray-900 truncate">
