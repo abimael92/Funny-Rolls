@@ -1301,7 +1301,7 @@ export function RecipeCalculatorPanel({
 
 
                     {/* Quick Stats */}
-                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
+                    {/* <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
                         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                             <div
                                 className="bg-white border-2 border-red-200 rounded-xl p-3 text-center cursor-pointer hover:bg-red-50 transition-colors"
@@ -1321,21 +1321,19 @@ export function RecipeCalculatorPanel({
                                 onClick={() => setShowMarginModal(true)}>
                                 <div className="text-sm text-gray-600">Margen %</div>
                                 <div className="text-lg font-bold text-blue-600">{profitPercentage.toFixed(1)}%</div>
-                            </div>
+                            </div>*/}
 
                             {/* Clickable Cost Card */}
-                            <div
+                 {/*
+                           <div
                                 className="bg-white border-2 border-purple-200 rounded-xl p-3 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-300 transition-all duration-200"
                                 onClick={() => setShowCostModal(true)}
                             >
                                 <div className="text-sm text-gray-600">Costo Total</div>
                                 <div className="text-lg font-bold text-purple-700">${totalRecipeCost.toFixed(2)}</div>
                             </div>
-
-
-
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Cost Summary */}
                     <Card className="bg-amber-50 border-amber-200">
@@ -1343,20 +1341,34 @@ export function RecipeCalculatorPanel({
                             <h3 className="font-semibold mb-3 text-amber-800 text-2xl text-center">Resumen de Costos</h3>
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div className="text-center">
-                                    <div className="text-gray-600 text-md">Costo Total Lote</div>
-                                    <div className="font-bold text-lg">${totalRecipeCost.toFixed(2)}</div>
+                                    <div
+                                        className="bg-white border-2 border-purple-200 rounded-xl p-3 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-300 transition-all duration-200"
+                                        onClick={() => setShowCostModal(true)}
+                                    >
+                                        <div className="text-sm text-gray-600">Costo Total</div>
+                                        <div className="text-lg font-bold text-purple-700">${totalRecipeCost.toFixed(2)}</div>
+                                    </div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-gray-600 text-md">Costo por Unidad</div>
-                                    <div className="font-bold text-lg">${costPerItem.toFixed(2)}</div>
+                                    <div className="bg-white border-2 border-red-200 rounded-xl p-3 cursor-pointer hover:bg-red-50 transition-colors"
+                                        onClick={() => setShowUnitCostModal(true)}>
+                                        <div className="text-sm text-gray-600">Costo/Unidad</div>
+                                        <div className="text-lg font-bold text-red-700">${costPerItem.toFixed(2)}</div>
+                                    </div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-gray-600 text-md">Ganancia/Unidad</div>
-                                    <div className="font-bold text-lg text-green-600">${profit.toFixed(2)}</div>
+                                    <div className="bg-white border-2 border-green-200 rounded-xl p-3 text-center cursor-pointer hover:bg-green-50 transition-colors"
+                                        onClick={() => setShowProfitModal(true)}>
+                                        <div className="text-sm text-gray-600">Ganancia/Unidad</div>
+                                        <div className="text-lg font-bold text-green-600">${profit.toFixed(2)}</div>
+                                    </div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-gray-600 text-md">Margen %</div>
-                                    <div className="font-bold text-lg text-green-600">{profitPercentage.toFixed(1)}%</div>
+                                    <div className="bg-white border-2 border-blue-200 rounded-xl p-3 text-center cursor-pointer hover:bg-blue-50 transition-colors"
+                                        onClick={() => setShowMarginModal(true)}>
+                                        <div className="text-sm text-gray-600">Margen %</div>
+                                        <div className="text-lg font-bold text-blue-600">{profitPercentage.toFixed(1)}%</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1645,10 +1657,7 @@ export function RecipeCalculatorPanel({
                             {/* Content */}
                             <div className="p-4 space-y-4">
                                 <div className="grid grid-cols-2 gap-4 text-center">
-                                    <div className="bg-red-50 p-3 rounded-lg">
-                                        <div className="text-sm text-gray-600">Costo/Unidad</div>
-                                        <div className="text-lg font-bold text-red-700">${costPerItem.toFixed(2)}</div>
-                                    </div>
+
                                     <div className="bg-blue-50 p-3 rounded-lg">
                                         <div className="text-sm text-gray-600">Precio Venta</div>
                                         <div className="text-lg font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
