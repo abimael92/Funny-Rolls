@@ -1165,7 +1165,7 @@ export function RecipeCalculatorPanel({
                                     {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
                                 </div>
                                 <svg
-                                    className={`w-5 h-5 text-amber-700 transition-transform duration-300 ${showAddIngredients ? "rotate-180" : ""}`}
+                                    className={`w-5 h-5 text-amber-700 transition-transform duration-300 ${!showAddIngredients ? "rotate-180" : ""}`}
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -1217,7 +1217,7 @@ export function RecipeCalculatorPanel({
                                     {selectedRecipe.ingredients.length} ingredientes
                                 </div>
                                 <svg
-                                    className={`w-5 h-5 text-amber-700 transition-transform duration-300 ${showRecipeIngredients ? "rotate-180" : ""}`}
+                                    className={`w-5 h-5 text-amber-700 transition-transform duration-300 ${!showRecipeIngredients ? "rotate-180" : ""}`}
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
