@@ -163,7 +163,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                 </div>
 
                 <div className={`transition-all duration-500 ease-out overflow-hidden ${showAddSection ? 'max-h-106 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <div className="p-4 bg-amber-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto overflow-x-hidden">
+                    <div className="p-4 bg-blue-50 rounded-b-lg border border-blue-300 border-t-0 max-h-80 overflow-y-auto overflow-x-hidden">
                         <h3 className="font-semibold text-lg text-blue-800 text-center mb-4">Agregar Herramienta</h3>
 
                         {error && (
@@ -375,7 +375,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-blue-700 mb-1">
+                                        <label className="block text-xs font-medium text-blue-700 mb-1">
                                             Valor de rescate (MXN)
                                             <span className="ml-1 relative">
                                                 <Info
@@ -417,7 +417,7 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-blue-700 mb-1">
+                                        <label className="block text-xs font-medium text-blue-700 mb-1">
                                             Costo por lote (MXN)
                                             <span className="ml-1 relative">
                                                 <Info
