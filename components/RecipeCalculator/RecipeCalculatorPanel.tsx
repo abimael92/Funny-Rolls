@@ -769,23 +769,52 @@ export function RecipeCalculatorPanel({
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <CustomNumberInput
-                                                    value={Number(UnitConverter.convertToReadableUnit(recipeIngredient.amount, ingredient.unit).split(' ')[0])}
-                                                    onChange={(displayValue) => {
-                                                        const converted = UnitConverter.convert(
-                                                            { value: displayValue, unit: 'unidad' },
-                                                            ingredient.unit
-                                                        );
-                                                        updateRecipeIngredient(recipeIngredient.ingredientId, converted?.value || 0)
+                                                    value={(() => {
+                                                        if (ingredient.unit === 'kg') {
+                                                            return recipeIngredient.amount * 1000;
+                                                        }
+                                                        else if (ingredient.unit === 'l' || ingredient.unit === 'litro') {
+                                                            return recipeIngredient.amount * 1000;
+                                                        }
+                                                        else if (ingredient.unit === 'docena') {
+                                                            return recipeIngredient.amount * 12;
+                                                        }
+                                                        else {
+                                                            return recipeIngredient.amount;
+                                                        }
+                                                    })()}
+                                                    onChange={(userInput) => {
+                                                        console.log(`[MOBILE CHANGE] ${ingredient.name}: User entered ${userInput}`);
+
+                                                        let convertedValue = userInput;
+
+                                                        if (ingredient.unit === 'kg') {
+                                                            convertedValue = userInput / 1000;
+                                                        }
+                                                        else if (ingredient.unit === 'l' || ingredient.unit === 'litro') {
+                                                            convertedValue = userInput / 1000;
+                                                        }
+                                                        else if (ingredient.unit === 'docena') {
+                                                            convertedValue = userInput / 12;
+                                                        }
+
+                                                        console.log(`[MOBILE CHANGE] Storing: ${convertedValue} ${ingredient.unit}`);
+                                                        updateRecipeIngredient(recipeIngredient.ingredientId, convertedValue);
                                                     }}
-                                                    allowDecimals={false}
+                                                    allowDecimals={true}
                                                     className="w-20 px-2 py-1 border-2 border-amber-300 rounded-lg text-base font-semibold text-center"
                                                     min={0}
                                                     max={10000}
-                                                    placeholder="20"
+                                                    placeholder="Cantidad"
                                                 />
 
                                                 <span className="text-base font-medium text-amber-700">
-                                                    {UnitConverter.convertToReadableUnit(recipeIngredient.amount, ingredient.unit).split(' ')[1]}
+                                                    {(() => {
+                                                        if (ingredient.unit === 'kg') return 'g';
+                                                        if (ingredient.unit === 'l' || ingredient.unit === 'litro') return 'ml';
+                                                        if (ingredient.unit === 'docena') return 'unidades';
+                                                        return ingredient.unit;
+                                                    })()}
                                                 </span>
                                             </div>
 
@@ -796,6 +825,7 @@ export function RecipeCalculatorPanel({
                                                 <Trash2 className="h-5 w-5" />
                                             </button>
                                         </div>
+                                        
                                     </div>
                                 )
                             })}
@@ -1202,7 +1232,7 @@ export function RecipeCalculatorPanel({
                             <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                                 {selectedRecipe.ingredients.map((recipeIngredient) => {
                                     const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
-                                    // console.log('ingredient', ingredient);
+                                    console.log('ingredient', ingredient);
 
                                     if (!ingredient) return null
 
@@ -1230,16 +1260,16 @@ export function RecipeCalculatorPanel({
                                                         <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
                                                             {isNonStandardUnit ? (
                                                                 <span className="line-through text-amber-400/50">
-                                                                    ${ingredient.price.toFixed(2)}/{ingredient.unit}
+                                                                    ${(ingredient.price).toFixed(2)} • {ingredient.amount} {ingredient.unit}
                                                                 </span>
                                                             ) : (
-                                                                `$${ingredient.price.toFixed(2)}/${ingredient.unit}`
+                                                                    `$${ingredient.price.toFixed(2)} • ${ingredient.amount} ${ingredient.unit}`
                                                             )}
                                                         </div>
 
                                                         {isNonStandardUnit && (
                                                             <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                                                                ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{convertedUnit?.unit || ingredient.unit}
+                                                                ${getIngredientCostPerUnit(ingredient).toFixed(2)} • {ingredient.containsAmount} {convertedUnit?.unit || ingredient.unit}
                                                             </div>
                                                         )}
                                                     </div>
@@ -1251,15 +1281,70 @@ export function RecipeCalculatorPanel({
 
                                                             <CustomNumberInput
                                                                 className="w-20 bg-transparent border-none text-md font-bold text-amber-900 focus:outline-none focus:ring-0"
-                                                                value={recipeIngredient.amount}
-                                                                onChange={(value) => updateRecipeIngredient(recipeIngredient.ingredientId, value)}
+                                                                value={(() => {
+                                                                    // Direct conversion logic here
+                                                                    if (ingredient.unit === 'kg') {
+                                                                        // Convert kg to grams for display
+                                                                        const grams = recipeIngredient.amount * 1000;
+                                                                        console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}kg = ${grams}g`);
+                                                                        return grams;
+                                                                    }
+                                                                    else if (ingredient.unit === 'l' || ingredient.unit === 'litro') {
+                                                                        // Convert liters to ml for display
+                                                                        const ml = recipeIngredient.amount * 1000;
+                                                                        console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}l = ${ml}ml`);
+                                                                        return ml;
+                                                                    }
+                                                                    else if (ingredient.unit === 'docena') {
+                                                                        // Convert docena to units for display
+                                                                        const units = recipeIngredient.amount * 12;
+                                                                        console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}docena = ${units}unidades`);
+                                                                        return units;
+                                                                    }
+                                                                    else {
+                                                                        // For other units, use as-is
+                                                                        console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}${ingredient.unit}`);
+                                                                        return recipeIngredient.amount;
+                                                                    }
+                                                                })()}
+                                                                onChange={(userInput) => {
+                                                                    console.log(`[CHANGE] ${ingredient.name}: User entered ${userInput}`);
+
+                                                                    let convertedValue = userInput;
+
+                                                                    // Convert back to storage unit
+                                                                    if (ingredient.unit === 'kg') {
+                                                                        convertedValue = userInput / 1000; // grams to kg
+                                                                        console.log(`[CHANGE] Converting ${userInput}g to ${convertedValue}kg`);
+                                                                    }
+                                                                    else if (ingredient.unit === 'l' || ingredient.unit === 'litro') {
+                                                                        convertedValue = userInput / 1000; // ml to liters
+                                                                        console.log(`[CHANGE] Converting ${userInput}ml to ${convertedValue}l`);
+                                                                    }
+                                                                    else if (ingredient.unit === 'docena') {
+                                                                        convertedValue = userInput / 12; // units to docena
+                                                                        console.log(`[CHANGE] Converting ${userInput} unidades to ${convertedValue} docena`);
+                                                                    }
+
+                                                                    console.log(`[CHANGE] Final storage value: ${convertedValue} ${ingredient.unit}`);
+                                                                    updateRecipeIngredient(recipeIngredient.ingredientId, convertedValue);
+                                                                }}
                                                                 allowDecimals={true}
                                                                 min={0}
                                                                 max={10000}
-                                                                placeholder="20"
+                                                                placeholder="Cantidad"
                                                             />
 
-                                                            <span className="text-md text-amber-700 font-semibold">{convertedUnit?.unit || ingredient.unit}</span>
+                                                            <span className="text-md text-amber-700 font-semibold">
+                                                                {(() => {
+                                                                    // Display unit based on storage unit
+                                                                    if (ingredient.unit === 'kg') return 'g';
+                                                                    if (ingredient.unit === 'l' || ingredient.unit === 'litro') return 'ml';
+                                                                    if (ingredient.unit === 'docena') return 'unidades';
+                                                                    return ingredient.unit;
+                                                                })()}
+                                                            </span>
+                                                            
                                                         </div>
 
                                                         {/* Cost Display */}
@@ -1281,8 +1366,8 @@ export function RecipeCalculatorPanel({
                                             </div>
 
                                             {/* Cost percentage indicator */}
-                                            <div className="mt-2 flex items-center justify-between text-xs">
-                                                <span className="text-gray-500">Porcentaje del costo total:</span>
+                                            <div className="mt-2 flex justify-end items-center gap-2 text-xs">
+                                                <span className="text-amber-950">Porcentaje del costo total:</span>
                                                 <span className="font-medium text-amber-700">{costPercentage.toFixed(1)}%</span>
                                             </div>
                                         </div>

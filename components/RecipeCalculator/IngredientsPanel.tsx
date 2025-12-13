@@ -29,7 +29,8 @@ export function IngredientsPanel({
     ingredients,
     setIngredients,
     inventory,
-    updateInventory
+    updateInventory,
+    addInventoryItem
 }: IngredientsPanelProps) {
     const [error, setError] = useState<string | null>(null)
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
@@ -119,9 +120,14 @@ export function IngredientsPanel({
 
         const ingredient: Ingredient = {
             ...newIngredient,
-            id: Date.now().toString()
+            id: Date.now().toString(),
+            ...(specialUnit.containsAmount > 0 && {
+                containsAmount: specialUnit.containsAmount,
+                containsUnit: specialUnit.containsUnit
+            })
         }
         setIngredients([...ingredients, ingredient])
+        addInventoryItem(ingredient.id, ingredient.minAmount)
         setNewIngredient({ name: '', price: 0, unit: '', amount: 0, minAmount: 0 })
         setSpecialUnit({ containsUnit: 'g', containsAmount: 0 })
     }
@@ -451,12 +457,6 @@ export function IngredientsPanel({
                                 const hasAmount = ingredient.amount > 0
                                 const isCompleted = isIngredientCompleted(ingredient.id)
 
-                                console.log(hasAmount);
-                                console.log(isCompleted);
-
-                                console.log(currentStock);
-
-
                                 return (
                                     <div
                                         key={ingredient.id}
@@ -465,10 +465,9 @@ export function IngredientsPanel({
                                                 ? 'bg-red-50 border-red-200 hover:border-red-400'
                                                 : 'bg-amber-50 border-amber-200 hover:border-amber-400'
                                             } ${isCompleted
-                                                ? 'bg-green-50 border-green-200'
+                                            ? 'bg-gray-50 border-gray-200 opacity-80 hover:bg-gray-100 hover:border-gray-400 '
                                                 : ''
                                             }`}
-                                        onClick={() => hasAmount && !editingIngredientId && toggleIngredientCompletion(ingredient.id)}
                                     >
                                         {editingIngredientId === ingredient.id ? (
                                             <EditableIngredientRow
@@ -481,15 +480,23 @@ export function IngredientsPanel({
                                             // SIMPLE COMPLETED VIEW
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex-shrink-0 w-5 h-5 bg-green-500 rounded flex items-center justify-center">
-                                                        <Check className="h-3 w-3 text-white" />
-                                                    </div>
+                                                            <div
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (!editingIngredientId) {
+                                                                        toggleIngredientCompletion(ingredient.id); // CLICK TO UNCHECK!
+                                                                    }
+                                                                }}
+                                                                className="shrink-0 w-5 h-5 bg-gray-500 rounded flex items-center justify-center cursor-pointer hover:bg-gray-600"
+                                                            >
+                                                                <Check className="h-3 w-3 text-white" />
+                                                            </div>
                                                     <div className="line-through text-gray-500">{ingredient.name}</div>
-                                                    <div className="text-sm text-green-600">
+                                                    <div className="text-sm text-gray-600">
                                                         Comprado: {ingredient.amount} {ingredient.unit} - ${ingredient.price}
                                                     </div>
                                                 </div>
-                                                <button
+                                                {/* <button
                                                     onClick={(e) => {
                                                         e.stopPropagation()
                                                         removeIngredient(ingredient.id)
@@ -497,7 +504,7 @@ export function IngredientsPanel({
                                                     className="p-2 text-red-500 hover:text-red-700"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
-                                                </button>
+                                                </button> */}
                                             </div>
                                         ) : (
                                             <>
@@ -506,22 +513,29 @@ export function IngredientsPanel({
                                                     {/* Ingredient Info */}
                                                     <div className="flex-1 min-w-0">
                                                         <div className="flex items-center justify-between gap-2 mb-3">
-                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
-                                                                <div className="flex items-center gap-2">
-
+                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0 max-w-3/4">
+                                                                        <div className="flex items-center gap-2 ">
                                                                     {/* Checkbox for ingredients with amount */}
-                                                                    {currentStock !== 0 && (
-                                                                        <div className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 border-2 rounded flex items-center justify-center transition-all duration-200 ${isCompleted
-                                                                            ? 'bg-green-500 border-green-500 text-white'
-                                                                            : 'border-amber-400 bg-white hover:border-amber-500'
-                                                                            }`}>
-                                                                            {isCompleted && <Check className="h-3 w-3 sm:h-4 sm:w-4" />}
-                                                                        </div>
-                                                                    )}
+                                                                            {hasAmount && currentStock > 0 && (
+                                                                                <div
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        if (!editingIngredientId) {
+                                                                                            toggleIngredientCompletion(ingredient.id);
+                                                                                        }
+                                                                                    }}
+                                                                                    className={`shrink-0 w-5 h-5 sm:w-6 sm:h-6 border-2 rounded flex items-center justify-center transition-all duration-200 cursor-pointer ${isCompleted
+                                                                                        ? 'bg-green-500 border-green-500 text-white'
+                                                                                        : 'border-amber-400 bg-white hover:border-amber-500'
+                                                                                        }`}
+                                                                                >
+                                                                                    {isCompleted && <Check className="h-3 w-3 sm:h-4 sm:w-4" />}
+                                                                                </div>
+                                                                            )}
 
-                                                                    <div className="font-semibold text-gray-900 text-lg sm:text-xl truncate">{ingredient.name}</div>
+                                                                            <div className="font-semibold text-gray-900 text-lg sm:text-xl truncate max-w-2/3">{ingredient.name}</div>
                                                                     <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm: py-1 rounded-full font-medium">
-                                                                        ${(ingredient.price).toFixed(2)} / {ingredient.unit}
+                                                                                ${(ingredient.price).toFixed(2)} • {ingredient.amount} {ingredient.unit}
                                                                     </div>
 
                                                                 </div>
@@ -529,19 +543,25 @@ export function IngredientsPanel({
                                                             </div>
 
                                                             {/* Action Buttons */}
-                                                            <div className="flex items-center gap-1 flex-shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
+                                                            <div className="flex items-center gap-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
 
                                                                 {(!hasAmount || !isCompleted) && (
                                                                     <>
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation()  
+                                                                                        setEditingIngredientId(ingredient.id)
+                                                                                    }}
+                                                                                    className="p-1 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                                                    title="Editar ingrediente"
+                                                                                >
+                                                                                    <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
+                                                                                </button>
                                                                         <button
-                                                                            onClick={() => setEditingIngredientId(ingredient.id)}
-                                                                            className="p-1 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                                            title="Editar ingrediente"
-                                                                        >
-                                                                            <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() => removeIngredient(ingredient.id)}
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        removeIngredient(ingredient.id);
+                                                                                    }}
                                                                             className="p-1 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
                                                                             title="Eliminar ingrediente"
                                                                         >
