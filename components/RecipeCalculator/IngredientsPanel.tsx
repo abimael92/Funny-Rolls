@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeftRight, Calculator, ChevronDown, CookingPot, Info, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
+import { ArrowLeftRight, Calculator, Check, ChevronDown, CookingPot, Info, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientCostPerUnit } from '@/lib/utils'
 import { DEFAULT_UNIT_CONVERSIONS } from '@/lib/unit-conversion'
@@ -436,9 +436,9 @@ export function IngredientsPanel({
 
                         {/* Divider */}
                         <div className="relative flex items-center my-6">
-                            <div className="flex-grow border-t border-amber-300"></div>
+                            <div className="grow border-t border-amber-300"></div>
                             <span className="mx-3 text-amber-600 text-base sm:text-lg font-medium">Lista de Ingredientes</span>
-                            <div className="flex-grow border-t border-amber-300"></div>
+                            <div className="grow border-t border-amber-300"></div>
                         </div>
 
                         {/* Ingredients List */}
@@ -447,7 +447,15 @@ export function IngredientsPanel({
                                 const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id)
                                 const currentStock = inventoryItem?.currentStock || 0
                                 const isLowStock = currentStock <= ingredient.minAmount
-                                const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit)
+                                const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit);
+                                const hasAmount = ingredient.amount > 0
+                                const isCompleted = isIngredientCompleted(ingredient.id)
+
+                                console.log(hasAmount);
+                                console.log(isCompleted);
+
+                                console.log(currentStock);
+
 
                                 return (
                                     <div
@@ -456,11 +464,11 @@ export function IngredientsPanel({
                                         hover:shadow-lg cursor-pointer overflow-visible ${isLowStock
                                                 ? 'bg-red-50 border-red-200 hover:border-red-400'
                                                 : 'bg-amber-50 border-amber-200 hover:border-amber-400'
-                                            } ${isIngredientCompleted(ingredient.id)
-                                                ? 'bg-green-50 border-green-200 opacity-75'
+                                            } ${isCompleted
+                                                ? 'bg-green-50 border-green-200'
                                                 : ''
                                             }`}
-                                        onClick={() => toggleIngredientCompletion(ingredient.id)}
+                                        onClick={() => hasAmount && !editingIngredientId && toggleIngredientCompletion(ingredient.id)}
                                     >
                                         {editingIngredientId === ingredient.id ? (
                                             <EditableIngredientRow
@@ -478,6 +486,17 @@ export function IngredientsPanel({
                                                         <div className="flex items-center justify-between gap-2 mb-3">
                                                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
                                                                 <div className="flex items-center gap-2">
+
+                                                                    {/* Checkbox for ingredients with amount */}
+                                                                    {currentStock !== 0 && (
+                                                                        <div className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 border-2 rounded flex items-center justify-center transition-all duration-200 ${isCompleted
+                                                                            ? 'bg-green-500 border-green-500 text-white'
+                                                                            : 'border-amber-400 bg-white hover:border-amber-500'
+                                                                            }`}>
+                                                                            {isCompleted && <Check className="h-3 w-3 sm:h-4 sm:w-4" />}
+                                                                        </div>
+                                                                    )}
+
                                                                     <div className="font-semibold text-gray-900 text-lg sm:text-xl truncate">{ingredient.name}</div>
                                                                     <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm: py-1 rounded-full font-medium">
                                                                         ${(ingredient.price).toFixed(2)} / {ingredient.unit}
@@ -489,20 +508,25 @@ export function IngredientsPanel({
 
                                                             {/* Action Buttons */}
                                                             <div className="flex items-center gap-1 flex-shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
-                                                                <button
-                                                                    onClick={() => setEditingIngredientId(ingredient.id)}
-                                                                    className="p-1 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                                    title="Editar ingrediente"
-                                                                >
-                                                                    <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => removeIngredient(ingredient.id)}
-                                                                    className="p-1 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                                    title="Eliminar ingrediente"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
-                                                                </button>
+
+                                                                {(!hasAmount || !isCompleted) && (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={() => setEditingIngredientId(ingredient.id)}
+                                                                            className="p-1 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                                            title="Editar ingrediente"
+                                                                        >
+                                                                            <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => removeIngredient(ingredient.id)}
+                                                                            className="p-1 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                                            title="Eliminar ingrediente"
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                                                                        </button>
+                                                                    </>
+                                                                )}
                                                             </div>
                                                         </div>
 
