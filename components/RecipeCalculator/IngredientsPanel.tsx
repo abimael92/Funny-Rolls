@@ -477,6 +477,28 @@ export function IngredientsPanel({
                                                 onSave={saveEditedIngredient}
                                                 onCancel={() => setEditingIngredientId(null)}
                                             />
+                                        ) : isCompleted ? (
+                                            // SIMPLE COMPLETED VIEW
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex-shrink-0 w-5 h-5 bg-green-500 rounded flex items-center justify-center">
+                                                        <Check className="h-3 w-3 text-white" />
+                                                    </div>
+                                                    <div className="line-through text-gray-500">{ingredient.name}</div>
+                                                    <div className="text-sm text-green-600">
+                                                        Comprado: {ingredient.amount} {ingredient.unit} - ${ingredient.price}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        removeIngredient(ingredient.id)
+                                                    }}
+                                                    className="p-2 text-red-500 hover:text-red-700"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
                                         ) : (
                                             <>
                                                 {/* Main Content */}
