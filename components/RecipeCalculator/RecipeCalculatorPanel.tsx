@@ -7,7 +7,7 @@ import { Plus, Trash2, Download, Upload, Wrench } from "lucide-react"
 import { Calculator, } from "lucide-react"
 
 import { products, toolCategories } from '@/lib/data'
-import { Ingredient, Recipe, Tool } from '@/lib/types'
+import { Ingredient, Recipe, Tool, ToolUsage } from '@/lib/types'
 import {
     calculateRecipeCost,
     calculateCostPerItem,
@@ -16,6 +16,8 @@ import {
     getIngredientCostPerUnit,
     exportRecipeData,
     importRecipeData,
+    calculateTotalToolCost,
+    calculateToolCost,
 } from '@/lib/utils'
 import { FlipCard } from './FlipCard';
 import { CloseButton, ActionButton } from './ModalHelpers';
@@ -61,6 +63,8 @@ export function RecipeCalculatorPanel({
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showAddIngredients, setShowAddIngredients] = useState(true);
     const [showRecipeIngredients, setShowRecipeIngredients] = useState(true);
+    const [selectedRecipeTool, setSelectedRecipeTool] = useState<{ toolId: string, toolName: string, currentUsage?: ToolUsage, currentPercentage?: number } | null>(null);
+    const [showToolUsageModal, setShowToolUsageModal] = useState(false);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -145,8 +149,6 @@ export function RecipeCalculatorPanel({
         setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
     }
 
-
-
     // Update recipe batch size
     const updateRecipeBatchSize = (size: number) => {
         const updatedRecipe = { ...selectedRecipe, batchSize: size }
@@ -214,12 +216,6 @@ export function RecipeCalculatorPanel({
 
         event.target.value = ''
     }
-
-    // const handleRecordProduction = () => {
-    //     if (productionBatchCount > 0) {
-    //         setShowConfirmModal(true)
-    //     }
-    // }
 
     const handleRecordProduction = () => {
         console.log("--- Starting Stock Check ---");
@@ -315,12 +311,27 @@ export function RecipeCalculatorPanel({
             setShowConfirmModal(true);
         }
     }
+    
+    const updateToolUsage = (toolId: string, usage: ToolUsage, usagePercentage?: number) => {
+        const updatedRecipe = {
+            ...selectedRecipe,
+            tools: selectedRecipe.tools?.map(rt =>
+                rt.toolId === toolId ? {
+                    ...rt,
+                    usage,
+                    usagePercentage: usage === 'partial' ? (usagePercentage || 50) : undefined
+                } : rt
+            ) || []
+        }
+        setSelectedRecipe(updatedRecipe)
+        setRecipes(recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r))
+    }
 
     // Calculate costs using utils functions
-    const costPerItem = calculateCostPerItem(selectedRecipe, ingredients)
-    const totalRecipeCost = calculateRecipeCost(selectedRecipe, ingredients)
-    const profit = calculateProfit(selectedRecipe, ingredients)
-    const profitPercentage = calculateProfitPercentage(selectedRecipe, ingredients)
+    const costPerItem = calculateCostPerItem(selectedRecipe, ingredients, tools)
+    const totalRecipeCost = calculateRecipeCost(selectedRecipe, ingredients, tools)
+    const profit = calculateProfit(selectedRecipe, ingredients, tools)
+    const profitPercentage = calculateProfitPercentage(selectedRecipe, ingredients, tools)
 
     // Calculate total cost of ONLY ingredients used in this recipe
     const totalRecipeIngredientsCost = selectedRecipe.ingredients.reduce((total, recipeIngredient) => {
@@ -331,6 +342,9 @@ export function RecipeCalculatorPanel({
     // Calculate batches needed
     const earningsPerLot = selectedRecipe.sellingPrice * selectedRecipe.batchSize;
     const metaLotes = Math.ceil(totalRecipeIngredientsCost / earningsPerLot);
+    
+    // Calculate tool costs separately
+    const totalToolCost = calculateTotalToolCost(selectedRecipe, tools)
 
     return (
         <Card className="w-full">
@@ -673,7 +687,7 @@ export function RecipeCalculatorPanel({
                         </div>
                     )}
 
-                    {/*    Agregar Ingredientes*/}
+                    {/* Agregar Ingredientes*/}
                     <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
                         <div
                             className={`flex items-center justify-between ${showAddIngredients ? "mb-4" : ""}`}
@@ -706,7 +720,7 @@ export function RecipeCalculatorPanel({
                                         <button
                                             key={ingredient.id}
                                             onClick={() => addIngredientToRecipe(ingredient.id)}
-                                            className="group relative overflow-hidden bg-white hover:bg-green-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
+                                            className="group relative overflow-hidden bg-white hover:bg-amber-50 border border-amber-300 hover:border-amber-400 rounded-lg px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95"
                                         >
                                             <div className="flex items-center gap-2">
                                                 <Plus className="h-5 w-5 text-amber-600 group-hover:text-amber-700 transition-colors" />
@@ -719,7 +733,7 @@ export function RecipeCalculatorPanel({
 
                                 {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length === 0 && (
                                     <div className="w-full text-center py-2">
-                                        <div className="text-green-600 text-base">Todos los ingredientes agregados</div>
+                                        <div className="text-amber-600 text-base">Todos los ingredientes agregados</div>
                                     </div>
                                 )}
                             </div>
@@ -1047,12 +1061,17 @@ export function RecipeCalculatorPanel({
                         <div
                             className={`flex items-center justify-between ${showRecipeTools ? "mb-4 " : ""}`}
                             onClick={() => setShowRecipeTools(!showRecipeTools)}>
-                            <h3 className="font-semibold text-blue-800 text-lg flex items-center gap-2">
-                                <Wrench className="h-4 w-4" />
+                            <div>
+                                <h3 className="font-semibold text-blue-800 text-lg flex items-center gap-2">
+                                    <Wrench className="h-4 w-4" />
 
-                                Herramientas de la Receta
-                            </h3>
+                                    Herramientas de la Receta</h3>
+                                <div className="text-xs text-blue-600">
+                                    Costo: ${totalToolCost.toFixed(2)}
+                                </div>
+                            </div>
                             <div className="flex items-center gap-2" >
+
                                 <div className="text-sm text-blue-700 bg-blue-200/60 px-3 py-1 rounded-full">
                                     {selectedRecipe.tools?.length || 0} herramientas
                                 </div>
@@ -1119,6 +1138,27 @@ export function RecipeCalculatorPanel({
                                                         )}
                                                     </div>
                                                 </div>
+                                                
+                                                {/* Settings Button */}
+                                                {/* <button
+                                                    onClick={() => {
+                                                        const recipeTool = selectedRecipe.tools?.find(rt => rt.toolId === tool.id);
+                                                        setSelectedRecipeTool({
+                                                            toolId: tool.id,
+                                                            toolName: tool.name,
+                                                            currentUsage: recipeTool?.usage,
+                                                            currentPercentage: recipeTool?.usagePercentage
+                                                        });
+                                                        setShowToolUsageModal(true);
+                                                    }}
+                                                    className="opacity-0 group-hover:opacity-100 p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                    title="Configurar uso"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    </svg>
+                                                </button> */}
 
                                                 {/* Remove Button */}
                                                 <button
@@ -1232,7 +1272,7 @@ export function RecipeCalculatorPanel({
                             <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                                 {selectedRecipe.ingredients.map((recipeIngredient) => {
                                     const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
-                                    console.log('ingredient', ingredient);
+                                    // console.log('ingredient', ingredient);
 
                                     if (!ingredient) return null
 
@@ -1555,8 +1595,7 @@ export function RecipeCalculatorPanel({
             </CardContent>
 
             {/* Cost Breakdown Modal */}
-            {
-                showCostModal && (
+            {showCostModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                         {/* Add backdrop click to close */}
                         <div
@@ -1583,6 +1622,8 @@ export function RecipeCalculatorPanel({
 
                             {/* Content */}
                             <div className="p-4 overflow-y-auto max-h-64">
+                                {/* Ingredients */}
+                                <h4 className="font-medium mb-2 text-amber-700">Ingredientes</h4>
                                 {selectedRecipe.ingredients.map((recipeIngredient) => {
                                     const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
                                     if (!ingredient) return null;
@@ -1605,17 +1646,44 @@ export function RecipeCalculatorPanel({
                                         </div>
                                     );
                                 })}
-                            </div>
+                            
+                            {/* Tools */}
+                            <h4 className="font-medium mb-2 mt-4 text-blue-700">Herramientas</h4>
+                            {selectedRecipe.tools?.map((recipeTool) => {
+                                const tool = tools.find(t => t.id === recipeTool.toolId);
+                                if (!tool) return null;
+
+                                const toolCost = calculateToolCost(tool, recipeTool);
+                                const percentage = (toolCost / totalRecipeCost) * 100;
+
+                                return (
+                                    <div key={recipeTool.toolId} className="flex justify-between items-center py-2 border-b">
+                                        <div className="flex-1">
+                                            <div className="font-medium">{tool.name}</div>
+                                            <div className="text-sm text-gray-500">
+                                                {recipeTool.usage === 'full' ? 'Uso completo' :
+                                                    recipeTool.usage === 'partial' ? `Uso parcial (${recipeTool.usagePercentage}%)` :
+                                                        'Depreciado'}
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="font-bold">${toolCost.toFixed(2)}</div>
+                                            <div className="text-sm text-gray-500">{percentage.toFixed(1)}%</div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
 
                             {/* Footer */}
                             <div className="p-6 border-t bg-gray-50">
                                 <div className="bg-white rounded-lg border p-4 mb-4">
                                     <div className="flex justify-between items-center mb-2">
                                         <span className="font-bold text-gray-900">Total de la Receta:</span>
-                                        <span className="text-xl font-bold text-red-700">${totalRecipeIngredientsCost.toFixed(2)}</span>
+                                        <span className="text-xl font-bold text-red-700">${totalRecipeCost.toFixed(2)}</span>
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                        {selectedRecipe.ingredients.length} ingrediente{selectedRecipe.ingredients.length !== 1 ? 's' : ''} en esta receta
+                                        {selectedRecipe.ingredients.length} ingrediente{selectedRecipe.ingredients.length !== 1 ? 's' : ''} y     {selectedRecipe.tools?.length || 0} herramienta{selectedRecipe.tools?.length !== 1 ? 's' : ''}
                                     </div>
                                 </div>
 
@@ -1629,13 +1697,12 @@ export function RecipeCalculatorPanel({
 
                             </div>
                         </div>
-                    </div>
+                    </div> 
                 )
             }
 
             {/* Unit Cost Breakdown Modal */}
-            {
-                showUnitCostModal && (
+            {showUnitCostModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                         <div
                             className="fixed inset-0"
@@ -1662,6 +1729,7 @@ export function RecipeCalculatorPanel({
                             {/* Content */}
                             <div className="p-6 overflow-y-auto max-h-96">
                                 <div className="space-y-3">
+                                <h4 className="font-medium text-amber-700 mt-4">Ingredientes por unidad</h4>
                                     {selectedRecipe.ingredients.map((recipeIngredient) => {
                                         const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
                                         if (!ingredient) return null;
@@ -1686,6 +1754,34 @@ export function RecipeCalculatorPanel({
                                             </div>
                                         );
                                     })}
+                                    
+                                {/* Tools Section */}
+                                <h4 className="font-medium text-blue-700 mt-4">Herramientas por unidad</h4>
+                                {selectedRecipe.tools?.map((recipeTool) => {
+                                    const tool = tools.find(t => t.id === recipeTool.toolId);
+                                    if (!tool) return null;
+
+                                    const toolCost = calculateToolCost(tool, recipeTool);
+                                    const unitToolCost = toolCost / selectedRecipe.batchSize;
+                                    const percentage = (unitToolCost / costPerItem) * 100;
+
+                                    return (
+                                        <div key={recipeTool.toolId} className="flex justify-between items-center py-2 border-b">
+                                            <div className="flex-1">
+                                                <div className="font-medium">{tool.name}</div>
+                                                <div className="text-sm text-gray-500">
+                                                    {recipeTool.usage === 'full' ? 'Uso completo' :
+                                                        recipeTool.usage === 'partial' ? `Uso parcial (${recipeTool.usagePercentage}%)` :
+                                                            'Depreciado'} ÷ {selectedRecipe.batchSize} unidades
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-bold">${unitToolCost.toFixed(4)}</div>
+                                                <div className="text-sm text-gray-500">{percentage.toFixed(1)}%</div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                                 </div>
                             </div>
 
@@ -1710,12 +1806,10 @@ export function RecipeCalculatorPanel({
                             </div>
                         </div>
                     </div>
-                )
-            }
+                )}
 
             {/* Profit Breakdown Modal */}
-            {
-                showProfitModal && (
+            {showProfitModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                         {/* Add backdrop click to close */}
                         <div
@@ -1739,37 +1833,59 @@ export function RecipeCalculatorPanel({
                                 </div>
                             </div>
 
-                            {/* Content */}
-                            <div className="p-4 space-y-4">
-                                <div className="grid grid-cols-2 gap-4 text-center">
-
-                                    <div className="bg-blue-50 p-3 rounded-lg">
-                                        <div className="text-sm text-gray-600">Precio Venta</div>
-                                        <div className="text-lg font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
-                                    </div>
+                        {/* Content */}
+                        <div className="p-4 space-y-4">
+                            <div className="grid grid-cols-2 gap-4 text-center">
+                                <div className="bg-blue-50 p-3 rounded-lg">
+                                    <div className="text-sm text-gray-600">Precio Venta</div>
+                                    <div className="text-lg font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
                                 </div>
-
-                                <div className="bg-green-50 p-4 rounded-lg">
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="font-medium">Ganancia por Unidad:</span>
-                                        <span className="text-lg font-bold text-green-700">${profit.toFixed(2)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="font-medium">Margen de Ganancia:</span>
-                                        <span className="text-lg font-bold text-green-700">{profitPercentage.toFixed(1)}%</span>
-                                    </div>
+                                <div className="bg-red-50 p-3 rounded-lg">
+                                    <div className="text-sm text-gray-600">Costo por Unidad</div>
+                                    <div className="text-lg font-bold text-red-700">${costPerItem.toFixed(2)}</div>
                                 </div>
+                            </div>
 
-                                <div className="bg-amber-50 p-3 rounded-lg">
-                                    <div className="text-sm text-gray-600 mb-1">Ganancia Total por Lote</div>
-                                    <div className="text-lg font-bold text-amber-700">
-                                        ${(profit * selectedRecipe.batchSize).toFixed(2)}
+                            {/* Cost Breakdown Section - THIS GOES HERE (OUTSIDE THE GRID) */}
+                            <div className="bg-red-50 p-4 rounded-lg">
+                                <div className="text-sm font-medium text-red-700 mb-2">Desglose de Costos por Unidad</div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">Ingredientes:</span>
+                                        <span>${(totalRecipeIngredientsCost / selectedRecipe.batchSize).toFixed(4)}</span>
                                     </div>
-                                    <div className="text-xs text-gray-500">
-                                        {selectedRecipe.batchSize} unidades × ${profit.toFixed(2)}
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-gray-600">Herramientas:</span>
+                                        <span>${(totalToolCost / selectedRecipe.batchSize).toFixed(4)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm font-bold border-t pt-1">
+                                        <span className="text-red-700">Costo Total:</span>
+                                        <span className="text-red-700">${costPerItem.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
+
+                            <div className="bg-green-50 p-4 rounded-lg">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="font-medium">Ganancia por Unidad:</span>
+                                    <span className="text-lg font-bold text-green-700">${profit.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium">Margen de Ganancia:</span>
+                                    <span className="text-lg font-bold text-green-700">{profitPercentage.toFixed(1)}%</span>
+                                </div>
+                            </div>
+
+                            <div className="bg-amber-50 p-3 rounded-lg">
+                                <div className="text-sm text-gray-600 mb-1">Ganancia Total por Lote</div>
+                                <div className="text-lg font-bold text-amber-700">
+                                    ${(profit * selectedRecipe.batchSize).toFixed(2)}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                    {selectedRecipe.batchSize} unidades × ${profit.toFixed(2)}
+                                </div>
+                            </div>
+                        </div>
 
                             <div className="p-4 border-t bg-gray-50">
                                 <button
@@ -1781,109 +1897,111 @@ export function RecipeCalculatorPanel({
                             </div>
                         </div>
                     </div>
-                )
-            }
+                ) }
 
             {/* Margin Analysis Modal */}
-            {
-                showMarginModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                        {/* Add backdrop click to close */}
-                        <div
-                            className="fixed inset-0"
-                            onClick={() => setShowMarginModal(false)}
-                        />
-                        <div className="bg-white rounded-2xl lg:rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
+            {showMarginModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="fixed inset-0" onClick={() => setShowMarginModal(false)} />
+                    <div className="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] overflow-hidden relative z-10 shadow-xl">
 
-                            {/* Header */}
-                            <div className="p-6 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <span className="text-lg">📊</span>
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-bold text-blue-800">Análisis de Margen</h3>
-                                            <p className="text-sm text-blue-600">Evaluación de rentabilidad</p>
-                                        </div>
+                        {/* Header */}
+                        <div className="p-6 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <span className="text-lg">📊</span>
                                     </div>
-                                    <CloseButton onClose={() => setShowMarginModal(false)} />
-                                </div>
-                            </div>
-
-                            <div className="p-6 space-y-4">
-                                {/* Profitability Indicator */}
-                                <div className="text-center">
-                                    <div className={`text-lg font-bold ${profitPercentage >= 50 ? 'text-green-600' :
-                                        profitPercentage >= 30 ? 'text-yellow-600' : 'text-red-600'
-                                        }`}>
-                                        {profitPercentage >= 50 ? '🟢 Excelente' :
-                                            profitPercentage >= 30 ? '🟡 Buena' : '🔴 Baja'} Rentabilidad
+                                    <div>
+                                        <h3 className="text-xl font-bold text-blue-800">Análisis de Margen</h3>
+                                        <p className="text-sm text-blue-600">Evaluación de rentabilidad</p>
                                     </div>
                                 </div>
-
-                                {/* Progress Bar */}
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-sm">
-                                        <span>0%</span>
-                                        <span>Margen Actual: {profitPercentage.toFixed(1)}%</span>
-                                        <span>100%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-200 rounded-full h-4">
-                                        <div
-                                            className={`h-4 rounded-full transition-all duration-300 ${profitPercentage >= 50 ? 'bg-green-500' :
-                                                profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
-                                                }`}
-                                            style={{ width: `${Math.min(profitPercentage, 100)}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-
-                                {/* Key Metrics */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-red-50 p-3 rounded-lg">
-                                        <div className="text-xs text-gray-600">Costo</div>
-                                        <div className="font-bold text-red-700">${costPerItem.toFixed(2)}</div>
-                                    </div>
-                                    <div className="bg-green-50 p-3 rounded-lg">
-                                        <div className="text-xs text-gray-600">Ganancia</div>
-                                        <div className="font-bold text-green-700">${profit.toFixed(2)}</div>
-                                    </div>
-                                    <div className="bg-blue-50 p-3 rounded-lg">
-                                        <div className="text-xs text-gray-600">Precio Venta</div>
-                                        <div className="font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
-                                    </div>
-                                    <div className="bg-purple-50 p-3 rounded-lg">
-                                        <div className="text-xs text-gray-600">Por cada $1</div>
-                                        <div className="font-bold text-purple-700">${(profitPercentage / 100).toFixed(2)}</div>
-                                    </div>
-                                </div>
-
-                                {/* Recommendation */}
-                                <div className="bg-gray-50 p-3 rounded-lg">
-                                    <div className="text-sm font-medium text-gray-700 mb-1">Recomendación:</div>
-                                    <div className="text-xs text-gray-600">
-                                        {profitPercentage >= 50 ? '✅ Margen saludable. Mantén este precio.' :
-                                            profitPercentage >= 30 ? '⚠️  Margen aceptable. Considera optimizar costos.' :
-                                                '❌ Margen bajo. Revisa costos o aumenta precio.'}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Footer */}
-                            <div className="p-6 border-t bg-gray-50">
-                                <ActionButton
-                                    onClick={() => setShowMarginModal(false)}
-                                    color="blue"
-                                    fullWidth
-                                >
-                                    Cerrar
-                                </ActionButton>
+                                <CloseButton onClose={() => setShowMarginModal(false)} />
                             </div>
                         </div>
+
+                        <div className="p-6 space-y-4">
+                            {/* Profitability Indicator */}
+                            <div className="text-center">
+                                <div className={`text-lg font-bold ${profitPercentage >= 50 ? 'text-green-600' : profitPercentage >= 30 ? 'text-yellow-600' : 'text-red-600'}`}>
+                                    {profitPercentage >= 50 ? '🟢 Excelente' : profitPercentage >= 30 ? '🟡 Buena' : '🔴 Baja'} Rentabilidad
+                                </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                    <span>0%</span>
+                                    <span>Margen Actual: {profitPercentage.toFixed(1)}%</span>
+                                    <span>100%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-4">
+                                    <div className={`h-4 rounded-full transition-all duration-300 ${profitPercentage >= 50 ? 'bg-green-500' : profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                        style={{ width: `${Math.min(profitPercentage, 100)}%` }}>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Cost Composition */}
+                            <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
+                                <div className="text-sm font-medium text-amber-800 mb-2">Composición del Costo (por unidad)</div>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-gray-600">Ingredientes:</span>
+                                        <span>${(totalRecipeIngredientsCost / selectedRecipe.batchSize).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-gray-600">Herramientas:</span>
+                                        <span>${(totalToolCost / selectedRecipe.batchSize).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs font-bold pt-1 border-t">
+                                        <span className="text-red-700">Costo Total:</span>
+                                        <span className="text-red-700">${costPerItem.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Key Metrics */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-red-50 p-3 rounded-lg">
+                                    <div className="text-xs text-gray-600">Costo</div>
+                                    <div className="font-bold text-red-700">${costPerItem.toFixed(2)}</div>
+                                </div>
+                                <div className="bg-green-50 p-3 rounded-lg">
+                                    <div className="text-xs text-gray-600">Ganancia</div>
+                                    <div className="font-bold text-green-700">${profit.toFixed(2)}</div>
+                                </div>
+                                <div className="bg-blue-50 p-3 rounded-lg">
+                                    <div className="text-xs text-gray-600">Precio Venta</div>
+                                    <div className="font-bold text-blue-700">${selectedRecipe.sellingPrice.toFixed(2)}</div>
+                                </div>
+                                <div className="bg-purple-50 p-3 rounded-lg">
+                                    <div className="text-xs text-gray-600">Por cada $1</div>
+                                    <div className="font-bold text-purple-700">${(profitPercentage / 100).toFixed(2)}</div>
+                                </div>
+                            </div>
+
+                            {/* Recommendation */}
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                                <div className="text-sm font-medium text-gray-700 mb-1">Recomendación:</div>
+                                <div className="text-xs text-gray-600">
+                                    {profitPercentage >= 50 ? '✅ Margen saludable. Mantén este precio.' :
+                                        profitPercentage >= 30 ? '⚠️  Margen aceptable. Considera optimizar costos.' :
+                                            '❌ Margen bajo. Revisa costos o aumenta precio.'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-6 border-t bg-gray-50">
+                            <ActionButton onClick={() => setShowMarginModal(false)} color="blue" fullWidth>
+                                Cerrar
+                            </ActionButton>
+                        </div>
                     </div>
-                )
-            }
+                </div>
+            )}
 
             {/* Modal showing only recipe ingredients */}
             {
@@ -2368,6 +2486,73 @@ export function RecipeCalculatorPanel({
                     </div>
                 )
             }
+            
+            {showToolUsageModal && selectedRecipeTool && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+                        <h3 className="text-lg font-bold mb-4">Configurar uso de {selectedRecipeTool.toolName}</h3>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Tipo de uso</label>
+                                <select
+                                    className="w-full border rounded-lg p-2"
+                                    value={selectedRecipeTool.currentUsage || 'full'}
+                                    onChange={(e) => setSelectedRecipeTool({
+                                        ...selectedRecipeTool,
+                                        currentUsage: e.target.value as ToolUsage
+                                    })}
+                                >
+                                    <option value="full">Uso completo (100%)</option>
+                                    <option value="partial">Uso parcial</option>
+                                    <option value="depreciated">Depreciado (0%)</option>
+                                </select>
+                            </div>
+
+                            {selectedRecipeTool.currentUsage === 'partial' && (
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">
+                                        Porcentaje de uso ({selectedRecipeTool.currentPercentage || 50}%)
+                                    </label>
+                                    <input
+                                        type="range"
+                                        min="1"
+                                        max="100"
+                                        value={selectedRecipeTool.currentPercentage || 50}
+                                        onChange={(e) => setSelectedRecipeTool({
+                                            ...selectedRecipeTool,
+                                            currentPercentage: parseInt(e.target.value)
+                                        })}
+                                        className="w-full"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="flex gap-2 pt-4">
+                                <button
+                                    onClick={() => setShowToolUsageModal(false)}
+                                    className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        updateToolUsage(
+                                            selectedRecipeTool.toolId,
+                                            selectedRecipeTool.currentUsage || 'full',
+                                            selectedRecipeTool.currentPercentage
+                                        )
+                                        setShowToolUsageModal(false)
+                                    }}
+                                    className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                >
+                                    Guardar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </Card >
     )
 }
