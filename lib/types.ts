@@ -93,8 +93,6 @@ export interface InventoryItem {
 	supplier?: string;
 }
 
-// In your lib/types.ts
-// lib/types.ts - Updated Tool interface
 export interface Tool {
 	id: string;
 	name: string;
@@ -150,11 +148,14 @@ export const TOOL_CATEGORY_CONFIGS: Record<string, ToolCategoryConfig> = {
 	general: { batchesPerYear: 400, yearsLifespan: 3, recoveryRate: 0.1 },
 };
 
-// In your lib/types.ts
-interface RecipeTool {
+export type ToolUsage = 'full' | 'partial' | 'depreciated';
+
+export interface RecipeTool {
 	toolId: string;
-	usage?: 'full' | 'partial' | 'amortized'; // You can customize this
+	usage?: ToolUsage;
+	usagePercentage?: number; // For partial usage
 }
+
 
 export interface UnitInfo {
 	unit: string;
