@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Product, CartItem } from "@/lib/types"
 import { products } from "@/lib/data"
 import { Hero } from "@/components/sections/Hero"
@@ -10,10 +10,12 @@ import { About } from "@/components/sections/About"
 import { Contact } from "@/components/sections/Contact"
 import { Footer } from "@/components/sections/Footer"
 import { CartModal } from "@/components/sections/CartModal"
+import { supabase } from "@/lib/supabase" 
 
 export default function FunnyRollsPage() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [cart, setCart] = useState<CartItem[]>([])
+  const [dbProducts, setDbProducts] = useState<Product[]>([])
 
   const addToCart = (product: Product) => {
     setCart((prev) => {
@@ -43,12 +45,37 @@ export default function FunnyRollsPage() {
 
   const getTotalPrice = () =>
     cart.reduce((total, item) => total + item.price * item.quantity, 0)
+    
+
+
+  // Combine with existing products
+  const allProducts = [...products, ...dbProducts]
+    
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      const { data } = await supabase.from('recipes').select('*')
+      if (data) {
+        const recipeProducts = data.map(recipe => ({
+          id: parseInt(recipe.id.replace('recipe-', '')) || Date.now(),
+          name: recipe.name,
+          price: recipe.selling_price,
+          image: recipe.image || "/placeholder.svg",
+          description: `Receta especial - ${recipe.batch_size} unidades`,
+          rating: 4.5,
+          available: recipe.available,
+          recipe: recipe
+        }))
+        setDbProducts(recipeProducts)
+      }
+    }
+    fetchRecipes()
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#FFF5E6]">
       <Navbar cart={cart} onCartOpen={() => setIsCartOpen(true)} />
       <Hero />
-      <MenuSection products={products} addToCart={addToCart} />
+      <MenuSection products={allProducts} addToCart={addToCart} />
       <About />
       <Contact />
       <Footer />
