@@ -1,81 +1,44 @@
-import {
-	S3Client,
-	PutObjectCommand,
-	DeleteObjectCommand,
-} from '@aws-sdk/client-s3';
-
-// Configure S3 client
-const s3Client = new S3Client({
-	region: process.env.NEXT_PUBLIC_AWS_REGION || 'eu-west-1',
-	credentials: {
-		accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID!,
-		secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY!,
-	},
-});
-
-// Generate a unique file name
-export const generateFileName = (originalName: string): string => {
-	const timestamp = Date.now();
-	const randomString = Math.random().toString(36).substring(2, 15);
-	const sanitizedName = originalName.replace(/[^a-zA-Z0-9.]/g, '-');
-	const extension = sanitizedName.split('.').pop()?.toLowerCase() || 'jpg';
-	return `recipe-${timestamp}-${randomString}.${extension}`;
-};
-
-// Upload file to S3
 export const uploadFileToS3 = async (file: File): Promise<string> => {
 	try {
-		const fileName = generateFileName(file.name);
-		const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET || 'funny-rolls';
+		const formData = new FormData();
+		formData.append('file', file);
 
-		const params = {
-			Bucket: bucketName,
-			Key: `recipe-images/${fileName}`,
-			Body: file,
-			ContentType: file.type,
-			ACL: 'public-read' as const,
-		};
+		const response = await fetch('/api/upload', {
+			method: 'POST',
+			body: formData,
+		});
 
-		const command = new PutObjectCommand(params);
-		await s3Client.send(command);
+		if (!response.ok) {
+			throw new Error('Upload failed');
+		}
 
-		// Return the public URL
-		return `https://${bucketName}.s3.${
-			process.env.NEXT_PUBLIC_AWS_REGION || 'eu-west-1'
-		}.amazonaws.com/recipe-images/${fileName}`;
+		const data = await response.json();
+		return data.url;
 	} catch (error) {
 		console.error('Error uploading to S3:', error);
 		throw new Error('Failed to upload image. Please try again.');
 	}
 };
 
-// Delete file from S3
 export const deleteFileFromS3 = async (url: string): Promise<void> => {
 	try {
-		const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET || 'funny-rolls';
+		const response = await fetch('/api/upload', {
+			method: 'DELETE',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ url }),
+		});
 
-		// Extract the key from the URL
-		const urlParts = url.split('/');
-		const key = urlParts.slice(3).join('/'); // Remove the https://bucket.s3.region.amazonaws.com part
-
-		const params = {
-			Bucket: bucketName,
-			Key: key,
-		};
-
-		const command = new DeleteObjectCommand(params);
-		await s3Client.send(command);
+		if (!response.ok) {
+			console.error('Delete failed');
+		}
 	} catch (error) {
 		console.error('Error deleting from S3:', error);
-		// Don't throw error here - just log it
 	}
 };
 
-// Validate image file
 export const validateImageFile = (
 	file: File
 ): { isValid: boolean; message: string } => {
-	// Check file type
 	const validTypes = [
 		'image/jpeg',
 		'image/jpg',
@@ -90,8 +53,7 @@ export const validateImageFile = (
 		};
 	}
 
-	// Check file size (max 5MB)
-	const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+	const maxSize = 5 * 1024 * 1024;
 	if (file.size > maxSize) {
 		return {
 			isValid: false,
