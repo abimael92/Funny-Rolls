@@ -586,24 +586,6 @@ export function RecipeCalculatorPanel({
                                 </div>
                             </div>
 
-                            {/* Profitability Indicator */}
-                            <div className="mt-4">
-                                <div className="flex justify-between text-lg mb-1">
-                                    <span>Rentabilidad:</span>
-                                    <span className={profitPercentage >= 50 ? 'text-green-600' : profitPercentage >= 30 ? 'text-yellow-600' : 'text-red-600'}>
-                                        {profitPercentage >= 50 ? 'Excelente' : profitPercentage >= 30 ? 'Buena' : 'Baja'}
-                                    </span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-6">
-                                    <div
-                                        className={`h-6 rounded-full transition-all duration-300 ${profitPercentage >= 50 ? 'bg-green-500' :
-                                            profitPercentage >= 30 ? 'bg-yellow-500' : 'bg-red-500'
-                                            }`}
-                                        style={{ width: `${Math.min(profitPercentage, 100)}%` }}
-                                    ></div>
-                                </div>
-
-                            </div>
                         </CardContent>
                     </Card>
                 </div>
