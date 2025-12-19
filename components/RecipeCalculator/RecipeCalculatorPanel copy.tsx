@@ -1,18 +1,10 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react';
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Trash2, } from "lucide-react"
 import { products } from "@/lib/data"
 import { Ingredient, Recipe } from '@/lib/types'
-import {
-    calculateRecipeCost,
-    calculateCostPerItem,
-    calculateProfit,
-    calculateProfitPercentage,
-    getIngredientCostPerUnit,
-} from '@/lib/utils'
 
 interface RecipeCalculatorPanelProps {
     selectedRecipe: Recipe
@@ -29,7 +21,6 @@ export function RecipeCalculatorPanel({
     recipes,
     setRecipes,
     ingredients,
-    recordProduction // ✅ ADDED THIS PROP
 }: RecipeCalculatorPanelProps) {
 
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false)
@@ -87,25 +78,6 @@ export function RecipeCalculatorPanel({
 
 
 
-
-
-
-
-    const handleRecordProduction = () => {
-        if (productionBatchCount > 0) {
-            recordProduction(selectedRecipe.id, productionBatchCount) // ✅ NOW THIS WILL WORK
-            setProductionBatchCount(1)
-            // Show success message or notification
-            alert(`Producción registrada: ${productionBatchCount} lote(s) de ${selectedRecipe.name}`)
-        }
-    }
-
-    // Calculate costs using utils functions
-    const costPerItem = calculateCostPerItem(selectedRecipe, ingredients)
-    const totalRecipeCost = calculateRecipeCost(selectedRecipe, ingredients)
-    const profit = calculateProfit(selectedRecipe, ingredients)
-    const profitPercentage = calculateProfitPercentage(selectedRecipe, ingredients)
-
     return (
         <Card className="w-full">
             <CardHeader className="pb-4">
@@ -148,7 +120,6 @@ export function RecipeCalculatorPanel({
 
 
 
-   
 
                 <div className="hidden lg:block space-y-6">
                     {/* Recipe Selection and Basic Info */}
@@ -190,27 +161,14 @@ export function RecipeCalculatorPanel({
                                     className="w-20 px-3 py-2 border-2 border-purple-300 rounded-lg text-lg font-bold text-center"
                                     min="1"
                                 />
-                                <Button
-                                    onClick={handleRecordProduction}
-                                    className="bg-purple-600 hover:bg-purple-700 text-lg py-2"
-                                >
-                                    <Plus className="h-5 w-5 mr-2" />
-                                    Registrar
-                                </Button>
+                          
                             </div>
                         </div>
                     </div>
 
                     {/* Add Ingredients Section - Desktop */}
                     <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
-                                Agregar Ingredientes
-                            </h3>
-                            <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
-                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
-                            </div>
-                        </div>
+           
 
                         <div className="flex flex-wrap gap-2">
                             {ingredients
@@ -241,40 +199,26 @@ export function RecipeCalculatorPanel({
                     {/* Recipe Ingredients */}
                     <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
 
-                        <div className="flex items-center mb-4">
-                            <h3 className="w-full font-semibold text-amber-800 text-xl flex items-center justify-between">
-                                <span>Ingredientes de la Receta</span>
-                                <span className="text-amber-600 bg-amber-100 px-2 py-1 rounded-full text-xs font-normal">
-                                    {selectedRecipe.ingredients.length} ingredientes
-                                </span>
-                            </h3>
-                        </div>
+
 
                         <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                             {selectedRecipe.ingredients.map((recipeIngredient) => {
                                 const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
                                 if (!ingredient) return null
 
-                                const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount
-                                const costPercentage = (cost / totalRecipeCost) * 100
 
                                 return (
                                     <div
                                         key={recipeIngredient.ingredientId}
                                         className="group relative bg-white hover:bg-amber-50 border border-amber-200 hover:border-amber-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md"
                                     >
-                                        {/* Cost percentage bar */}
-                                        <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-amber-400 to-orange-400 rounded-t-xl"
-                                            style={{ width: `${Math.min(costPercentage, 100)}%` }}></div>
 
                                         <div className="flex items-center justify-between">
                                             {/* Ingredient Info */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-3 mb-2">
                                                     <div className="font-semibold text-gray-900 text-lg">{ingredient.name}</div>
-                                                    <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                                                        ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
-                                                    </div>
+                                              
                                                 </div>
 
                                                 {/* Amount Input */}
@@ -293,10 +237,7 @@ export function RecipeCalculatorPanel({
                                                         <span className="text-md text-amber-700 font-semibold">{ingredient.unit}</span>
                                                     </div>
 
-                                                    {/* Cost Display */}
-                                                    <div className="text-lg font-bold text-amber-700 bg-amber-50 border-2 border-amber-200 rounded-lg px-4 py-2 min-w-[80px] text-center shadow-sm">
-                                                        ${cost.toFixed(2)}
-                                                    </div>
+                                        
                                                 </div>
 
                                             </div>
@@ -311,14 +252,12 @@ export function RecipeCalculatorPanel({
                                             </button>
                                         </div>
 
-                                        {/* Cost percentage indicator */}
-                                        <div className="mt-2 flex items-center justify-between text-xs">
-                                            <span className="text-gray-500">Porcentaje del costo total:</span>
-                                            <span className="font-medium text-amber-700">{costPercentage.toFixed(1)}%</span>
-                                        </div>
+               
                                     </div>
                                 )
                             })}
+                            
+                            
 
                         </div>
 
