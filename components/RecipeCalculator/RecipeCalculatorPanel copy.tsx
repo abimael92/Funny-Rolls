@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react';
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Trash2, } from "lucide-react"
 import { products } from "@/lib/data"
@@ -22,7 +21,6 @@ export function RecipeCalculatorPanel({
     recipes,
     setRecipes,
     ingredients,
-    recordProduction // ✅ ADDED THIS PROP
 }: RecipeCalculatorPanelProps) {
 
     const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false)
@@ -78,20 +76,6 @@ export function RecipeCalculatorPanel({
     }
 
 
-
-
-
-
-
-
-    const handleRecordProduction = () => {
-        if (productionBatchCount > 0) {
-            recordProduction(selectedRecipe.id, productionBatchCount) // ✅ NOW THIS WILL WORK
-            setProductionBatchCount(1)
-            // Show success message or notification
-            alert(`Producción registrada: ${productionBatchCount} lote(s) de ${selectedRecipe.name}`)
-        }
-    }
 
 
     return (
@@ -177,13 +161,7 @@ export function RecipeCalculatorPanel({
                                     className="w-20 px-3 py-2 border-2 border-purple-300 rounded-lg text-lg font-bold text-center"
                                     min="1"
                                 />
-                                <Button
-                                    onClick={handleRecordProduction}
-                                    className="bg-purple-600 hover:bg-purple-700 text-lg py-2"
-                                >
-                                    <Plus className="h-5 w-5 mr-2" />
-                                    Registrar
-                                </Button>
+                          
                             </div>
                         </div>
                     </div>
