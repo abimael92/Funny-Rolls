@@ -311,11 +311,7 @@ export function RecipeCalculatorPanel({
                                             </button>
                                         </div>
 
-                                        {/* Cost percentage indicator */}
-                                        <div className="mt-2 flex items-center justify-between text-xs">
-                                            <span className="text-gray-500">Porcentaje del costo total:</span>
-                                            <span className="font-medium text-amber-700">{costPercentage.toFixed(1)}%</span>
-                                        </div>
+               
                                     </div>
                                 )
                             })}
