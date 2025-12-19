@@ -6,13 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Trash2, } from "lucide-react"
 import { products } from "@/lib/data"
 import { Ingredient, Recipe } from '@/lib/types'
-import {
-    calculateRecipeCost,
-    calculateCostPerItem,
-    calculateProfit,
-    calculateProfitPercentage,
-    getIngredientCostPerUnit,
-} from '@/lib/utils'
 
 interface RecipeCalculatorPanelProps {
     selectedRecipe: Recipe
@@ -100,11 +93,6 @@ export function RecipeCalculatorPanel({
         }
     }
 
-    // Calculate costs using utils functions
-    const costPerItem = calculateCostPerItem(selectedRecipe, ingredients)
-    const totalRecipeCost = calculateRecipeCost(selectedRecipe, ingredients)
-    const profit = calculateProfit(selectedRecipe, ingredients)
-    const profitPercentage = calculateProfitPercentage(selectedRecipe, ingredients)
 
     return (
         <Card className="w-full">
@@ -148,7 +136,6 @@ export function RecipeCalculatorPanel({
 
 
 
-   
 
                 <div className="hidden lg:block space-y-6">
                     {/* Recipe Selection and Basic Info */}
@@ -203,14 +190,7 @@ export function RecipeCalculatorPanel({
 
                     {/* Add Ingredients Section - Desktop */}
                     <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-semibold text-amber-800 text-lg flex items-center gap-2">
-                                Agregar Ingredientes
-                            </h3>
-                            <div className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
-                                {ingredients.filter(ing => !selectedRecipe.ingredients.find(ri => ri.ingredientId === ing.id)).length} disponibles
-                            </div>
-                        </div>
+           
 
                         <div className="flex flex-wrap gap-2">
                             {ingredients
@@ -248,26 +228,19 @@ export function RecipeCalculatorPanel({
                                 const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId)
                                 if (!ingredient) return null
 
-                                const cost = getIngredientCostPerUnit(ingredient) * recipeIngredient.amount
-                                const costPercentage = (cost / totalRecipeCost) * 100
 
                                 return (
                                     <div
                                         key={recipeIngredient.ingredientId}
                                         className="group relative bg-white hover:bg-amber-50 border border-amber-200 hover:border-amber-300 rounded-xl p-4 transition-all duration-200 hover:shadow-md"
                                     >
-                                        {/* Cost percentage bar */}
-                                        <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-amber-400 to-orange-400 rounded-t-xl"
-                                            style={{ width: `${Math.min(costPercentage, 100)}%` }}></div>
 
                                         <div className="flex items-center justify-between">
                                             {/* Ingredient Info */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-3 mb-2">
                                                     <div className="font-semibold text-gray-900 text-lg">{ingredient.name}</div>
-                                                    <div className="text-md text-amber-600 bg-amber-100 px-2 py-1 rounded-full">
-                                                        ${getIngredientCostPerUnit(ingredient).toFixed(2)}/{ingredient.unit}
-                                                    </div>
+                                              
                                                 </div>
 
                                                 {/* Amount Input */}
@@ -286,10 +259,7 @@ export function RecipeCalculatorPanel({
                                                         <span className="text-md text-amber-700 font-semibold">{ingredient.unit}</span>
                                                     </div>
 
-                                                    {/* Cost Display */}
-                                                    <div className="text-lg font-bold text-amber-700 bg-amber-50 border-2 border-amber-200 rounded-lg px-4 py-2 min-w-[80px] text-center shadow-sm">
-                                                        ${cost.toFixed(2)}
-                                                    </div>
+                                        
                                                 </div>
 
                                             </div>
