@@ -16,10 +16,10 @@ const inter = Inter({
 })
 
 export const metadata = {
-  title: "Funny Rolls - Get Your Giggle and Your Swirl!",
-  description:
-    "Delicious cinnamon rolls that will make you laugh and crave more. Order now for the perfect sweet treat!",
-  icons: {
+    title: "Funny Rolls - Risas y Rollos de Canela",
+    description:
+      "Deliciosos rollos de canela que te harán reír y querer más. ¡Ordénalos ahora y disfruta el antojo perfecto!",
+    icons: {
     icon: [
       { url: '/favicon/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
       { url: '/favicon/favicon-16x16.png', type: 'image/png', sizes: '16x16' }
