@@ -34,6 +34,7 @@ interface RecipeCalculatorPanelProps {
     ingredients: Ingredient[];
     tools: Tool[];
     recordProduction: (recipeId: string, batchCount: number) => void
+    inventory: Array<{ ingredientId: string; currentStock: number; unit: string }>
 }
 
 export function RecipeCalculatorPanel({
@@ -43,7 +44,8 @@ export function RecipeCalculatorPanel({
     setRecipes,
     ingredients,
     tools,
-    recordProduction
+    recordProduction,
+    inventory = [],
 }: RecipeCalculatorPanelProps) {
     const [newStep, setNewStep] = useState('')
     const [isEditingSteps, setIsEditingSteps] = useState(false)
@@ -219,32 +221,27 @@ export function RecipeCalculatorPanel({
 
     const handleRecordProduction = () => {
         console.log("--- Starting Stock Check ---");
+        console.log("Inventory data:", inventory);
+        console.log("Recipe Ingredients:", selectedRecipe.ingredients);
+        
+        selectedRecipe.ingredients.forEach(recipeIngredient => {
+            const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
+            const inventoryItem = inventory.find(item => item.ingredientId === ingredient?.id);
 
-        // First, filter out any ingredients that don't exist
+            console.log(`${ingredient?.name}:`);
+            console.log("  Recipe:", recipeIngredient.amount, ingredient?.unit);
+            console.log("  Inventory:", inventoryItem?.currentStock, inventoryItem?.unit);
+            console.log("  Units match?", ingredient?.unit === inventoryItem?.unit);
+        });
+
         const validIngredients = selectedRecipe.ingredients.filter(recipeIngredient => {
             const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
+
             if (!ingredient) {
                 console.warn(`Missing ingredient with ID: ${recipeIngredient.ingredientId} in recipe: ${selectedRecipe.name}`);
-                return (
-                    <div key={recipeIngredient.ingredientId} className="bg-red-50 border border-red-200 rounded-xl p-4">
-                        <div className="flex justify-between items-center">
-                            <span className="font-semibold text-red-800">
-                                ⚠️ Ingrediente no encontrado (ID: {recipeIngredient.ingredientId})
-                            </span>
-                            <button
-                                onClick={() => removeIngredientFromRecipe(recipeIngredient.ingredientId)}
-                                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-lg"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </button>
-                        </div>
-                        <div className="text-sm text-red-600 mt-1">
-                            Este ingrediente ya no existe en la base de datos
-                        </div>
-                    </div>
-                )
+                return false; 
             }
-            return true;
+            return true; 
         });
 
         // If there are missing ingredients, show a warning
@@ -266,24 +263,56 @@ export function RecipeCalculatorPanel({
                     },
                 }
             );
-            // Continue with valid ingredients only
         }
 
-        // Now check stock for valid ingredients only
         const lowStockNames = validIngredients
             .map(recipeIngredient => {
                 const ingredient = ingredients.find(i => i.id === recipeIngredient.ingredientId);
 
-                // This should always find the ingredient since we filtered above
                 if (!ingredient) return null;
 
-                const currentStock = Number(ingredient.minAmount ?? 0);
-                const totalRequired = Number(recipeIngredient.amount) * Number(productionBatchCount);
+                const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id);
 
-                console.log(`${ingredient.name}: Have ${currentStock} | Need ${totalRequired}`);
+                if (!inventoryItem) {
+                    console.log(`${ingredient.name}: No inventory data found`);
+                    return ingredient.name; // No inventory data = assume out of stock
+                }
+
+                const currentStock = inventoryItem?.currentStock || 0;
+
+                let totalRequired = 0; 
+                
+                // Check if units match
+                if (ingredient.unit === inventoryItem.unit) {
+                    // Same unit, simple multiplication
+                    totalRequired = recipeIngredient.amount * productionBatchCount;
+                } else {
+                    // Need to convert - use UnitConverter
+                    try {
+                        // Convert recipe amount to inventory unit
+                        const convertedAmount = UnitConverter.convert(
+                            { value: recipeIngredient.amount, unit: ingredient.unit },
+                            inventoryItem.unit
+                        );
+
+                        if (convertedAmount) {
+                            totalRequired = convertedAmount.value * productionBatchCount;
+                        } else {
+                            console.warn(`Cannot convert ${recipeIngredient.amount} ${ingredient.unit} to ${inventoryItem.unit} for ${ingredient.name}`);
+                            totalRequired = recipeIngredient.amount * productionBatchCount; // Fallback
+                        }
+                    } catch (error) {
+                        console.error(`Conversion error for ${ingredient.name}:`, error);
+                        totalRequired = recipeIngredient.amount * productionBatchCount; // Fallback
+                    }
+                }
+
+                console.log(`${ingredient.name}: Have ${currentStock} ${inventoryItem.unit} | Need ${totalRequired} ${inventoryItem.unit}`);
 
                 if (currentStock < totalRequired) {
-                    return ingredient.name;
+                    const missingAmount = totalRequired - currentStock;
+                    console.log(`Missing: ${missingAmount} ${inventoryItem.unit} of ${ingredient.name}`);
+                    return `${ingredient.name} (faltan ${missingAmount.toFixed(2)} ${inventoryItem.unit})`;
                 }
                 return null;
             })
@@ -297,21 +326,23 @@ export function RecipeCalculatorPanel({
                     <div className="bg-red-50 border border-red-300 rounded-lg p-4">
                         <div className="font-semibold text-red-800">⚠️ Stock Insuficiente</div>
                         <div className="text-sm text-red-600 mt-1">
-                            Te falta: {lowStockNames.join(', ')}
+                            Te falta:
+                            {lowStockNames.map((item, index) => (
+                                <div key={index}>{item}</div>
+                            ))}
                         </div>
                     </div>
                 ),
-                { duration: 5000 }
+                { duration: 10000 }
             );
             return;
         }
 
-        // This part is only reached if lowStockNames is empty []
         if (productionBatchCount > 0 && validIngredients.length > 0) {
             setShowConfirmModal(true);
         }
     }
-    
+
     const updateToolUsage = (toolId: string, usage: ToolUsage, usagePercentage?: number) => {
         const updatedRecipe = {
             ...selectedRecipe,
@@ -2459,7 +2490,7 @@ export function RecipeCalculatorPanel({
                                             // Add toast success message
                                             toast.success(
                                                 <div>
-                                                    <div className="font-semibold">✅ Producción Registrada</div>
+                                                    <div className="font-semibold">Producción Registrada</div>
                                                     <div className="text-sm">
                                                         {productionBatchCount} lote(s) de {selectedRecipe.name}
                                                     </div>

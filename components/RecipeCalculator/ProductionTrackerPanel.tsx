@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import { Ingredient, Recipe, ProductionRecord, InventoryItem } from '@/lib/types'
 import { UnitConverter } from '../../lib/unit-conversion'
+import { CustomSelect } from './CustomSelect'
 
 interface ProductionTrackerPanelProps {
     productionHistory: ProductionRecord[]
@@ -657,7 +658,7 @@ export function ProductionTrackerPanel({
                                                 </div>
 
                                                 {/* Units Grid - SHOWS INDIVIDUAL UNIT STATUS */}
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 mb-6 p-4">
                                                     {recordItems.map((item, index) => {
                                                         const statusInfo = statusConfig[item.status]
                                                         return (
@@ -678,21 +679,22 @@ export function ProductionTrackerPanel({
                                                                     <label className="text-sm font-medium block">
                                                                         Estado:
                                                                     </label>
-                                                                    <select
+                                                                    <CustomSelect
                                                                         value={item.status}
-                                                                        onChange={(e) => handleItemStatusChange(record.id, item.id, e.target.value as ProductionStatus)}
-                                                                        className="w-full border rounded px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                                    >
-                                                                        {Object.entries(statusConfig).map(([status, config]) => (
-                                                                            <option key={status} value={status}>
-                                                                                {config.label}
-                                                                            </option>
-                                                                        ))}
-                                                                    </select>
+                                                                        onChange={(value) => handleItemStatusChange(record.id, item.id, value as ProductionStatus)}
+                                                                        options={Object.entries(statusConfig).map(([status, config]) => ({
+                                                                            value: status,
+                                                                            label: config.label
+                                                                        }))}
+                                                                        placeholder="Seleccionar estado"
+                                                                        color="gray"
+                                                                        className="w-full"
+                                                                        showFullName={false}
+                                                                    />
                                                                 </div>
 
                                                                 {/* Quick action buttons */}
-                                                                <div className="flex gap-1 mt-3">
+                                                                {/* <div className="flex gap-1 mt-3">
                                                                     {Object.entries(statusConfig).map(([status, config]) => (
                                                                         <button
                                                                             key={status}
@@ -708,7 +710,7 @@ export function ProductionTrackerPanel({
                                                                             {config.label.slice(0, 3)}
                                                                         </button>
                                                                     ))}
-                                                                </div>
+                                                                </div> */}
                                                             </div>
                                                         )
                                                     })}

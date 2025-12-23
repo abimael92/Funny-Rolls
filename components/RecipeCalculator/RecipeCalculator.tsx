@@ -268,11 +268,33 @@ export function RecipeCalculator() {
     // Function to update inventory manually
     const updateInventory = (ingredientId: string, newStock: number) => {
         const validStock = validateNumber(newStock.toString(), 0, 100000)
-        setInventory(prev => prev.map(item =>
-            item.ingredientId === ingredientId
-                ? { ...item, currentStock: validStock }
-                : item
-        ))
+
+        setInventory(prev => {
+            // Check if item exists
+            const existingItemIndex = prev.findIndex(item => item.ingredientId === ingredientId)
+
+            if (existingItemIndex >= 0) {
+                // Update existing item
+                const updated = [...prev]
+                updated[existingItemIndex] = {
+                    ...updated[existingItemIndex],
+                    currentStock: validStock
+                }
+                return updated
+            } else {
+                // Create new inventory item
+                const ingredient = ingredients.find(ing => ing.id === ingredientId)
+                if (!ingredient) return prev // Safety check
+
+                return [...prev, {
+                    ingredientId,
+                    currentStock: validStock,
+                    unit: ingredient.unit,
+                    minimumStock: 0,
+                    lastUpdated: new Date().toISOString()
+                }]
+            }
+        })
     }
 
     // Function to add inventory item
@@ -469,6 +491,7 @@ export function RecipeCalculator() {
                         setRecipes={setRecipes}
                         ingredients={ingredients}
                         tools={tools}
+                        inventory={inventory}
                         recordProduction={recordProduction}
                     />
                 </div>

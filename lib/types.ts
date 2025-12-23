@@ -47,17 +47,7 @@ export interface CartItem extends Product {
 	specialInstructions?: string;
 }
 
-export interface ProductionRecord {
-	id: string;
-	recipeId: string;
-	recipeName: string;
-	batchCount: number;
-	date: string;
-	totalProduced: number;
-	items?: ProductionItem[];
-	status?: ProductionStatus;
-	unitPrice?: number;
-}
+
 
 export const PRODUCTION_STATUSES = [
 	'good',
@@ -231,6 +221,8 @@ export interface ProductionRecord {
 	wasteCost?: number; // Cost of wasted/burned items
 	notes?: string; // Additional notes
 }
+
+
 
 export interface Order {
 	id: string;

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeftRight, Calculator, Check, ChevronDown, CookingPot, Info, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
-import { getIngredientCostPerUnit } from '@/lib/utils'
+import { getIngredientById, getIngredientCostPerUnit } from '@/lib/utils'
 import { DEFAULT_UNIT_CONVERSIONS } from '@/lib/unit-conversion'
 import { UnitConverter } from '@/lib/unit-conversion';
 import { EditableIngredientRow } from './EditableIngredientRow'
@@ -70,6 +70,38 @@ export function IngredientsPanel({
         { value: 'botella', label: 'botella', fullName: '' },
         { value: 'bolsa', label: 'bolsa', fullName: '' },
     ];
+    
+    // Add this helper function
+    const checkIfLowStock = (
+        ingredient: Ingredient,
+        inventoryItem?: InventoryItem
+    ): boolean => {
+        if (!inventoryItem) return true; // No inventory = low stock
+
+        const currentStock = inventoryItem.currentStock || 0;
+
+        // FIX: Calculate actual quantity in stock
+        const actualStock = currentStock * ingredient.amount;
+
+        // Always convert minAmount to inventory unit
+        try {
+            // Convert minAmount from ingredient unit to inventory unit
+            const convertedMinAmount = UnitConverter.convert(
+                { value: ingredient.minAmount, unit: ingredient.unit },
+                inventoryItem.unit
+            );
+
+            if (convertedMinAmount) {
+                return actualStock <= convertedMinAmount.value;
+            }
+        } catch (error) {
+            console.error(`Conversion error for ${ingredient.name}:`, error);
+            // Fallback: compare as-is
+            return actualStock <= ingredient.minAmount;
+        }
+
+        return actualStock <= ingredient.minAmount;
+    };
 
     // Toggle ingredient completion
     const toggleIngredientCompletion = (ingredientId: string) => {
@@ -150,6 +182,8 @@ export function IngredientsPanel({
     const toggleTooltip = (fieldName: string) => {
         setActiveTooltip(activeTooltip === fieldName ? null : fieldName);
     };
+    
+    
 
     return (
         <Card className="w-full">
@@ -451,8 +485,11 @@ export function IngredientsPanel({
                         <div className="space-y-4 max-h-292 overflow-y-auto pr-2">
                             {ingredients.map((ingredient) => {
                                 const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id)
+                                const currentIngredient = getIngredientById(ingredient.id);
                                 const currentStock = inventoryItem?.currentStock || 0
-                                const isLowStock = currentStock <= ingredient.minAmount
+                                const isLowStock = checkIfLowStock(ingredient, inventoryItem) 
+                                if (isLowStock) console.log('the item ', currentIngredient, 'isLowStock: ',isLowStock, 'since it has currentStock:', currentStock, 'and minAmount: ', ingredient.minAmount);
+                                
                                 const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit);
                                 const hasAmount = ingredient.amount > 0
                                 const isCompleted = isIngredientCompleted(ingredient.id)
@@ -609,7 +646,8 @@ export function IngredientsPanel({
                                                                     {/* Number Input */}
                                                                     <CustomNumberInput
                                                                         value={currentStock || 0}
-                                                                        onChange={(value) => updateInventory(ingredient.id, value)}
+                                                                                onChange={(value) => { console.log("Updating inventory for", ingredient.id, "to", value); 
+                                                                                updateInventory(ingredient.id, value)}}
                                                                         min={0}
                                                                         max={10000}
                                                                         placeholder="0"
@@ -630,7 +668,7 @@ export function IngredientsPanel({
                                                                     <div className="flex items-center p-1 sm:p-2 text-xs">
                                                                         <span className="font-medium">Faltan:</span>
                                                                         <span className="font-bold ml-1 text-red-700">
-                                                                            {UnitConverter.convertToReadableUnit(Number((ingredient.minAmount - currentStock).toFixed(2)), ingredient.unit)}
+                                                                                    {UnitConverter.convertToReadableUnit(Math.max(0, Number((ingredient.minAmount - currentStock).toFixed(2))), ingredient.unit)}
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -769,8 +807,8 @@ export function IngredientsPanel({
                                     {ingredients.map((ingredient) => {
                                         const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id);
                                         const currentStock = inventoryItem?.currentStock || 0;
-                                        const isLowStock = currentStock <= ingredient.minAmount;
-
+                                        const isLowStock = checkIfLowStock(ingredient, inventoryItem);
+                                        console.log(`${ingredient.name}: minAmount=${ingredient.minAmount} ${ingredient.unit}, currentStock=${currentStock} ${inventoryItem?.unit}, isLowStock=${isLowStock}`);
                                         return (
                                             <div key={ingredient.id} className={`flex justify-between items-center p-3 rounded-lg ${isLowStock ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}>
                                                 <div className="flex-1">
