@@ -269,8 +269,6 @@ select {
   background: #9ca3af;
 }
 
-
-/* In your global CSS */
 @media print {
     .print-content {
         display: block !important;
