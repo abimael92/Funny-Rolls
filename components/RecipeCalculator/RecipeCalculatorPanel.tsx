@@ -1326,24 +1326,24 @@ export function RecipeCalculatorPanel({
                                                                     if (ingredient.unit === 'kg') {
                                                                         // Convert kg to grams for display
                                                                         const grams = recipeIngredient.amount * 1000;
-                                                                        console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}kg = ${grams}g`);
+                                                                        // console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}kg = ${grams}g`);
                                                                         return grams;
                                                                     }
                                                                     else if (ingredient.unit === 'l' || ingredient.unit === 'litro') {
                                                                         // Convert liters to ml for display
                                                                         const ml = recipeIngredient.amount * 1000;
-                                                                        console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}l = ${ml}ml`);
+                                                                        // console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}l = ${ml}ml`);
                                                                         return ml;
                                                                     }
                                                                     else if (ingredient.unit === 'docena') {
                                                                         // Convert docena to units for display
                                                                         const units = recipeIngredient.amount * 12;
-                                                                        console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}docena = ${units}unidades`);
+                                                                        // console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}docena = ${units}unidades`);
                                                                         return units;
                                                                     }
                                                                     else {
                                                                         // For other units, use as-is
-                                                                        console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}${ingredient.unit}`);
+                                                                        // console.log(`[DISPLAY] ${ingredient.name}: ${recipeIngredient.amount}${ingredient.unit}`);
                                                                         return recipeIngredient.amount;
                                                                     }
                                                                 })()}
