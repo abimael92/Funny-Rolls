@@ -1,159 +1,147 @@
 // lib/mock-data.ts
-import { ProductionRecord, Recipe } from './types';
+import { Product, ProductionRecord, Recipe } from './types';
 
 export function generateMockProductionData(
-	recipes: Recipe[]
+	recipes: Recipe[],
+	products: Product[]
 ): ProductionRecord[] {
-	const recipeNames = recipes.map((r) => r.name);
-	if (recipeNames.length === 0)
-		recipeNames.push(
-			'Roll Clásico Risueño',
-			'Roll de Choco Risas',
-			'Remolino de Fresa'
-		);
+	// Filter only available recipes
+	const availableRecipes = recipes.filter((r) => {
+		const product = products.find((p) => p.recipe.id === r.id);
+		return product?.available; // ← ONLY check product.available
+	});
+	const recipeNames = availableRecipes.map((r) => r.name);
+
+	if (recipeNames.length === 0) {
+		console.log('No available recipes for mock data generation');
+		return [];
+	}
 
 	const data: ProductionRecord[] = [];
-	const targetYear = 2025; // Changed to 2025
+	const currentDate = new Date();
+	const currentYear = currentDate.getFullYear();
+	const currentMonth = currentDate.getMonth(); // 0-11
 
-	// Generate 3 months of data for September, October, November 2025
-	const months = [
-		{ month: 8, name: 'September', pattern: 'weekday' }, // September 2025
-		{ month: 9, name: 'October', pattern: 'weekend' }, // October 2025
-		{ month: 10, name: 'November', pattern: 'mixed' }, // November 2025
-	];
+	// Generate data for current month and 2 previous months
+	for (let monthOffset = 1; monthOffset <= 3; monthOffset++) {
+		const targetMonth = currentMonth - monthOffset;
+		const targetYear = targetMonth < 0 ? currentYear - 1 : currentYear;
+		const actualMonth = targetMonth < 0 ? targetMonth + 12 : targetMonth;
 
-	months.forEach(({ month, pattern }) => {
-		// Get correct days in month for 2025
-		let daysInMonth: number;
-		if (month === 10) {
-			// November
-			daysInMonth = 30; // November 2025 has 30 days
-		} else if (month === 8) {
-			// September
-			daysInMonth = 30; // September 2025 has 30 days
-		} else {
-			// October
-			daysInMonth = 31; // October 2025 has 31 days
-		}
+		// Determine days in the month (approximate)
+		const daysInMonth = new Date(targetYear, actualMonth + 1, 0).getDate();
 
-		for (let day = 1; day <= daysInMonth; day++) {
-			const date = new Date(targetYear, month, day);
-			const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
+		// Generate data for 8-12 random days in the month (more realistic)
+		const daysToGenerate = Math.floor(Math.random() * 5) + 8;
 
-			let shouldGenerate = false;
+		// Select random days
+		const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+			.sort(() => Math.random() - 0.5)
+			.slice(0, daysToGenerate);
 
-			if (pattern === 'weekday' && dayOfWeek >= 1 && dayOfWeek <= 4) {
-				shouldGenerate = true; // Monday-Thursday for September
-			} else if (
-				pattern === 'weekend' &&
-				(dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0)
-			) {
-				shouldGenerate = true; // Friday-Sunday for October
-			} else if (pattern === 'mixed') {
-				shouldGenerate = true; // All days for November
-			}
+		for (const day of days) {
+			const date = new Date(targetYear, actualMonth, day);
 
-			if (shouldGenerate) {
-				const recordCount = Math.floor(Math.random() * 4) + 1;
+			// Only generate for weekdays (Monday-Friday) for realism
+			const dayOfWeek = date.getDay();
+			if (dayOfWeek === 0 || dayOfWeek === 6) continue; // Skip weekends
 
-				for (let i = 0; i < recordCount; i++) {
-					const recipeName =
-						recipeNames[Math.floor(Math.random() * recipeNames.length)];
-					const recipe = recipes.find((r) => r.name === recipeName);
-					const batchCount = Math.floor(Math.random() * 3) + 1;
-					const totalProduced = batchCount * (recipe?.batchSize || 12);
+			// Generate 1-2 production records per day (not 3)
+			const recordCount = Math.floor(Math.random() * 2) + 1;
 
-					let goodCount, soldCount, badCount;
+			for (let i = 0; i < recordCount; i++) {
+				const recipe =
+					availableRecipes[Math.floor(Math.random() * availableRecipes.length)];
+				const recipeName = recipe.name;
 
-					if (month === 8) {
-						// September 2025
-						// September: 60-90% good
-						goodCount = Math.floor(totalProduced * (Math.random() * 0.3 + 0.6));
-						soldCount = Math.floor((totalProduced - goodCount) * 0.5);
-						badCount = totalProduced - goodCount - soldCount;
-					} else if (month === 9) {
-						// October 2025
-						// October: 80% sold
-						soldCount = Math.floor(totalProduced * 0.8);
-						goodCount = totalProduced - soldCount;
-						badCount = 0;
-					} else {
-						// November 2025
-						// November: Mixed patterns
-						if (day <= 7) {
-							// First week: Perfect production
-							goodCount = totalProduced;
-							soldCount = 0;
-							badCount = 0;
-						} else if (day <= 14) {
-							// Second week: Bad production
-							goodCount = Math.floor(totalProduced * 0.3);
-							badCount = totalProduced - goodCount;
-							soldCount = 0;
-						} else if (day <= 21) {
-							// Third week: Balance of 2 (equal good and sold)
-							goodCount = Math.floor(totalProduced / 2);
-							soldCount = totalProduced - goodCount;
-							badCount = 0;
-						} else {
-							// Last week: Mixed
-							goodCount = Math.floor(
-								totalProduced * (Math.random() * 0.4 + 0.4)
-							);
-							soldCount = Math.floor((totalProduced - goodCount) * 0.6);
-							badCount = totalProduced - goodCount - soldCount;
-						}
-					}
+				// Realistic batch count: 1-2 batches per production (not 3)
+				const batchCount = Math.floor(Math.random() * 2) + 1;
+				const totalProduced = batchCount * (recipe?.batchSize || 12);
 
-					data.push({
-						id: `${
-							month === 8 ? 'sep' : month === 9 ? 'oct' : 'nov'
-						}-2025-${day}-${i}`,
-						recipeId: recipe?.id || '1',
-						recipeName,
-						batchCount,
-						date: date.toISOString(), // This will be 2025 dates
-						totalProduced,
-						items: [
-							...(goodCount > 0
-								? [
-										{
-											id: `item-${day}-${i}-1`,
-											status: 'good' as const,
-											quantity: goodCount,
-										},
-								  ]
-								: []),
-							...(soldCount > 0
-								? [
-										{
-											id: `item-${day}-${i}-2`,
-											status: 'sold' as const,
-											quantity: soldCount,
-										},
-								  ]
-								: []),
-							...(badCount > 0
-								? [
-										{
-											id: `item-${day}-${i}-3`,
-											status: 'bad' as const,
-											quantity: badCount,
-										},
-								  ]
-								: []),
-						],
-					});
+				// Simplified realistic production outcomes
+				let goodCount, soldCount, badCount;
+				const quality = Math.random();
+
+				if (quality > 0.8) {
+					// Good production (20% of time)
+					goodCount = Math.floor(totalProduced * 0.9);
+					soldCount = totalProduced - goodCount;
+					badCount = 0;
+				} else if (quality > 0.4) {
+					// Average production (40% of time)
+					goodCount = Math.floor(totalProduced * 0.7);
+					soldCount = Math.floor((totalProduced - goodCount) * 0.6);
+					badCount = totalProduced - goodCount - soldCount;
+				} else {
+					// Poor production (40% of time)
+					goodCount = Math.floor(totalProduced * 0.5);
+					badCount = Math.floor((totalProduced - goodCount) * 0.4);
+					soldCount = totalProduced - goodCount - badCount;
 				}
+
+				// Ensure no negative counts
+				goodCount = Math.max(0, goodCount);
+				soldCount = Math.max(0, soldCount);
+				badCount = Math.max(0, badCount);
+
+				// Adjust if total doesn't match
+				const total = goodCount + soldCount + badCount;
+				if (total !== totalProduced) {
+					goodCount += totalProduced - total;
+				}
+
+				data.push({
+					id: `prod-${targetYear}-${actualMonth + 1}-${day}-${i}-${Date.now()}`,
+					recipeId: recipe?.id || '1',
+					recipeName,
+					batchCount,
+					date: date.toISOString(),
+					totalProduced,
+					items: [
+						...(goodCount > 0
+							? [
+									{
+										id: `item-${targetYear}-${actualMonth + 1}-${day}-${i}-1`,
+										status: 'good' as const,
+										quantity: goodCount,
+									},
+							  ]
+							: []),
+						...(soldCount > 0
+							? [
+									{
+										id: `item-${targetYear}-${actualMonth + 1}-${day}-${i}-2`,
+										status: 'sold' as const,
+										quantity: soldCount,
+									},
+							  ]
+							: []),
+						...(badCount > 0
+							? [
+									{
+										id: `item-${targetYear}-${actualMonth + 1}-${day}-${i}-3`,
+										status: 'bad' as const,
+										quantity: badCount,
+									},
+							  ]
+							: []),
+					],
+				});
 			}
 		}
-	});
+	}
 
-	console.log('Generated mock data for 2025:', data.length, 'records');
+	console.log(
+		'Generated',
+		data.length,
+		'mock production records for',
+		availableRecipes.length,
+		'available recipes'
+	);
 	console.log(
 		'Sample dates:',
-		data.slice(0, 3).map((d) => d.date)
+		data.slice(0, 3).map((d) => new Date(d.date).toLocaleDateString())
 	);
-	
+
 	return data;
 }
