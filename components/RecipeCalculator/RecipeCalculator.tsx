@@ -11,6 +11,7 @@ import { ProductionTrackerPanel } from './ProductionTrackerPanel'
 import { RecipeManagerModal } from './RecipeManagerModal'
 import { Database, BookOpen, ChevronDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+// Add import at top
 import { generateMockProductionData } from '@/lib/mock-data'
 
 
@@ -27,7 +28,6 @@ export function RecipeCalculator() {
     const [error, setError] = useState<string | null>(null)
     const [databaseRecipes, setDatabaseRecipes] = useState<Recipe[]>([])
     const [loadingDatabase, setLoadingDatabase] = useState(false)
-    const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>([]);
     const [showDatabaseRecipes, setShowDatabaseRecipes] = useState(false)
     const [recipeModal, setRecipeModal] = useState<{
         isOpen: boolean;
@@ -38,26 +38,11 @@ export function RecipeCalculator() {
         mode: 'add'
     })
     
-    
-    
-    
-
-    // Then add this useEffect right after:
-    useEffect(() => {
-        // Check if localStorage has data
-        const savedData = localStorage.getItem('recipe-calculator-production-history')
-
-        if (!savedData || JSON.parse(savedData).length === 0) {
-            // Generate and save mock data
-            const mockData = generateMockProductionData(products.map(p => p.recipe))
-            localStorage.setItem('recipe-calculator-production-history', JSON.stringify(mockData))
-            setProductionHistory(mockData)
-            console.log('Saved mock data to localStorage:', mockData.length, 'records')
-        } else {
-            // Load existing data
-            setProductionHistory(JSON.parse(savedData))
-        }
-    }, [])
+    // Then change the useState line to:
+    const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>(() => {
+        // Generate mock data for 2025
+        return generateMockProductionData(products.map(p => p.recipe), products)
+    })
 
     // Safe localStorage functions
     const safeSetLocalStorage = (key: string, data: unknown) => {
@@ -171,9 +156,11 @@ export function RecipeCalculator() {
         setIngredients(savedIngredients);
         setTools(savedTools);
 
+        // FIX: Add missing tools to saved recipes
         const recipesWithTools = savedRecipes.map((savedRecipe: Recipe) => {
             const defaultRecipe = products.find(p => p.recipe.id === savedRecipe.id)?.recipe;
 
+            // If saved recipe doesn't have tools, add them from default
             if (!savedRecipe.tools && defaultRecipe?.tools) {
                 return {
                     ...savedRecipe,
