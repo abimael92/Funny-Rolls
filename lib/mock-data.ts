@@ -13,31 +13,42 @@ export function generateMockProductionData(
 		);
 
 	const data: ProductionRecord[] = [];
-	const currentYear = new Date().getFullYear();
+	const targetYear = 2025; // Changed to 2025
 
-	// Generate 3 months of data
+	// Generate 3 months of data for September, October, November 2025
 	const months = [
-		{ month: 7, name: 'August', pattern: 'weekday' }, // August: Monday-Thursday
-		{ month: 9, name: 'October', pattern: 'weekend' }, // October: Friday-Sunday
-		{ month: 10, name: 'November', pattern: 'mixed' }, // November: Mixed pattern
+		{ month: 8, name: 'September', pattern: 'weekday' }, // September 2025
+		{ month: 9, name: 'October', pattern: 'weekend' }, // October 2025
+		{ month: 10, name: 'November', pattern: 'mixed' }, // November 2025
 	];
 
 	months.forEach(({ month, pattern }) => {
-		const daysInMonth = month === 10 ? 30 : 31; // November has 30 days
+		// Get correct days in month for 2025
+		let daysInMonth: number;
+		if (month === 10) {
+			// November
+			daysInMonth = 30; // November 2025 has 30 days
+		} else if (month === 8) {
+			// September
+			daysInMonth = 30; // September 2025 has 30 days
+		} else {
+			// October
+			daysInMonth = 31; // October 2025 has 31 days
+		}
 
 		for (let day = 1; day <= daysInMonth; day++) {
-			const date = new Date(currentYear, month, day);
+			const date = new Date(targetYear, month, day);
 			const dayOfWeek = date.getDay(); // 0 = Sunday, 1 = Monday, etc.
 
 			let shouldGenerate = false;
 
 			if (pattern === 'weekday' && dayOfWeek >= 1 && dayOfWeek <= 4) {
-				shouldGenerate = true; // Monday-Thursday
+				shouldGenerate = true; // Monday-Thursday for September
 			} else if (
 				pattern === 'weekend' &&
 				(dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0)
 			) {
-				shouldGenerate = true; // Friday-Sunday
+				shouldGenerate = true; // Friday-Sunday for October
 			} else if (pattern === 'mixed') {
 				shouldGenerate = true; // All days for November
 			}
@@ -54,17 +65,20 @@ export function generateMockProductionData(
 
 					let goodCount, soldCount, badCount;
 
-					if (month === 7) {
-						// August: 60-90% good
+					if (month === 8) {
+						// September 2025
+						// September: 60-90% good
 						goodCount = Math.floor(totalProduced * (Math.random() * 0.3 + 0.6));
 						soldCount = Math.floor((totalProduced - goodCount) * 0.5);
 						badCount = totalProduced - goodCount - soldCount;
 					} else if (month === 9) {
+						// October 2025
 						// October: 80% sold
 						soldCount = Math.floor(totalProduced * 0.8);
 						goodCount = totalProduced - soldCount;
 						badCount = 0;
 					} else {
+						// November 2025
 						// November: Mixed patterns
 						if (day <= 7) {
 							// First week: Perfect production
@@ -93,12 +107,12 @@ export function generateMockProductionData(
 
 					data.push({
 						id: `${
-							month === 7 ? 'aug' : month === 9 ? 'oct' : 'nov'
-						}-${day}-${i}`,
+							month === 8 ? 'sep' : month === 9 ? 'oct' : 'nov'
+						}-2025-${day}-${i}`,
 						recipeId: recipe?.id || '1',
 						recipeName,
 						batchCount,
-						date: date.toISOString(),
+						date: date.toISOString(), // This will be 2025 dates
 						totalProduced,
 						items: [
 							...(goodCount > 0
@@ -135,5 +149,11 @@ export function generateMockProductionData(
 		}
 	});
 
+	console.log('Generated mock data for 2025:', data.length, 'records');
+	console.log(
+		'Sample dates:',
+		data.slice(0, 3).map((d) => d.date)
+	);
+	
 	return data;
 }
