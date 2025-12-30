@@ -11,6 +11,10 @@ import { ProductionTrackerPanel } from './ProductionTrackerPanel'
 import { RecipeManagerModal } from './RecipeManagerModal'
 import { Database, BookOpen, ChevronDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+// Add import at top
+import { generateMockProductionData } from '@/lib/mock-data'
+
+
 
 export function RecipeCalculator() {
     // Ingredients management
@@ -19,7 +23,7 @@ export function RecipeCalculator() {
     const [recipes, setRecipes] = useState<Recipe[]>(products.map(p => p.recipe))
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe>(recipes[0])
     const [mobileView, setMobileView] = useState<'ingredients' | 'calculator' | 'production'>('calculator')
-    const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>([])
+    // const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>([])
     const [inventory, setInventory] = useState<InventoryItem[]>([])
     const [error, setError] = useState<string | null>(null)
     const [databaseRecipes, setDatabaseRecipes] = useState<Recipe[]>([])
@@ -32,6 +36,12 @@ export function RecipeCalculator() {
     }>({
         isOpen: false,
         mode: 'add'
+    })
+    
+    // Then change the useState line to:
+    const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>(() => {
+        // Generate mock data for 2025
+        return generateMockProductionData(products.map(p => p.recipe))
     })
 
     // Safe localStorage functions
