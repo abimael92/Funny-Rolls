@@ -15,15 +15,23 @@ export function generateMockProductionData(
 	const data: ProductionRecord[] = [];
 	const currentYear = new Date().getFullYear();
 
-	// Generate 3 months of data
+	// Generate 3 months of data for September, October, November
 	const months = [
-		{ month: 7, name: 'August', pattern: 'weekday' }, // August: Monday-Thursday
+		{ month: 8, name: 'September', pattern: 'weekday' }, // September: Monday-Thursday
 		{ month: 9, name: 'October', pattern: 'weekend' }, // October: Friday-Sunday
 		{ month: 10, name: 'November', pattern: 'mixed' }, // November: Mixed pattern
 	];
 
 	months.forEach(({ month, pattern }) => {
-		const daysInMonth = month === 10 ? 30 : 31; // November has 30 days
+		// Get correct days in month
+		let daysInMonth: number;
+		if (month === 10) {
+			daysInMonth = 30; // November has 30 days
+		} else if (month === 8) {
+			daysInMonth = 30; // September has 30 days
+		} else {
+			daysInMonth = 31; // October has 31 days
+		}
 
 		for (let day = 1; day <= daysInMonth; day++) {
 			const date = new Date(currentYear, month, day);
@@ -54,17 +62,20 @@ export function generateMockProductionData(
 
 					let goodCount, soldCount, badCount;
 
-					if (month === 7) {
-						// August: 60-90% good
+					if (month === 8) {
+						// September
+						// September: 60-90% good
 						goodCount = Math.floor(totalProduced * (Math.random() * 0.3 + 0.6));
 						soldCount = Math.floor((totalProduced - goodCount) * 0.5);
 						badCount = totalProduced - goodCount - soldCount;
 					} else if (month === 9) {
+						// October
 						// October: 80% sold
 						soldCount = Math.floor(totalProduced * 0.8);
 						goodCount = totalProduced - soldCount;
 						badCount = 0;
 					} else {
+						// November
 						// November: Mixed patterns
 						if (day <= 7) {
 							// First week: Perfect production
@@ -93,7 +104,7 @@ export function generateMockProductionData(
 
 					data.push({
 						id: `${
-							month === 7 ? 'aug' : month === 9 ? 'oct' : 'nov'
+							month === 8 ? 'sep' : month === 9 ? 'oct' : 'nov'
 						}-${day}-${i}`,
 						recipeId: recipe?.id || '1',
 						recipeName,
