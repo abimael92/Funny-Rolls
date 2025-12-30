@@ -428,7 +428,11 @@ export function ProductionTrackerPanel({
                                     const dayData = allProductionData.filter(
                                         record => record.date.startsWith(dateStr)
                                     );
-                                    const totalUnits = dayData.reduce((sum, record) => sum + record.totalProduced, 0);
+
+                                    // Change this calculation to be deterministic
+                                    const totalUnits = dayData.reduce((sum, record) => {
+                                        return sum + (record.batchCount * 12); // Fixed calculation
+                                    }, 0);
 
                                     return (
                                         <button
