@@ -239,26 +239,56 @@ export function ProductionTrackerPanel({
         setSelectedDate(date.toISOString().split('T')[0])
     }
 
+    // Add this helper function at the top of your component (after imports):
+    const capitalizeSpanishMonth = (text: string): string => {
+        // Capitalize first letter of each word in Spanish month names
+        const words = text.split(' ');
+        return words.map(word => {
+            // Handle special cases for Spanish month names
+            if (word === 'de' || word === 'del') return word;
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        }).join(' ');
+    };
+
     // Format date display based on view
     const getFormattedDate = () => {
         const date = new Date(selectedDate)
 
         if (timeView === 'daily') {
-            return date.toLocaleDateString('es-ES', {
+            const options: Intl.DateTimeFormatOptions = {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
-            })
+            };
+            const dateStr = date.toLocaleDateString('es-ES', options);
+            // Use the helper to capitalize
+            return capitalizeSpanishMonth(dateStr);
         } else if (timeView === 'weekly') {
-            const weekStart = new Date(date)
-            weekStart.setDate(date.getDate() - date.getDay() + 1)
-            const weekEnd = new Date(weekStart)
-            weekEnd.setDate(weekEnd.getDate() + 6)
+            const weekStart = new Date(date);
+            weekStart.setDate(date.getDate() - date.getDay() + 1); // Start Monday
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
 
-            return `${weekStart.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} - ${weekEnd.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}`
+            const startMonth = weekStart.toLocaleDateString('es-ES', { month: 'long' });
+            const endMonth = weekEnd.toLocaleDateString('es-ES', { month: 'long' });
+            const startDay = weekStart.getDate();
+            const endDay = weekEnd.getDate();
+            const endYear = weekEnd.getFullYear();
+
+            // Capitalize using helper
+            const capitalizedStartMonth = capitalizeSpanishMonth(startMonth);
+            const capitalizedEndMonth = capitalizeSpanishMonth(endMonth);
+
+            if (weekStart.getMonth() === weekEnd.getMonth()) {
+                return `Semana del ${startDay} al ${endDay} de ${capitalizedEndMonth} ${endYear}`;
+            } else {
+                return `Semana del ${startDay} de ${capitalizedStartMonth} al ${endDay} de ${capitalizedEndMonth} ${endYear}`;
+            }
         } else { // monthly
-            return date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+            const monthName = date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+            // Use helper to capitalize
+            return capitalizeSpanishMonth(monthName);
         }
     }
 
@@ -290,8 +320,21 @@ export function ProductionTrackerPanel({
 
         return summary
     }
-    
+
     // Add this function to your ProductionTrackerPanel component
+    // const getAllDatesWithData = () => {
+    //     const datesWithData = new Set<string>();
+
+    //     allProductionData.forEach(record => {
+    //         const dateStr = record.date.split('T')[0]; // Extract YYYY-MM-DD
+    //         datesWithData.add(dateStr);
+    //     });
+
+    //     return datesWithData;
+    // };
+
+    // Replace the getDatesWithData function with these new functions:
+
     const getDatesWithData = () => {
         const datesWithData = new Set<string>();
 
@@ -301,6 +344,102 @@ export function ProductionTrackerPanel({
         });
 
         return datesWithData;
+    };
+
+    // Get last days with production
+    const getLastDaysWithData = () => {
+        const datesArray = Array.from(getDatesWithData())
+            .sort((a, b) => b.localeCompare(a)) // Most recent first
+            .slice(0, 5); // Only show last 5
+
+        return datesArray;
+    };
+
+    // Get last 3 weeks with production
+    const getLastWeeksWithData = () => {
+        const weekMap = new Map<string, {
+            startDate: Date,
+            endDate: Date,
+            totalUnits: number,
+            records: ProductionRecord[]
+        }>();
+
+        allProductionData.forEach(record => {
+            const recordDate = new Date(record.date);
+            const weekStart = new Date(recordDate);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1); // Start Monday
+            const weekKey = weekStart.toISOString().split('T')[0];
+
+            if (!weekMap.has(weekKey)) {
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                weekMap.set(weekKey, {
+                    startDate: weekStart,
+                    endDate: weekEnd,
+                    totalUnits: 0,
+                    records: []
+                });
+            }
+
+            const weekData = weekMap.get(weekKey)!;
+            weekData.totalUnits += record.totalProduced;
+            weekData.records.push(record);
+        });
+
+        // Get last 3 weeks (most recent first)
+        const weeksArray = Array.from(weekMap.entries())
+            .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
+            .slice(0, 4)
+            .map(([weekKey, weekData]) => ({
+                key: weekKey,
+                ...weekData
+            }));
+
+        return weeksArray;
+    };
+
+    // Get months with production
+    const getMonthsWithData = () => {
+        const monthMap = new Map<string, {
+            year: number,
+            month: number,
+            monthName: string,
+            totalUnits: number,
+            records: ProductionRecord[]
+        }>();
+
+        allProductionData.forEach(record => {
+            const recordDate = new Date(record.date);
+            const monthKey = `${recordDate.getFullYear()}-${recordDate.getMonth()}`;
+            const monthNameRaw = recordDate.toLocaleDateString('es-ES', { month: 'long' });
+            const year = recordDate.getFullYear();
+            const capitalizedMonth = monthNameRaw.charAt(0).toUpperCase() + monthNameRaw.slice(1);
+            const monthName = `${capitalizedMonth} ${year}`;
+
+            if (!monthMap.has(monthKey)) {
+                monthMap.set(monthKey, {
+                    year: recordDate.getFullYear(),
+                    month: recordDate.getMonth(),
+                    monthName,
+                    totalUnits: 0,
+                    records: []
+                });
+            }
+
+            const monthData = monthMap.get(monthKey)!;
+            monthData.totalUnits += record.totalProduced;
+            monthData.records.push(record);
+        });
+
+        // Sort by most recent month first
+        const monthsArray = Array.from(monthMap.entries())
+            .sort(([keyA], [keyB]) => keyB.localeCompare(keyA))
+            .map(([monthKey, monthData]) => ({
+                key: monthKey,
+                ...monthData
+            }));
+
+        return monthsArray;
     };
 
     const summary = getProductionSummary()
@@ -409,31 +548,38 @@ export function ProductionTrackerPanel({
                         </div>
                     </div>
 
-                    {/* Quick Date Navigation Bar - Shows ALL dates with data */}
+                    {/* Quick Date Navigation Bar - Shows options based on view */}
                     <div className="mt-4">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs font-medium text-gray-600">Días con producción:</span>
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-medium text-gray-600">
+                                {timeView === 'daily' ? 'Últimos 3 días con producción:' :
+                                    timeView === 'weekly' ? 'Últimas 3 semanas con producción:' :
+                                        'Meses con producción:'}
+                            </span>
                             <div className="flex items-center gap-1">
                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span className="text-xs text-gray-500">{getDatesWithData().size} días con datos</span>
+                                <span className="text-xs text-gray-500">
+                                    {timeView === 'daily' ? `${getLastDaysWithData().length} días` :
+                                        timeView === 'weekly' ? `${getLastWeeksWithData().length} semanas` :
+                                            `${getMonthsWithData().length} meses`}
+                                </span>
                             </div>
                         </div>
 
                         <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
-                            {/* Convert Set to Array, sort by date (newest first), and display */}
-                            {Array.from(getDatesWithData())
-                                .sort((a, b) => b.localeCompare(a)) // Most recent first
-                                .map(dateStr => {
+                            {timeView === 'daily' ? (
+                                /* Daily View - Last days with production */
+                                getLastDaysWithData().map(dateStr => {
                                     const date = new Date(dateStr);
                                     const dayData = allProductionData.filter(
                                         record => record.date.startsWith(dateStr)
                                     );
+                                    const totalUnits = dayData.reduce((sum, record) => sum + record.totalProduced, 0);
 
-                                    // Change this calculation to be deterministic
-                                    const totalUnits = dayData.reduce((sum, record) => {
-                                        return sum + (record.batchCount * 12); // Fixed calculation
-                                    }, 0);
-
+                                    // Get month name and capitalize it
+                                    const monthName = date.toLocaleDateString('es-ES', { month: 'short' });
+                                    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                                    
                                     return (
                                         <button
                                             key={dateStr}
@@ -441,25 +587,104 @@ export function ProductionTrackerPanel({
                                                 setSelectedDate(dateStr);
                                                 setTimeView('daily');
                                             }}
-                                            className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1
-                                ${selectedDate === dateStr
+                                            className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center gap-2
+                            ${selectedDate === dateStr
                                                     ? 'bg-blue-500 text-white shadow-md'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                                 }`}
                                             title={`${date.toLocaleDateString('es-ES')}: ${totalUnits} unidades producidas`}
                                         >
-                                            <div className={`w-1.5 h-1.5 rounded-full ${totalUnits > 30 ? 'bg-green-600' :
-                                                    totalUnits > 15 ? 'bg-green-500' :
-                                                        totalUnits > 5 ? 'bg-green-400' : 'bg-green-300'
-                                                }`}></div>
-                                            {date.toLocaleDateString('es-ES', {
-                                                day: 'numeric',
-                                                month: 'short'
-                                            })}
-                                            {/* <span className="text-[10px] opacity-75">({totalUnits})</span> */}
+                                            <div className={`w-2 h-2 rounded-full ${totalUnits > 30 ? 'bg-green-600' :
+                                                totalUnits > 15 ? 'bg-green-500' :
+                                                    totalUnits > 5 ? 'bg-green-400' : 'bg-green-300'
+                                                }`}>
+                                                </div>
+                                            
+                                            <span>
+                                                {date.toLocaleDateString('es-ES', { weekday: 'short' }).charAt(0).toUpperCase() +
+                                                    date.toLocaleDateString('es-ES', { weekday: 'short' }).slice(1)},
+                                                {date.getDate()} {capitalizedMonth}.
+                                            </span>
+                                            
+                                            <span className="text-xs opacity-75">({totalUnits})</span>
                                         </button>
                                     );
-                                })}
+                                })
+                            ) : timeView === 'weekly' ? (
+                                /* Weekly View - Last 3 weeks with production */
+                                getLastWeeksWithData().map(week => {
+                                    const isCurrentWeek = new Date(week.key).toISOString().split('T')[0] ===
+                                        new Date(selectedDate).toISOString().split('T')[0];
+                                        
+                                    // Capitalize month names
+                                    const startMonth = week.startDate.toLocaleDateString('es-ES', { month: 'short' });
+                                    const endMonth = week.endDate.toLocaleDateString('es-ES', { month: 'short' });
+                                    const capitalizedStartMonth = startMonth.charAt(0).toUpperCase() + startMonth.slice(1);
+                                    const capitalizedEndMonth = endMonth.charAt(0).toUpperCase() + endMonth.slice(1);
+
+                                    return (
+                                        <button
+                                            key={week.key}
+                                            onClick={() => {
+                                                // Set to the start of the week
+                                                setSelectedDate(week.key);
+                                                setTimeView('weekly');
+                                            }}
+                                            className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center gap-2
+                            ${isCurrentWeek
+                                                    ? 'bg-blue-500 text-white shadow-md'
+                                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                                }`}
+                                            title={`${week.startDate.toLocaleDateString('es-ES')} - ${week.endDate.toLocaleDateString('es-ES')}: ${week.totalUnits} unidades`}
+                                        >
+                                            <div className={`w-2 h-2 rounded-full ${week.totalUnits > 100 ? 'bg-green-600' :
+                                                week.totalUnits > 50 ? 'bg-green-500' :
+                                                    week.totalUnits > 20 ? 'bg-green-400' : 'bg-green-300'
+                                                }`}></div>
+
+                                            {week.startDate.getMonth() === week.endDate.getMonth() ? (
+                                                <span>Sem. {week.startDate.getDate()}-{week.endDate.getDate()} {capitalizedEndMonth}.</span>
+                                            ) : (
+                                                <span>Sem. {week.startDate.getDate()}{capitalizedStartMonth}-{week.endDate.getDate()}{capitalizedEndMonth}.</span>
+                                            )}
+
+                                            <span className="text-xs opacity-75">({week.totalUnits})</span>
+                                        </button>
+                                    );
+                                })
+                            ) : (
+                                /* Monthly View - All months with production */
+                                getMonthsWithData().map(month => {
+                                    const isCurrentMonth = new Date(selectedDate).getMonth() === month.month &&
+                                        new Date(selectedDate).getFullYear() === month.year;
+
+                                    return (
+                                        <button
+                                            key={month.key}
+                                            onClick={() => {
+                                                // Set to first day of the month
+                                                const firstDay = new Date(month.year, month.month, 1)
+                                                    .toISOString().split('T')[0];
+                                                setSelectedDate(firstDay);
+                                                setTimeView('monthly');
+                                            }}
+                                            className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center gap-2
+                            ${isCurrentMonth
+                                                    ? 'bg-blue-500 text-white shadow-md'
+                                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                                }`}
+                                            title={`${month.monthName}: ${month.totalUnits} unidades`}
+                                        >
+                                            <div className={`w-2 h-2 rounded-full ${month.totalUnits > 300 ? 'bg-green-600' :
+                                                month.totalUnits > 150 ? 'bg-green-500' :
+                                                    month.totalUnits > 50 ? 'bg-green-400' : 'bg-green-300'
+                                                }`}></div>
+                                            <span>{month.monthName}</span>
+                                            <span className="text-xs opacity-75">({month.totalUnits})</span>
+                                        </button>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
                 </div>
@@ -749,7 +974,7 @@ export function ProductionTrackerPanel({
                                                     </div>
                                                 </div>
 
-                                                {/* Units Grid - SHOWS INDIVIDUAL UNIT STATUS */}
+                                                {/* Units Grid */}
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 mb-6 p-4">
                                                     {recordItems.map((item, index) => {
                                                         const statusInfo = statusConfig[item.status]
