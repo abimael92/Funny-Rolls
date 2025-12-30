@@ -290,6 +290,18 @@ export function ProductionTrackerPanel({
 
         return summary
     }
+    
+    // Add this function to your ProductionTrackerPanel component
+    const getDatesWithData = () => {
+        const datesWithData = new Set<string>();
+
+        allProductionData.forEach(record => {
+            const dateStr = record.date.split('T')[0]; // Extract YYYY-MM-DD
+            datesWithData.add(dateStr);
+        });
+
+        return datesWithData;
+    };
 
     const summary = getProductionSummary()
 
@@ -299,7 +311,8 @@ export function ProductionTrackerPanel({
                 <CardTitle className="text-xl text-center">Seguimiento de Producción</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-                {/* Time Navigation - Compact Version */}
+
+                {/* Time Navigation */}
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex items-center space-x-2">
@@ -313,9 +326,16 @@ export function ProductionTrackerPanel({
 
                             <div className="text-center flex-1">
                                 <h3 className="text-lg font-semibold text-gray-800">{getFormattedDate()}</h3>
-                                <div className="text-sm text-gray-600">
+                                <div className="text-sm text-gray-600 flex items-center justify-center gap-2">
                                     {timeView === 'daily' ? 'Vista Diaria' :
                                         timeView === 'weekly' ? 'Vista Semanal' : 'Vista Mensual'}
+                                    {/* Show if current date has data */}
+                                    {getDatesWithData().has(selectedDate) && (
+                                        <span className="flex items-center gap-1 text-green-600 font-medium">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                            Datos disponibles
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
@@ -363,12 +383,80 @@ export function ProductionTrackerPanel({
                             </button>
                         </div>
 
-                        <input
-                            type="date"
-                            value={selectedDate}
-                            onChange={(e) => setSelectedDate(e.target.value)}
-                            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white shadow-sm"
-                        />
+                        {/* Enhanced Date Picker with Visual Indicators */}
+                        <div className="relative group">
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                className={`px-3 py-1.5 border rounded-lg text-sm bg-white shadow-sm pr-10 transition-colors
+                    ${getDatesWithData().has(selectedDate)
+                                        ? 'border-green-400 focus:border-green-500'
+                                        : 'border-gray-300'
+                                    }`}
+                            />
+                            {/* Visual indicator dot */}
+                            {getDatesWithData().has(selectedDate) && (
+                                <>
+                                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-sm"></div>
+                                    </div>
+                                    <div className="absolute -bottom-6 left-0 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                        ✓ Datos de producción disponibles
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Quick Date Navigation Bar - Shows ALL dates with data */}
+                    <div className="mt-4">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs font-medium text-gray-600">Días con producción:</span>
+                            <div className="flex items-center gap-1">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span className="text-xs text-gray-500">{getDatesWithData().size} días con datos</span>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
+                            {/* Convert Set to Array, sort by date (newest first), and display */}
+                            {Array.from(getDatesWithData())
+                                .sort((a, b) => b.localeCompare(a)) // Most recent first
+                                .map(dateStr => {
+                                    const date = new Date(dateStr);
+                                    const dayData = allProductionData.filter(
+                                        record => record.date.startsWith(dateStr)
+                                    );
+                                    const totalUnits = dayData.reduce((sum, record) => sum + record.totalProduced, 0);
+
+                                    return (
+                                        <button
+                                            key={dateStr}
+                                            onClick={() => {
+                                                setSelectedDate(dateStr);
+                                                setTimeView('daily');
+                                            }}
+                                            className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 flex items-center gap-1
+                                ${selectedDate === dateStr
+                                                    ? 'bg-blue-500 text-white shadow-md'
+                                                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                                }`}
+                                            title={`${date.toLocaleDateString('es-ES')}: ${totalUnits} unidades producidas`}
+                                        >
+                                            <div className={`w-1.5 h-1.5 rounded-full ${totalUnits > 30 ? 'bg-green-600' :
+                                                    totalUnits > 15 ? 'bg-green-500' :
+                                                        totalUnits > 5 ? 'bg-green-400' : 'bg-green-300'
+                                                }`}></div>
+                                            {date.toLocaleDateString('es-ES', {
+                                                day: 'numeric',
+                                                month: 'short'
+                                            })}
+                                            <span className="text-[10px] opacity-75">({totalUnits})</span>
+                                        </button>
+                                    );
+                                })}
+                        </div>
                     </div>
                 </div>
 
