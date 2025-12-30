@@ -552,8 +552,8 @@ export function ProductionTrackerPanel({
                     <div className="mt-4">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-medium text-gray-600">
-                                {timeView === 'daily' ? 'Últimos 3 días con producción:' :
-                                    timeView === 'weekly' ? 'Últimas 3 semanas con producción:' :
+                                {timeView === 'daily' ? 'Últimos días con producción:' :
+                                    timeView === 'weekly' ? 'Últimas semanas con producción:' :
                                         'Meses con producción:'}
                             </span>
                             <div className="flex items-center gap-1">
@@ -737,7 +737,7 @@ export function ProductionTrackerPanel({
                 </div>
 
                 <div className="lg:grid lg:grid-cols-3 lg:gap-6 xl:gap-8 space-y-6 lg:space-y-0">
-                    {/* Production History - FILTERED BY TIME VIEW */}
+                    {/* Production History */}
                     <Card className="lg:col-span-2">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
@@ -875,8 +875,8 @@ export function ProductionTrackerPanel({
                     </Card>
                 </div>
 
-                {/* Recent Production - ORIGINAL FUNCTIONALITY PRESERVED */}
-                <Card>
+                {/* Recent Production */}
+                <Card className=" my-6">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <BarChart3 className="h-5 w-5" />
@@ -885,7 +885,7 @@ export function ProductionTrackerPanel({
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4 max-h-96 overflow-y-auto">
-                            {allProductionData.slice(0, 10).map(record => {
+                            {filteredProduction.map(record => {
                                 const isExpanded = expandedRecords.has(record.id)
                                 const recordItems = [...(record.items || []), ...(currentProductionItems[record.id] || [])]
                                 const totalItems = recordItems.reduce((sum, item) => sum + item.quantity, 0)
@@ -1094,7 +1094,7 @@ export function ProductionTrackerPanel({
                                 )
                             })}
 
-                            {allProductionData.length === 0 && (
+                            {filteredProduction.length === 0 && (
                                 <div className="text-center py-8 text-gray-500">
                                     No hay historial de producción para control de calidad
                                 </div>
