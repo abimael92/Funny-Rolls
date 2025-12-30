@@ -456,7 +456,7 @@ export function ProductionTrackerPanel({
                                                 day: 'numeric',
                                                 month: 'short'
                                             })}
-                                            <span className="text-[10px] opacity-75">({totalUnits})</span>
+                                            {/* <span className="text-[10px] opacity-75">({totalUnits})</span> */}
                                         </button>
                                     );
                                 })}
