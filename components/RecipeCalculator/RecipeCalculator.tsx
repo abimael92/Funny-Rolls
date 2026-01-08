@@ -323,48 +323,60 @@ export function RecipeCalculator() {
                 .select('*')
                 .order('name', { ascending: true })
 
-            if (error) throw error
+            if (error) {
+                console.error('Supabase ingredients error:',
+                    error.message || 'Unknown error - check table permissions'
+                );
+
+                // Set default ingredients and empty set on error
+                setIngredientsInDatabase(new Set());
+                setIngredients(defaultIngredients);
+                return;
+            }
 
             if (data && data.length > 0) {
                 // Create a Set of ingredient IDs from Supabase
                 const dbIngredientIds = new Set(data.map(dbIng => dbIng.id));
                 setIngredientsInDatabase(dbIngredientIds);
 
-                // Transform Supabase data to Ingredient type
+                // Transform Supabase data to Ingredient type with defaults
                 const dbIngredients: Ingredient[] = data.map(dbIng => ({
                     id: dbIng.id,
-                    name: dbIng.name,
-                    price: dbIng.price,
-                    unit: dbIng.unit,
-                    amount: dbIng.amount,
-                    minAmount: dbIng.min_amount,
-                    containsAmount: dbIng.contains_amount,
-                    containsUnit: dbIng.contains_unit
+                    name: dbIng.name || 'Unknown',
+                    price: dbIng.price || 0,
+                    unit: dbIng.unit || 'unit',
+                    amount: dbIng.amount || 0,
+                    minAmount: dbIng.min_amount || 0,
+                    containsAmount: dbIng.contains_amount || 0,
+                    containsUnit: dbIng.contains_unit || 'unit'
                 }))
 
                 // Merge with default ingredients, prioritizing Supabase data
                 const mergedIngredients = [...defaultIngredients];
 
                 dbIngredients.forEach(dbIng => {
-                    // Check if a default ingredient with same name/unit exists
                     const existingIndex = mergedIngredients.findIndex(
                         ing => ing.name.toLowerCase() === dbIng.name.toLowerCase() &&
                             ing.unit === dbIng.unit
                     );
 
                     if (existingIndex >= 0) {
-                        // Replace default with Supabase data
                         mergedIngredients[existingIndex] = dbIng;
                     } else {
-                        // Add new ingredient from Supabase
                         mergedIngredients.push(dbIng);
                     }
                 });
 
                 setIngredients(mergedIngredients);
+            } else {
+                // No data returned, use defaults
+                setIngredientsInDatabase(new Set());
+                setIngredients(defaultIngredients);
             }
         } catch (error) {
-            console.error('Error loading ingredients from Supabase:', error);
+            console.error('Error loading ingredients:', error);
+            setIngredientsInDatabase(new Set());
+            setIngredients(defaultIngredients);
         }
     }
 
