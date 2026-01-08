@@ -49,7 +49,7 @@ export function RecipeManagerModal({
         name: initialRecipe?.name || '',
         ingredients: initialRecipe?.ingredients || [],
         tools: initialRecipe?.tools || [],
-        batchSize: initialRecipe?.batchSize || 12,
+        batchSize: initialRecipe?.batchSize || 10,
         sellingPrice: initialRecipe?.sellingPrice || 50,
         profitMargin: initialRecipe?.profitMargin || 60,
         available: initialRecipe?.available ?? true,
@@ -90,7 +90,7 @@ export function RecipeManagerModal({
                     { toolId: 'uten-6', usage: 'full' as const }, // Rodillo para Masa
                     { toolId: 'uten-7', usage: 'full' as const }, // Moldes para Hornear
                 ],
-                batchSize: 12,
+                batchSize: 10,
                 sellingPrice: 50,
                 profitMargin: 60,
                 available: true,
