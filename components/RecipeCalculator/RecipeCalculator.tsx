@@ -43,6 +43,9 @@ export function RecipeCalculator() {
         // Generate mock data for 2025
         return generateMockProductionData(products.map(p => p.recipe), products)
     })
+    
+    // In RecipeCalculator component, add this state
+    const [ingredientsInDatabase, setIngredientsInDatabase] = useState<Set<string>>(new Set());
 
     // Safe localStorage functions
     const safeSetLocalStorage = (key: string, data: unknown) => {
@@ -218,6 +221,11 @@ export function RecipeCalculator() {
     useEffect(() => {
         loadDatabaseRecipes()
     }, [])
+    
+    // Call this in useEffect
+    useEffect(() => {
+        loadIngredientsFromSupabase()
+    }, [])
 
     // Enhanced record production with validation
     const recordProduction = (recipeId: string, batchCount: number, date: Date = new Date()) => {
@@ -307,6 +315,128 @@ export function RecipeCalculator() {
         })
     }
 
+    // Update the loadIngredientsFromSupabase function:
+    const loadIngredientsFromSupabase = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('ingredients')
+                .select('*')
+                .order('name', { ascending: true })
+
+            if (error) throw error
+
+            if (data && data.length > 0) {
+                // Create a Set of ingredient IDs from Supabase
+                const dbIngredientIds = new Set(data.map(dbIng => dbIng.id));
+                setIngredientsInDatabase(dbIngredientIds);
+
+                // Transform Supabase data to Ingredient type
+                const dbIngredients: Ingredient[] = data.map(dbIng => ({
+                    id: dbIng.id,
+                    name: dbIng.name,
+                    price: dbIng.price,
+                    unit: dbIng.unit,
+                    amount: dbIng.amount,
+                    minAmount: dbIng.min_amount,
+                    containsAmount: dbIng.contains_amount,
+                    containsUnit: dbIng.contains_unit
+                }))
+
+                // Merge with default ingredients, prioritizing Supabase data
+                const mergedIngredients = [...defaultIngredients];
+
+                dbIngredients.forEach(dbIng => {
+                    // Check if a default ingredient with same name/unit exists
+                    const existingIndex = mergedIngredients.findIndex(
+                        ing => ing.name.toLowerCase() === dbIng.name.toLowerCase() &&
+                            ing.unit === dbIng.unit
+                    );
+
+                    if (existingIndex >= 0) {
+                        // Replace default with Supabase data
+                        mergedIngredients[existingIndex] = dbIng;
+                    } else {
+                        // Add new ingredient from Supabase
+                        mergedIngredients.push(dbIng);
+                    }
+                });
+
+                setIngredients(mergedIngredients);
+            }
+        } catch (error) {
+            console.error('Error loading ingredients from Supabase:', error);
+        }
+    }
+
+    // Update the saveIngredientToSupabase function to update the Set:
+    const saveIngredientToSupabase = async (ingredient: Ingredient): Promise<Ingredient> => {
+        try {
+            const { data, error } = await supabase
+                .from('ingredients')
+                .upsert({
+                    id: ingredient.id,
+                    name: ingredient.name,
+                    price: ingredient.price,
+                    unit: ingredient.unit,
+                    amount: ingredient.amount,
+                    min_amount: ingredient.minAmount,
+                    contains_amount: ingredient.containsAmount,
+                    contains_unit: ingredient.containsUnit
+                })
+                .select()
+                .single()
+
+            if (error) throw error
+
+            const savedIngredient: Ingredient = {
+                id: data.id,
+                name: data.name,
+                price: data.price,
+                unit: data.unit,
+                amount: data.amount,
+                minAmount: data.min_amount,
+                containsAmount: data.contains_amount,
+                containsUnit: data.contains_unit
+            }
+
+            // After saving, update the ingredientsInDatabase Set
+            setIngredientsInDatabase(prev => {
+                const newSet = new Set(prev);
+                newSet.add(savedIngredient.id);
+                return newSet;
+            });
+
+            return savedIngredient;
+        } catch (error) {
+            console.error('Failed to save ingredient to Supabase:', error);
+            throw error;
+        }
+    }
+
+    // Update the deleteIngredientFromSupabase function:
+    const deleteIngredientFromSupabase = async (ingredientId: string) => {
+        try {
+            const { error } = await supabase
+                .from('ingredients')
+                .delete()
+                .eq('id', ingredientId)
+
+            if (error) throw error;
+
+            // Remove from ingredientsInDatabase Set
+            setIngredientsInDatabase(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(ingredientId);
+                return newSet;
+            });
+
+            console.log('Ingredient deleted from Supabase:', ingredientId);
+        } catch (error) {
+            console.error('Failed to delete ingredient from Supabase:', error);
+            throw error;
+        }
+    }
+
     // Function to add inventory item
     const addInventoryItem = (ingredientId: string, minimumStock: number = 0) => {
         const ingredient = ingredients.find(ing => ing.id === ingredientId)
@@ -325,61 +455,6 @@ export function RecipeCalculator() {
         }
         setInventory(prev => [...prev, newInventoryItem])
     }
-
-    // Functions to save and delete ingredient from Supabase
-    const saveIngredientToSupabase = async (ingredient: Ingredient): Promise<Ingredient> => {
-        try {
-            const { data, error } = await supabase
-                .from('ingredients')
-                .upsert({
-                    name: ingredient.name,
-                    price: ingredient.price,
-                    unit: ingredient.unit,
-                    amount: ingredient.amount,
-                    min_amount: ingredient.minAmount,
-                    contains_amount: ingredient.containsAmount,
-                    contains_unit: ingredient.containsUnit
-                })
-                .select() // Return the created/updated row
-                .single()
-
-            if (error) throw error
-
-            // Transform database format back to Ingredient type
-            const savedIngredient: Ingredient = {
-                id: data.id, // Use the ID from Supabase
-                name: data.name,
-                price: data.price,
-                unit: data.unit,
-                amount: data.amount,
-                minAmount: data.min_amount,
-                containsAmount: data.contains_amount,
-                containsUnit: data.contains_unit
-            }
-
-            console.log('Ingredient saved to Supabase:', savedIngredient.name)
-            return savedIngredient
-        } catch (error) {
-            console.error('Failed to save ingredient to Supabase:', error)
-            throw error
-        }
-    }
-
-    const deleteIngredientFromSupabase = async (ingredientId: string) => {
-        try {
-            const { error } = await supabase
-                .from('ingredients')
-                .delete()
-                .eq('id', ingredientId)
-
-            if (error) throw error
-            console.log('Ingredient deleted from Supabase:', ingredientId)
-        } catch (error) {
-            console.error('Failed to delete ingredient from Supabase:', error)
-            throw error
-        }
-    }
-
 
     return (
         <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-0">
@@ -546,6 +621,7 @@ export function RecipeCalculator() {
                         addInventoryItem={addInventoryItem}
                         saveIngredientToSupabase={saveIngredientToSupabase}
                         deleteIngredientFromSupabase={deleteIngredientFromSupabase}
+                        ingredientsInDatabase={ingredientsInDatabase} 
                     />
                 </div>
 
