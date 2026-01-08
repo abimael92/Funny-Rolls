@@ -326,6 +326,60 @@ export function RecipeCalculator() {
         setInventory(prev => [...prev, newInventoryItem])
     }
 
+    // Functions to save and delete ingredient from Supabase
+    const saveIngredientToSupabase = async (ingredient: Ingredient): Promise<Ingredient> => {
+        try {
+            const { data, error } = await supabase
+                .from('ingredients')
+                .upsert({
+                    name: ingredient.name,
+                    price: ingredient.price,
+                    unit: ingredient.unit,
+                    amount: ingredient.amount,
+                    min_amount: ingredient.minAmount,
+                    contains_amount: ingredient.containsAmount,
+                    contains_unit: ingredient.containsUnit
+                })
+                .select() // Return the created/updated row
+                .single()
+
+            if (error) throw error
+
+            // Transform database format back to Ingredient type
+            const savedIngredient: Ingredient = {
+                id: data.id, // Use the ID from Supabase
+                name: data.name,
+                price: data.price,
+                unit: data.unit,
+                amount: data.amount,
+                minAmount: data.min_amount,
+                containsAmount: data.contains_amount,
+                containsUnit: data.contains_unit
+            }
+
+            console.log('Ingredient saved to Supabase:', savedIngredient.name)
+            return savedIngredient
+        } catch (error) {
+            console.error('Failed to save ingredient to Supabase:', error)
+            throw error
+        }
+    }
+
+    const deleteIngredientFromSupabase = async (ingredientId: string) => {
+        try {
+            const { error } = await supabase
+                .from('ingredients')
+                .delete()
+                .eq('id', ingredientId)
+
+            if (error) throw error
+            console.log('Ingredient deleted from Supabase:', ingredientId)
+        } catch (error) {
+            console.error('Failed to delete ingredient from Supabase:', error)
+            throw error
+        }
+    }
+
 
     return (
         <div className="space-y-4 sm:space-y-6 px-2 sm:px-4 lg:px-0">
@@ -490,6 +544,8 @@ export function RecipeCalculator() {
                         inventory={inventory}
                         updateInventory={updateInventory}
                         addInventoryItem={addInventoryItem}
+                        saveIngredientToSupabase={saveIngredientToSupabase}
+                        deleteIngredientFromSupabase={deleteIngredientFromSupabase}
                     />
                 </div>
 
