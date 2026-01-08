@@ -56,7 +56,7 @@ export function generateMockProductionData(
 
 				// Realistic batch count: 1-2 batches per production (not 3)
 				const batchCount = Math.floor(Math.random() * 2) + 1;
-				const totalProduced = batchCount * (recipe?.batchSize || 12);
+				const totalProduced = batchCount * (recipe?.batchSize || 10);
 
 				// Simplified realistic production outcomes
 				let goodCount, soldCount, badCount;

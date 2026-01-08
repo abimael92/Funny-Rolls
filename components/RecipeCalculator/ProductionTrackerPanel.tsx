@@ -37,21 +37,26 @@ export function ProductionTrackerPanel({
     recipes,
     updateProductionStatus
 }: ProductionTrackerPanelProps) {
-    const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0])
+    // Initialize all states to empty/neutral values, then update in useEffect
+    const [selectedDate, setSelectedDate] = useState<string>("")
     const [expandedRecords, setExpandedRecords] = useState<Set<string>>(new Set())
     const [currentProductionItems, setCurrentProductionItems] = useState<{ [recordId: string]: ProductionItem[] }>({})
     const [timeView, setTimeView] = useState<TimeView>('daily')
-    const [allProductionData, setAllProductionData] = useState<ProductionRecord[]>(productionHistory)
-    const [isClient, setIsClient] = useState(false);
+    const [allProductionData, setAllProductionData] = useState<ProductionRecord[]>([])
+    const [isClient, setIsClient] = useState(false)
+    const [itemIdCounter, setItemIdCounter] = useState(0)
 
-    // Initialize with productionHistory
+    // Initialize everything on the client only
     useEffect(() => {
+        setIsClient(true)
+        // Get today's date in a consistent way
+        const today = new Date()
+        const year = today.getFullYear()
+        const month = String(today.getMonth() + 1).padStart(2, '0')
+        const day = String(today.getDate()).padStart(2, '0')
+        setSelectedDate(`${year}-${month}-${day}`)
         setAllProductionData(productionHistory)
     }, [productionHistory])
-    
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
 
     // Toggle accordion
     const toggleRecord = (recordId: string) => {
@@ -80,13 +85,17 @@ export function ProductionTrackerPanel({
         }
     }
 
-    // Add function to handle new item creation
+    // Add function to handle new item creation - WITHOUT Date.now() or Math.random()
     const handleAddProductionItem = (recordId: string, quantity: number = 1, autoIndex?: number) => {
         const newItem: ProductionItem = {
-            id: `item-${recordId}-${Date.now()}-${autoIndex || Math.random()}`,
+            // Use a deterministic ID based on counter
+            id: `item-${recordId}-${itemIdCounter}-${autoIndex || 0}`,
             status: 'good', // Default to "good" status
             quantity: quantity
         }
+
+        // Update counter for next item
+        setItemIdCounter(prev => prev + 1)
 
         // Local state update for UI
         setCurrentProductionItems(prev => ({
@@ -155,6 +164,8 @@ export function ProductionTrackerPanel({
 
     // Filter production history by selected time period
     const getFilteredProduction = () => {
+        if (!selectedDate) return []
+
         const selectedDateObj = new Date(selectedDate)
 
         if (timeView === 'daily') {
@@ -231,6 +242,8 @@ export function ProductionTrackerPanel({
 
     // Navigation functions
     const navigateTime = (direction: 'prev' | 'next') => {
+        if (!selectedDate) return
+
         const date = new Date(selectedDate)
 
         if (timeView === 'daily') {
@@ -241,11 +254,16 @@ export function ProductionTrackerPanel({
             date.setMonth(date.getMonth() + (direction === 'next' ? 1 : -1))
         }
 
-        setSelectedDate(date.toISOString().split('T')[0])
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        setSelectedDate(`${year}-${month}-${day}`)
     }
 
-    // Format date display based on view
+    // Format date display based on view - FIXED to be deterministic
     const getFormattedDate = () => {
+        if (!selectedDate) return "Seleccionar fecha"
+
         const date = new Date(selectedDate);
         const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         const weekdayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -306,25 +324,12 @@ export function ProductionTrackerPanel({
         return summary
     }
 
-    // Helper function for consistent UTC date formatting
+    // Helper function for consistent date formatting
     const formatDateUTC = (date: Date) => {
         return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     };
 
-    // Add this function to your ProductionTrackerPanel component
-    // const getAllDatesWithData = () => {
-    //     const datesWithData = new Set<string>();
-
-    //     allProductionData.forEach(record => {
-    //         const dateStr = record.date.split('T')[0]; // Extract YYYY-MM-DD
-    //         datesWithData.add(dateStr);
-    //     });
-
-    //     return datesWithData;
-    // };
-
-    // Replace the getDatesWithData function with these new functions:
-
+    // Get dates with production data
     const getDatesWithData = () => {
         const datesWithData = new Set<string>();
 
@@ -345,7 +350,7 @@ export function ProductionTrackerPanel({
         return datesArray;
     };
 
-    // Get last 3 weeks with production
+    // Get last weeks with production
     const getLastWeeksWithData = () => {
         const weekMap = new Map<string, {
             startDate: Date,
@@ -376,7 +381,7 @@ export function ProductionTrackerPanel({
             weekData.records.push(record);
         });
 
-        // Get last 3 weeks (most recent first)
+        // Get last weeks (most recent first)
         const weeksArray = Array.from(weekMap.entries())
             .sort(([dateA], [dateB]) => dateB.localeCompare(dateA))
             .slice(0, 4)
@@ -435,8 +440,27 @@ export function ProductionTrackerPanel({
 
     const summary = getProductionSummary()
 
+    // Render minimal content during SSR
+    if (!isClient) {
+        return (
+            <Card className="w-full">
+                <CardHeader className="pb-4">
+                    <CardTitle className="text-xl text-center">Seguimiento de Producción</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div className="text-center py-8">
+                        <div className="animate-pulse">
+                            <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+                            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
     return (
-        <Card className="w-full" suppressHydrationWarning>
+        <Card className="w-full">
             <CardHeader className="pb-4">
                 <CardTitle className="text-xl text-center">Seguimiento de Producción</CardTitle>
             </CardHeader>
@@ -450,6 +474,7 @@ export function ProductionTrackerPanel({
                                 onClick={() => navigateTime('prev')}
                                 className="p-2 rounded-lg hover:bg-white transition-colors shadow-sm"
                                 title="Anterior"
+                                disabled={!selectedDate}
                             >
                                 <ChevronLeft className="h-4 w-4" />
                             </button>
@@ -461,8 +486,8 @@ export function ProductionTrackerPanel({
                                 <div className="text-sm text-gray-600 flex items-center justify-center gap-2">
                                     {timeView === 'daily' ? 'Vista Diaria' :
                                         timeView === 'weekly' ? 'Vista Semanal' : 'Vista Mensual'}
-                                    {/* Only show if we have data AND are on client */}
-                                    {isClient && getDatesWithData().has(selectedDate) && (
+                                    {/* Only show if we have data */}
+                                    {selectedDate && getDatesWithData().has(selectedDate) && (
                                         <span className="flex items-center gap-1 text-green-600 font-medium">
                                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                             Datos disponibles
@@ -475,6 +500,7 @@ export function ProductionTrackerPanel({
                                 onClick={() => navigateTime('next')}
                                 className="p-2 rounded-lg hover:bg-white transition-colors shadow-sm"
                                 title="Siguiente"
+                                disabled={!selectedDate}
                             >
                                 <ChevronRight className="h-4 w-4" />
                             </button>
@@ -522,13 +548,13 @@ export function ProductionTrackerPanel({
                                 value={selectedDate}
                                 onChange={(e) => setSelectedDate(e.target.value)}
                                 className={`px-3 py-1.5 border rounded-lg text-sm bg-white shadow-sm pr-10 transition-colors
-                    ${getDatesWithData().has(selectedDate)
+                    ${selectedDate && getDatesWithData().has(selectedDate)
                                         ? 'border-green-400 focus:border-green-500'
                                         : 'border-gray-300'
                                     }`}
                             />
                             {/* Visual indicator dot */}
-                            {getDatesWithData().has(selectedDate) && (
+                            {selectedDate && getDatesWithData().has(selectedDate) && (
                                 <>
                                     <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                                         <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-sm"></div>
@@ -612,8 +638,7 @@ export function ProductionTrackerPanel({
                             ) : timeView === 'weekly' ? (
                                 /* Weekly View - Last 3 weeks with production */
                                 getLastWeeksWithData().map(week => {
-                                    const isCurrentWeek = new Date(week.key).toISOString().split('T')[0] ===
-                                        new Date(selectedDate).toISOString().split('T')[0];
+                                    const isCurrentWeek = week.key === selectedDate;
 
                                     // Use hardcoded month names for consistency
                                     const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -656,8 +681,7 @@ export function ProductionTrackerPanel({
                             ) : (
                                 /* Monthly View - All months with production */
                                 getMonthsWithData().map(month => {
-                                    const isCurrentMonth = new Date(selectedDate).getMonth() === month.month &&
-                                        new Date(selectedDate).getFullYear() === month.year;
+                                    const isCurrentMonth = selectedDate.startsWith(`${month.year}-${String(month.month + 1).padStart(2, '0')}`);
 
                                     // Use hardcoded month names
                                     const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -669,8 +693,10 @@ export function ProductionTrackerPanel({
                                             onClick={() => {
                                                 // Set to first day of the month
                                                 const firstDay = new Date(month.year, month.month, 1)
-                                                    .toISOString().split('T')[0];
-                                                setSelectedDate(firstDay);
+                                                const year = firstDay.getFullYear()
+                                                const monthNum = String(firstDay.getMonth() + 1).padStart(2, '0')
+                                                const day = String(firstDay.getDate()).padStart(2, '0')
+                                                setSelectedDate(`${year}-${monthNum}-${day}`);
                                                 setTimeView('monthly');
                                             }}
                                             className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center gap-2
@@ -1014,25 +1040,6 @@ export function ProductionTrackerPanel({
                                                                         showFullName={false}
                                                                     />
                                                                 </div>
-
-                                                                {/* Quick action buttons */}
-                                                                {/* <div className="flex gap-1 mt-3">
-                                                                    {Object.entries(statusConfig).map(([status, config]) => (
-                                                                        <button
-                                                                            key={status}
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation()
-                                                                                handleItemStatusChange(record.id, item.id, status as ProductionStatus)
-                                                                            }}
-                                                                            className={`flex-1 text-xs px-2 py-1 rounded border transition-colors ${item.status === status
-                                                                                ? 'bg-white font-bold'
-                                                                                : 'bg-gray-100 hover:bg-gray-200'
-                                                                                }`}
-                                                                        >
-                                                                            {config.label.slice(0, 3)}
-                                                                        </button>
-                                                                    ))}
-                                                                </div> */}
                                                             </div>
                                                         )
                                                     })}

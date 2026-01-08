@@ -613,7 +613,7 @@ export function RecipeManagerModal({
                                                         onChange={(value) => setFormData(prev => ({ ...prev, batchSize: value }))}
                                                         min={1}
                                                         max={1000}
-                                                        placeholder="12"
+                                                        placeholder="10"
                                                         allowDecimals={false}
                                                         className="w-full"
                                                         color="amber"
