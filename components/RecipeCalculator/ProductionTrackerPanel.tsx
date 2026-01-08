@@ -320,6 +320,16 @@ export function ProductionTrackerPanel({
 
         return summary
     }
+    
+    // Helper function for consistent UTC date formatting
+    const formatDateUTC = (date: Date) => {
+        const utcDate = new Date(Date.UTC(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        ));
+        return utcDate.toLocaleDateString('es-ES', { timeZone: 'UTC' });
+    };
 
     // Add this function to your ProductionTrackerPanel component
     // const getAllDatesWithData = () => {
@@ -568,7 +578,6 @@ export function ProductionTrackerPanel({
 
                         <div className="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
                             {timeView === 'daily' ? (
-                                /* Daily View - Last days with production */
                                 getLastDaysWithData().map(dateStr => {
                                     const date = new Date(dateStr);
                                     const dayData = allProductionData.filter(
@@ -576,10 +585,24 @@ export function ProductionTrackerPanel({
                                     );
                                     const totalUnits = dayData.reduce((sum, record) => sum + record.totalProduced, 0);
 
-                                    // Get month name and capitalize it
-                                    const monthName = date.toLocaleDateString('es-ES', { month: 'short' });
+                                    // FORCE consistent timezone (UTC) for server/client consistency
+                                    const utcDate = new Date(Date.UTC(
+                                        date.getUTCFullYear(),
+                                        date.getUTCMonth(),
+                                        date.getUTCDate()
+                                    ));
+
+                                    // Format month name consistently
+                                    const monthName = utcDate.toLocaleDateString('es-ES', { month: 'short', timeZone: 'UTC' });
                                     const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-                                    
+
+                                    // Format weekday consistently
+                                    const weekday = utcDate.toLocaleDateString('es-ES', { weekday: 'short', timeZone: 'UTC' });
+                                    const formattedWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+
+                                    // Format full date for title
+                                    const formattedFullDate = utcDate.toLocaleDateString('es-ES', { timeZone: 'UTC' });
+
                                     return (
                                         <button
                                             key={dateStr}
@@ -588,24 +611,22 @@ export function ProductionTrackerPanel({
                                                 setTimeView('daily');
                                             }}
                                             className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center gap-2
-                            ${selectedDate === dateStr
+                ${selectedDate === dateStr
                                                     ? 'bg-blue-500 text-white shadow-md'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                                 }`}
-                                            title={`${date.toLocaleDateString('es-ES')}: ${totalUnits} unidades producidas`}
+                                            title={`${formattedFullDate}: ${totalUnits} unidades producidas`}
                                         >
                                             <div className={`w-2 h-2 rounded-full ${totalUnits > 30 ? 'bg-green-600' :
                                                 totalUnits > 15 ? 'bg-green-500' :
                                                     totalUnits > 5 ? 'bg-green-400' : 'bg-green-300'
-                                                }`}>
-                                                </div>
-                                            
+                                                }`}></div>
+
                                             <span>
-                                                {date.toLocaleDateString('es-ES', { weekday: 'short' }).charAt(0).toUpperCase() +
-                                                    date.toLocaleDateString('es-ES', { weekday: 'short' }).slice(1)},
-                                                {date.getDate()} {capitalizedMonth}.
+                                                {formattedWeekday},
+                                                {utcDate.getUTCDate()} {capitalizedMonth}.
                                             </span>
-                                            
+
                                             <span className="text-xs opacity-75">({totalUnits})</span>
                                         </button>
                                     );
@@ -615,7 +636,7 @@ export function ProductionTrackerPanel({
                                 getLastWeeksWithData().map(week => {
                                     const isCurrentWeek = new Date(week.key).toISOString().split('T')[0] ===
                                         new Date(selectedDate).toISOString().split('T')[0];
-                                        
+
                                     // Capitalize month names
                                     const startMonth = week.startDate.toLocaleDateString('es-ES', { month: 'short' });
                                     const endMonth = week.endDate.toLocaleDateString('es-ES', { month: 'short' });
@@ -635,7 +656,7 @@ export function ProductionTrackerPanel({
                                                     ? 'bg-blue-500 text-white shadow-md'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                                 }`}
-                                            title={`${week.startDate.toLocaleDateString('es-ES')} - ${week.endDate.toLocaleDateString('es-ES')}: ${week.totalUnits} unidades`}
+                                            title={`${formatDateUTC(week.startDate)} - ${formatDateUTC(week.endDate)}: ${week.totalUnits} unidades`}
                                         >
                                             <div className={`w-2 h-2 rounded-full ${week.totalUnits > 100 ? 'bg-green-600' :
                                                 week.totalUnits > 50 ? 'bg-green-500' :

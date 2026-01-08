@@ -23,6 +23,8 @@ interface IngredientsPanelProps {
     inventory: InventoryItem[]
     updateInventory: (ingredientId: string, newStock: number) => void
     addInventoryItem: (ingredientId: string, minimumStock: number) => void
+    saveIngredientToSupabase: (ingredient: Ingredient) => Promise<Ingredient>
+    deleteIngredientFromSupabase: (ingredientId: string) => Promise<void>
 }
 
 export function IngredientsPanel({
@@ -30,7 +32,9 @@ export function IngredientsPanel({
     setIngredients,
     inventory,
     updateInventory,
-    addInventoryItem
+    addInventoryItem,
+    saveIngredientToSupabase,  
+    deleteIngredientFromSupabase 
 }: IngredientsPanelProps) {
     const [error, setError] = useState<string | null>(null)
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
@@ -118,7 +122,7 @@ export function IngredientsPanel({
     const isIngredientCompleted = (ingredientId: string) => completedIngredients.includes(ingredientId)
 
     // Add new ingredient
-    const addIngredient = () => {
+    const addIngredient = async () => {
         setError(null)
 
         if (!newIngredient.name.trim()) {
@@ -152,22 +156,36 @@ export function IngredientsPanel({
 
         const ingredient: Ingredient = {
             ...newIngredient,
-            id: Date.now().toString(),
+            id: '',
             ...(specialUnit.containsAmount > 0 && {
                 containsAmount: specialUnit.containsAmount,
                 containsUnit: specialUnit.containsUnit
             })
         }
-        setIngredients([...ingredients, ingredient])
-        addInventoryItem(ingredient.id, ingredient.minAmount)
+
+        try {
+            const savedIngredient = await saveIngredientToSupabase(ingredient)
+
+            // Update local state with the REAL ID from Supabase
+            setIngredients([...ingredients, savedIngredient])
+
+            // Use the saved ingredient ID
+            addInventoryItem(savedIngredient.id, savedIngredient.minAmount)
+        } catch (error) {
+            console.error('Failed to save ingredient:', error)
+            return // Don't add to local state if Supabase fails
+        }
+
         setNewIngredient({ name: '', price: 0, unit: '', amount: 0, minAmount: 0 })
         setSpecialUnit({ containsUnit: 'g', containsAmount: 0 })
     }
 
     // Remove ingredient
-    const removeIngredient = (id: string) => {
+    const removeIngredient = async (id: string) => {
         if (window.confirm('¿Estás seguro de que quieres eliminar este ingrediente?')) {
             setIngredients(ingredients.filter(ing => ing.id !== id))
+            
+            await deleteIngredientFromSupabase(id)
         }
     }
 
