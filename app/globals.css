@@ -138,6 +138,16 @@ html {
   animation: shine 2s infinite;
 }
 
+.handle {
+    will-change: transform; /* Optimize for animation */
+    transform: translateZ(0); /* Force GPU acceleration */
+    touch-action: none; /* Prevent browser touch actions */
+}
+
+.track {
+    will-change: width;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
