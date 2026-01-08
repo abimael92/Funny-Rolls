@@ -152,7 +152,7 @@ export const products: Product[] = [
 		recipe: {
 			id: '1',
 			name: 'Roll Clásico Risueño',
-			batchSize: 12,
+			batchSize: 10,
 			sellingPrice: 50,
 			profitMargin: 60,
 			available: true,
@@ -205,7 +205,7 @@ export const products: Product[] = [
 		recipe: {
 			id: '2',
 			name: 'Roll de Choco Risas',
-			batchSize: 12,
+			batchSize: 10,
 			sellingPrice: 65,
 			profitMargin: 65,
 			available: true,
@@ -257,7 +257,7 @@ export const products: Product[] = [
 		recipe: {
 			id: '3',
 			name: 'Remolino de Fresa',
-			batchSize: 12,
+			batchSize: 10,
 			sellingPrice: 60,
 			profitMargin: 62,
 			available: true,
@@ -310,7 +310,7 @@ export const products: Product[] = [
 		recipe: {
 			id: '4',
 			name: 'Arándano en Verano',
-			batchSize: 12,
+			batchSize: 10,
 			sellingPrice: 65,
 			profitMargin: 63,
 			available: true,
@@ -365,7 +365,7 @@ export const products: Product[] = [
 		recipe: {
 			id: '5',
 			name: 'Glaseado Divertido',
-			batchSize: 12,
+			batchSize: 10,
 			sellingPrice: 45,
 			profitMargin: 55,
 			available: true,
@@ -418,7 +418,7 @@ export const products: Product[] = [
 		recipe: {
 			id: '6',
 			name: 'Caramelo Crujiente',
-			batchSize: 12,
+			batchSize: 10,
 			sellingPrice: 70,
 			profitMargin: 68,
 			available: true,

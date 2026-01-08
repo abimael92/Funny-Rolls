@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowLeftRight, Calculator, Check, ChevronDown, CookingPot, Info, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench } from "lucide-react"
+import { ArrowLeftRight, Calculator, Check, ChevronDown, CookingPot, Info, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench, Database } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
 import { getIngredientById, getIngredientCostPerUnit } from '@/lib/utils'
 import { DEFAULT_UNIT_CONVERSIONS } from '@/lib/unit-conversion'
@@ -25,6 +25,7 @@ interface IngredientsPanelProps {
     addInventoryItem: (ingredientId: string, minimumStock: number) => void
     saveIngredientToSupabase: (ingredient: Ingredient) => Promise<Ingredient>
     deleteIngredientFromSupabase: (ingredientId: string) => Promise<void>
+    ingredientsInDatabase: Set<string>
 }
 
 export function IngredientsPanel({
@@ -33,8 +34,9 @@ export function IngredientsPanel({
     inventory,
     updateInventory,
     addInventoryItem,
-    saveIngredientToSupabase,  
-    deleteIngredientFromSupabase 
+    saveIngredientToSupabase,
+    deleteIngredientFromSupabase,
+    ingredientsInDatabase
 }: IngredientsPanelProps) {
     const [error, setError] = useState<string | null>(null)
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
@@ -74,7 +76,7 @@ export function IngredientsPanel({
         { value: 'botella', label: 'botella', fullName: '' },
         { value: 'bolsa', label: 'bolsa', fullName: '' },
     ];
-    
+
     // Add this helper function
     const checkIfLowStock = (
         ingredient: Ingredient,
@@ -146,6 +148,22 @@ export function IngredientsPanel({
             return
         }
 
+        // Check for duplicates in both local and database
+        const existingIngredient = ingredients.find(ing =>
+            ing.name.toLowerCase() === newIngredient.name.toLowerCase()
+        )
+
+        if (existingIngredient) {
+            // Check if it's already in database
+            if (ingredientsInDatabase.has(existingIngredient.id)) {
+                setError(`"${newIngredient.name}" ya existe en la base de datos`)
+                return
+            } else {
+                setError(`Ya existe "${newIngredient.name}" con unidad "${newIngredient.unit}"`)
+                return
+            }
+        }
+
         // For non-standard units, use the package content for calculations
         if (['paquete', 'sobre', 'caja', 'lata'].includes(newIngredient.unit)) {
             if (specialUnit.containsAmount <= 0) {
@@ -184,7 +202,7 @@ export function IngredientsPanel({
     const removeIngredient = async (id: string) => {
         if (window.confirm('¿Estás seguro de que quieres eliminar este ingrediente?')) {
             setIngredients(ingredients.filter(ing => ing.id !== id))
-            
+
             await deleteIngredientFromSupabase(id)
         }
     }
@@ -200,12 +218,15 @@ export function IngredientsPanel({
     const toggleTooltip = (fieldName: string) => {
         setActiveTooltip(activeTooltip === fieldName ? null : fieldName);
     };
-    
-    
+
+    // Check if ingredient is in database
+    const isIngredientInDatabase = (ingredientId: string) => {
+        return ingredientsInDatabase.has(ingredientId)
+    }
+
 
     return (
         <Card className="w-full">
-
             <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -500,7 +521,7 @@ export function IngredientsPanel({
                         </div>
 
                         {/* Ingredients List */}
-                        <div className="space-y-4 max-h-292 overflow-y-auto pr-2">
+                        <div className="space-y-4 max-h-292 overflow-y-auto overflow-x-hidden pr-2">
                             {ingredients.map((ingredient) => {
                                 const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id)
                                 const currentIngredient = getIngredientById(ingredient.id);
@@ -566,10 +587,62 @@ export function IngredientsPanel({
                                                 {/* Main Content */}
                                                 <div className="flex items-start justify-between overflow-visible">
                                                     {/* Ingredient Info */}
-                                                    <div className="flex-1 min-w-0">
+                                                            <div className="flex-1 min-w-0">
+                                                                {/* Compact Database Indicator - positioned absolutely or in corner */}
+                                                                <div className="flex justify-between items-start mb-1">
+                                                                    <div className="text-xs">
+                                                                        {isIngredientInDatabase(ingredient.id) ? (
+                                                                            <div className="flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full w-fit">
+                                                                                <Database className="h-2.5 w-2.5" />
+                                                                                <span className="text-[10px]">DB</span>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div className="flex items-center gap-1 text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full w-fit">
+                                                                                <Database className="h-2.5 w-2.5" />
+                                                                                <span className="text-[10px]">Local</span>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    {/* Optional: Move low stock indicator here if needed */}
+                                                                    {/* {isLowStock && (
+                                                                        <div className="text-[10px] text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                                                                            Stock bajo
+                                                                        </div>
+                                                                    )} */}
+                                                                    
+                                                                    <div className="flex items-center gap-1 shrink-0 ">
+
+                                                                        {(!hasAmount || !isCompleted) && (
+                                                                            <>
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation()
+                                                                                        setEditingIngredientId(ingredient.id)
+                                                                                    }}
+                                                                                    className="p-1 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                                                    title="Editar ingrediente"
+                                                                                >
+                                                                                    <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        removeIngredient(ingredient.id);
+                                                                                    }}
+                                                                                    className="p-1 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                                                    title="Eliminar ingrediente"
+                                                                                >
+                                                                                    <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                                                                                </button>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                    
+                                                                </div>
                                                         <div className="flex items-center justify-between gap-2 mb-3">
-                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0 max-w-3/4">
-                                                                        <div className="flex items-center gap-2 ">
+                                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1">
+                                                                        <div className="flex items-center justify-between gap-2 flex-1">
+                                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
                                                                     {/* Checkbox for ingredients with amount */}
                                                                             {hasAmount && currentStock > 0 && (
                                                                                 <div
@@ -588,43 +661,23 @@ export function IngredientsPanel({
                                                                                 </div>
                                                                             )}
 
-                                                                            <div className="font-semibold text-gray-900 text-lg sm:text-xl truncate max-w-2/3">{ingredient.name}</div>
-                                                                    <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm: py-1 rounded-full font-medium">
-                                                                                ${(ingredient.price).toFixed(2)} • {ingredient.amount} {ingredient.unit}
-                                                                    </div>
+                                                                                <div className="font-semibold text-gray-900 text-lg sm:text-xl wrap-break-word flex-1 min-w-0">
+                                                                                {ingredient.name}
+                                                                            </div>
+
+                                                                                <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm:py-1 rounded-full font-medium whitespace-nowrap shrink-0">
+                                                                                    ${(ingredient.price).toFixed(2)} • {ingredient.amount} {ingredient.unit}
+                                                                                </div>
+                                                                            </div>
 
                                                                 </div>
 
                                                             </div>
 
                                                             {/* Action Buttons */}
-                                                            <div className="flex items-center gap-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
-
-                                                                {(!hasAmount || !isCompleted) && (
-                                                                    <>
-                                                                                <button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation()  
-                                                                                        setEditingIngredientId(ingredient.id)
-                                                                                    }}
-                                                                                    className="p-1 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                                                    title="Editar ingrediente"
-                                                                                >
-                                                                                    <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
-                                                                                </button>
-                                                                        <button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        removeIngredient(ingredient.id);
-                                                                                    }}
-                                                                            className="p-1 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                                            title="Eliminar ingrediente"
-                                                                        >
-                                                                            <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
-                                                                        </button>
-                                                                    </>
-                                                                )}
-                                                            </div>
+                                                            {/* <div className="flex items-center gap-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300"> */}
+                                                            
+                                      
                                                         </div>
 
                                                         {/* Special Unit Cost Info */}
@@ -713,12 +766,19 @@ export function IngredientsPanel({
                         </div>
                     </>
                 )}
+
+                {/* Divider */}
+                <div className="relative flex items-center my-6">
+                    <div className="grow border-t border-amber-300"></div>
+                
+                    <div className="grow border-t border-amber-300"></div>
+                </div>
             </CardContent>
 
             {!showTools && (
                 <CardContent>
                     {/* Mobile Quick Actions */}
-                    <div className="bg-gradient-to-br from-blue-50 to-emerald-50 border-2 border-blue-300 rounded-2xl p-3 sm:p-4">
+                    <div className="bg-linear-to-br from-blue-50 to-emerald-50 border-2 border-blue-300 rounded-2xl p-3 sm:p-4">
                         <h4 className="font-semibold text-blue-800 text-center text-lg sm:text-xl mb-2 sm:mb-3">Resumen</h4>
                         <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
                             <div

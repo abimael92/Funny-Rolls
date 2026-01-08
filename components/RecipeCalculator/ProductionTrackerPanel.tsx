@@ -42,11 +42,16 @@ export function ProductionTrackerPanel({
     const [currentProductionItems, setCurrentProductionItems] = useState<{ [recordId: string]: ProductionItem[] }>({})
     const [timeView, setTimeView] = useState<TimeView>('daily')
     const [allProductionData, setAllProductionData] = useState<ProductionRecord[]>(productionHistory)
+    const [isClient, setIsClient] = useState(false);
 
     // Initialize with productionHistory
     useEffect(() => {
         setAllProductionData(productionHistory)
     }, [productionHistory])
+    
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     // Toggle accordion
     const toggleRecord = (recordId: string) => {
@@ -239,56 +244,36 @@ export function ProductionTrackerPanel({
         setSelectedDate(date.toISOString().split('T')[0])
     }
 
-    // Add this helper function at the top of your component (after imports):
-    const capitalizeSpanishMonth = (text: string): string => {
-        // Capitalize first letter of each word in Spanish month names
-        const words = text.split(' ');
-        return words.map(word => {
-            // Handle special cases for Spanish month names
-            if (word === 'de' || word === 'del') return word;
-            return word.charAt(0).toUpperCase() + word.slice(1);
-        }).join(' ');
-    };
-
     // Format date display based on view
     const getFormattedDate = () => {
-        const date = new Date(selectedDate)
+        const date = new Date(selectedDate);
+        const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        const weekdayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
         if (timeView === 'daily') {
-            const options: Intl.DateTimeFormatOptions = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            };
-            const dateStr = date.toLocaleDateString('es-ES', options);
-            // Use the helper to capitalize
-            return capitalizeSpanishMonth(dateStr);
+            const weekday = weekdayNames[date.getDay()];
+            const day = date.getDate();
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+            return `${weekday}, ${day} de ${month} de ${year}`;
         } else if (timeView === 'weekly') {
             const weekStart = new Date(date);
-            weekStart.setDate(date.getDate() - date.getDay() + 1); // Start Monday
+            weekStart.setDate(date.getDate() - date.getDay() + 1);
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekEnd.getDate() + 6);
 
-            const startMonth = weekStart.toLocaleDateString('es-ES', { month: 'long' });
-            const endMonth = weekEnd.toLocaleDateString('es-ES', { month: 'long' });
-            const startDay = weekStart.getDate();
-            const endDay = weekEnd.getDate();
-            const endYear = weekEnd.getFullYear();
-
-            // Capitalize using helper
-            const capitalizedStartMonth = capitalizeSpanishMonth(startMonth);
-            const capitalizedEndMonth = capitalizeSpanishMonth(endMonth);
+            const startMonth = monthNames[weekStart.getMonth()];
+            const endMonth = monthNames[weekEnd.getMonth()];
 
             if (weekStart.getMonth() === weekEnd.getMonth()) {
-                return `Semana del ${startDay} al ${endDay} de ${capitalizedEndMonth} ${endYear}`;
+                return `Semana del ${weekStart.getDate()} al ${weekEnd.getDate()} de ${endMonth} ${weekEnd.getFullYear()}`;
             } else {
-                return `Semana del ${startDay} de ${capitalizedStartMonth} al ${endDay} de ${capitalizedEndMonth} ${endYear}`;
+                return `Semana del ${weekStart.getDate()} de ${startMonth} al ${weekEnd.getDate()} de ${endMonth} ${weekEnd.getFullYear()}`;
             }
-        } else { // monthly
-            const monthName = date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-            // Use helper to capitalize
-            return capitalizeSpanishMonth(monthName);
+        } else {
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+            return `${month} ${year}`;
         }
     }
 
@@ -320,15 +305,10 @@ export function ProductionTrackerPanel({
 
         return summary
     }
-    
+
     // Helper function for consistent UTC date formatting
     const formatDateUTC = (date: Date) => {
-        const utcDate = new Date(Date.UTC(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate()
-        ));
-        return utcDate.toLocaleDateString('es-ES', { timeZone: 'UTC' });
+        return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     };
 
     // Add this function to your ProductionTrackerPanel component
@@ -421,10 +401,11 @@ export function ProductionTrackerPanel({
         allProductionData.forEach(record => {
             const recordDate = new Date(record.date);
             const monthKey = `${recordDate.getFullYear()}-${recordDate.getMonth()}`;
-            const monthNameRaw = recordDate.toLocaleDateString('es-ES', { month: 'long' });
+
+            // Use hardcoded month names instead of toLocaleDateString
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
             const year = recordDate.getFullYear();
-            const capitalizedMonth = monthNameRaw.charAt(0).toUpperCase() + monthNameRaw.slice(1);
-            const monthName = `${capitalizedMonth} ${year}`;
+            const monthName = `${monthNames[recordDate.getMonth()]} ${year}`;
 
             if (!monthMap.has(monthKey)) {
                 monthMap.set(monthKey, {
@@ -455,14 +436,14 @@ export function ProductionTrackerPanel({
     const summary = getProductionSummary()
 
     return (
-        <Card className="w-full">
+        <Card className="w-full" suppressHydrationWarning>
             <CardHeader className="pb-4">
                 <CardTitle className="text-xl text-center">Seguimiento de Producción</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
 
                 {/* Time Navigation */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex items-center space-x-2">
                             <button
@@ -474,12 +455,14 @@ export function ProductionTrackerPanel({
                             </button>
 
                             <div className="text-center flex-1">
-                                <h3 className="text-lg font-semibold text-gray-800">{getFormattedDate()}</h3>
+                                <h3 className="text-lg font-semibold text-gray-800">
+                                    {getFormattedDate()}
+                                </h3>
                                 <div className="text-sm text-gray-600 flex items-center justify-center gap-2">
                                     {timeView === 'daily' ? 'Vista Diaria' :
                                         timeView === 'weekly' ? 'Vista Semanal' : 'Vista Mensual'}
-                                    {/* Show if current date has data */}
-                                    {getDatesWithData().has(selectedDate) && (
+                                    {/* Only show if we have data AND are on client */}
+                                    {isClient && getDatesWithData().has(selectedDate) && (
                                         <span className="flex items-center gap-1 text-green-600 font-medium">
                                             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                             Datos disponibles
@@ -585,23 +568,19 @@ export function ProductionTrackerPanel({
                                     );
                                     const totalUnits = dayData.reduce((sum, record) => sum + record.totalProduced, 0);
 
-                                    // FORCE consistent timezone (UTC) for server/client consistency
-                                    const utcDate = new Date(Date.UTC(
-                                        date.getUTCFullYear(),
-                                        date.getUTCMonth(),
-                                        date.getUTCDate()
-                                    ));
+                                    // Simple formatting without locale dependencies
+                                    const day = date.getDate();
+                                    const month = date.getMonth() + 1;
+                                    const year = date.getFullYear();
 
-                                    // Format month name consistently
-                                    const monthName = utcDate.toLocaleDateString('es-ES', { month: 'short', timeZone: 'UTC' });
-                                    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+                                    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                                    const weekdayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
-                                    // Format weekday consistently
-                                    const weekday = utcDate.toLocaleDateString('es-ES', { weekday: 'short', timeZone: 'UTC' });
-                                    const formattedWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+                                    const capitalizedMonth = monthNames[date.getMonth()];
+                                    const formattedWeekday = weekdayNames[date.getDay()];
 
-                                    // Format full date for title
-                                    const formattedFullDate = utcDate.toLocaleDateString('es-ES', { timeZone: 'UTC' });
+                                    // Title format: DD/MM/YYYY
+                                    const formattedFullDate = `${day}/${month}/${year}`;
 
                                     return (
                                         <button
@@ -611,7 +590,7 @@ export function ProductionTrackerPanel({
                                                 setTimeView('daily');
                                             }}
                                             className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center gap-2
-                ${selectedDate === dateStr
+                                                ${selectedDate === dateStr
                                                     ? 'bg-blue-500 text-white shadow-md'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                                 }`}
@@ -623,8 +602,7 @@ export function ProductionTrackerPanel({
                                                 }`}></div>
 
                                             <span>
-                                                {formattedWeekday},
-                                                {utcDate.getUTCDate()} {capitalizedMonth}.
+                                                {formattedWeekday}, {day} {capitalizedMonth}.
                                             </span>
 
                                             <span className="text-xs opacity-75">({totalUnits})</span>
@@ -637,11 +615,13 @@ export function ProductionTrackerPanel({
                                     const isCurrentWeek = new Date(week.key).toISOString().split('T')[0] ===
                                         new Date(selectedDate).toISOString().split('T')[0];
 
-                                    // Capitalize month names
-                                    const startMonth = week.startDate.toLocaleDateString('es-ES', { month: 'short' });
-                                    const endMonth = week.endDate.toLocaleDateString('es-ES', { month: 'short' });
-                                    const capitalizedStartMonth = startMonth.charAt(0).toUpperCase() + startMonth.slice(1);
-                                    const capitalizedEndMonth = endMonth.charAt(0).toUpperCase() + endMonth.slice(1);
+                                    // Use hardcoded month names for consistency
+                                    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+                                    const startMonthIndex = week.startDate.getMonth();
+                                    const endMonthIndex = week.endDate.getMonth();
+
+                                    const capitalizedStartMonth = monthNames[startMonthIndex];
+                                    const capitalizedEndMonth = monthNames[endMonthIndex];
 
                                     return (
                                         <button
@@ -652,7 +632,7 @@ export function ProductionTrackerPanel({
                                                 setTimeView('weekly');
                                             }}
                                             className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center gap-2
-                            ${isCurrentWeek
+                                                ${isCurrentWeek
                                                     ? 'bg-blue-500 text-white shadow-md'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                                 }`}
@@ -679,6 +659,10 @@ export function ProductionTrackerPanel({
                                     const isCurrentMonth = new Date(selectedDate).getMonth() === month.month &&
                                         new Date(selectedDate).getFullYear() === month.year;
 
+                                    // Use hardcoded month names
+                                    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                                    const monthName = `${monthNames[month.month]} ${month.year}`;
+
                                     return (
                                         <button
                                             key={month.key}
@@ -690,17 +674,17 @@ export function ProductionTrackerPanel({
                                                 setTimeView('monthly');
                                             }}
                                             className={`px-3 py-2 text-sm rounded-lg transition-all duration-200 flex items-center gap-2
-                            ${isCurrentMonth
+                                                ${isCurrentMonth
                                                     ? 'bg-blue-500 text-white shadow-md'
                                                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                                 }`}
-                                            title={`${month.monthName}: ${month.totalUnits} unidades`}
+                                            title={`${monthName}: ${month.totalUnits} unidades`}
                                         >
                                             <div className={`w-2 h-2 rounded-full ${month.totalUnits > 300 ? 'bg-green-600' :
                                                 month.totalUnits > 150 ? 'bg-green-500' :
                                                     month.totalUnits > 50 ? 'bg-green-400' : 'bg-green-300'
                                                 }`}></div>
-                                            <span>{month.monthName}</span>
+                                            <span>{monthName}</span>
                                             <span className="text-xs opacity-75">({month.totalUnits})</span>
                                         </button>
                                     );
@@ -712,26 +696,26 @@ export function ProductionTrackerPanel({
 
                 {/* Production Stats - Original Layout */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 text-center">
+                    <div className="bg-linear-to-br from-blue-50 to-blue-100 border-2 border-blue-300 rounded-xl p-4 text-center">
                         <div className="text-2xl font-bold text-blue-700">{totalBatches}</div>
                         <div className="text-sm text-blue-600">Lotes Totales</div>
                     </div>
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-4 text-center">
+                    <div className="bg-linear-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-xl p-4 text-center">
                         <div className="text-2xl font-bold text-green-700">{totalProduced}</div>
                         <div className="text-sm text-green-600">Unidades Producidas</div>
                     </div>
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-4 text-center">
+                    <div className="bg-linear-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-4 text-center">
                         <div className="text-2xl font-bold text-amber-700">{allProductionData.length}</div>
                         <div className="text-sm text-amber-600">Días de Producción</div>
                     </div>
-                    <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-4 text-center">
+                    <div className="bg-linear-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-4 text-center">
                         <div className="text-2xl font-bold text-red-700">{lowStockItems.length}</div>
                         <div className="text-sm text-red-600">Stock Bajo</div>
                     </div>
                 </div>
 
                 {/* View-specific Stats */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
+                <div className="bg-linear-to-r from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
                     <div className="text-center mb-2">
                         <span className="text-sm font-medium text-gray-600">
                             Resumen para {timeView === 'daily' ? 'el día' : timeView === 'weekly' ? 'la semana' : 'el mes'}:
@@ -1094,11 +1078,11 @@ export function ProductionTrackerPanel({
                                                             })}
                                                         </div>
                                                         <div className="grid grid-cols-2 md:grid-cols-2 mt-4 gap-4">
-                                                            <div className="bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-4 text-center">
+                                                            <div className="bg-linear-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-xl p-4 text-center">
                                                                 <div className="text-2xl font-bold text-amber-700">${totalIncome.toFixed(2)}</div>
                                                                 <div className="text-sm text-amber-600">Ingresos (Vendido)</div>
                                                             </div>
-                                                            <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-4 text-center">
+                                                            <div className="bg-linear-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-4 text-center">
                                                                 <div className="text-2xl font-bold text-red-700">${totalLoss.toFixed(2)}</div>
                                                                 <div className="text-sm text-red-600">Pérdidas (Defectuoso)</div>
                                                             </div>
