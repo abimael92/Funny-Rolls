@@ -303,3 +303,31 @@ select {
         width: 100%;
     }
 }
+
+/* Force mobile view on 1366px and below */
+@media (max-width: 1366px) {
+  /* Hide desktop navbar menu */
+  nav .lg\:flex {
+    display: none !important;
+  }
+  
+  /* Show mobile menu button */
+  nav .lg\:hidden {
+    display: flex !important;
+  }
+  
+  /* Hide desktop title */
+  nav .lg\:block {
+    display: none !important;
+  }
+  
+  /* Force mobile layout for calculator */
+  .lg\:grid {
+    display: block !important;
+  }
+  
+  /* Show mobile view switcher */
+  .xl\:hidden {
+    display: flex !important;
+  }
+}
