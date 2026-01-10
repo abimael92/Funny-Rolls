@@ -42,7 +42,7 @@ export function IngredientsPanel({
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
     const [showAddSection, setShowAddSection] = useState(false);
     const [newIngredient, setNewIngredient] = useState<Omit<Ingredient, 'id'>>({
-        name: '', price: 0, unit: '', amount: 0, minAmount: 0
+        name: '', price: 0, unit: '', amount: 0, minAmount: 0, minAmountUnit: ''
     });
     const [showTotalCostModal, setShowTotalCostModal] = useState(false);
     const [tools, setTools] = useState<Tool[]>(defaultTools);
@@ -175,6 +175,7 @@ export function IngredientsPanel({
         const ingredient: Ingredient = {
             ...newIngredient,
             id: '',
+            minAmountUnit: newIngredient.minAmountUnit || newIngredient.unit, 
             ...(specialUnit.containsAmount > 0 && {
                 containsAmount: specialUnit.containsAmount,
                 containsUnit: specialUnit.containsUnit
@@ -194,7 +195,7 @@ export function IngredientsPanel({
             return // Don't add to local state if Supabase fails
         }
 
-        setNewIngredient({ name: '', price: 0, unit: '', amount: 0, minAmount: 0 })
+        setNewIngredient({ name: '', price: 0, unit: '', amount: 0, minAmount: 0, minAmountUnit: '' })
         setSpecialUnit({ containsUnit: 'g', containsAmount: 0 })
     }
 
@@ -208,11 +209,20 @@ export function IngredientsPanel({
     }
 
     // Save edited ingredient
-    const saveEditedIngredient = (updatedIngredient: Ingredient) => {
-        setIngredients(ingredients.map(ing =>
-            ing.id === updatedIngredient.id ? updatedIngredient : ing
-        ))
-        setEditingIngredientId(null)
+    const saveEditedIngredient = async (updatedIngredient: Ingredient) => {
+        try {
+            // Save to Supabase database
+            const savedIngredient = await saveIngredientToSupabase(updatedIngredient);
+
+            // Update local state with the saved ingredient (which has the database ID)
+            setIngredients(ingredients.map(ing =>
+                ing.id === savedIngredient.id ? savedIngredient : ing
+            ));
+            setEditingIngredientId(null);
+        } catch (error) {
+            console.error('Failed to save ingredient to database:', error);
+            setError('Error al guardar el ingrediente en la base de datos');
+        }
     }
 
     const toggleTooltip = (fieldName: string) => {
@@ -504,6 +514,24 @@ export function IngredientsPanel({
                                                 />
                                             </div>
                                         </div>
+                                            {/* ADD THIS NEW SECTION - Minimum Unit Field for New Ingredients */}
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div></div> {/* Empty column for alignment */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-amber-700 mb-2">
+                                                        Unidad del stock mínimo
+                                                    </label>
+                                                    <CustomSelect
+                                                        value={newIngredient.minAmountUnit || newIngredient.unit}
+                                                        onChange={(value) => setNewIngredient({
+                                                            ...newIngredient,
+                                                            minAmountUnit: value
+                                                        })}
+                                                        options={units}
+                                                        color="amber"
+                                                    />
+                                                </div>
+                                            </div>
                                     </div>
                                     <Button onClick={addIngredient} className="w-full bg-amber-600 hover:bg-amber-700 text-sm sm:text-base py-2 sm:py-3 mt-4">
                                         <Save className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
