@@ -6,6 +6,7 @@ import { Save } from "lucide-react"
 import { Ingredient } from '@/lib/types'
 import { CustomNumberInput } from './CustomNumberInput';
 import { CustomSelect } from './CustomSelect'
+import { DEFAULT_UNIT_CONVERSIONS } from '@/lib/unit-conversion'
 
 interface EditableIngredientRowProps {
     ingredient: Ingredient
@@ -15,6 +16,10 @@ interface EditableIngredientRowProps {
 
 export function EditableIngredientRow({ ingredient, onSave, onCancel }: EditableIngredientRowProps) {
     const [localIngredient, setLocalIngredient] = useState(ingredient);
+    const [specialUnit, setSpecialUnit] = useState({
+        containsAmount: ingredient.containsAmount || 0,
+        containsUnit: ingredient.containsUnit || 'g'
+    });
 
     const units = [
         { value: '', label: 'Selecciona...', fullName: '' },
@@ -37,8 +42,18 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
     ]
 
     const handleSave = () => {
-        onSave(localIngredient)
-    }
+        // Include special unit data for non-standard units
+        const ingredientToSave = {
+            ...localIngredient,
+            minAmountUnit: localIngredient.minAmountUnit || localIngredient.unit,
+            ...(['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(localIngredient.unit) && {
+                containsAmount: specialUnit.containsAmount,
+                containsUnit: specialUnit.containsUnit
+            })
+        };
+
+        onSave(ingredientToSave);
+    };
 
     return (
         <div className="flex-1 min-w-0 space-y-3 sm:space-y-4">
@@ -90,8 +105,20 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                     <label className="block text-sm font-medium text-gray-700 mb-1">Unidad</label>
                     <CustomSelect
                         value={localIngredient.unit}
-                        onChange={(value) => setLocalIngredient(prev => ({ ...prev, unit: value }))}
-                        options={units} // Use the imported units array
+                        onChange={(value) => {
+                            setLocalIngredient(prev => ({ ...prev, unit: value }));
+
+                            // Set default values for special units
+                            if (DEFAULT_UNIT_CONVERSIONS[value]) {
+                                setSpecialUnit({
+                                    containsAmount: DEFAULT_UNIT_CONVERSIONS[value].amount,
+                                    containsUnit: DEFAULT_UNIT_CONVERSIONS[value].unit
+                                });
+                            } else {
+                                setSpecialUnit({ containsUnit: 'g', containsAmount: 0 });
+                            }
+                        }}
+                        options={units}
                         placeholder="Selecciona..."
                         color="gray"
                         className="w-full"
@@ -112,6 +139,60 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                         color='gray'
                     />
                 </div>
+                
+                {/* Minimum Unit Field */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Unidad del stock mínimo</label>
+                    <CustomSelect
+                        value={localIngredient.minAmountUnit || localIngredient.unit}
+                        onChange={(value) => setLocalIngredient(prev => ({
+                            ...prev,
+                            minAmountUnit: value
+                        }))}
+                        options={units}
+                        placeholder="Selecciona..."
+                        color="gray"
+                        className="w-full"
+                        showFullName={true}
+                    />
+                </div>
+
+
+                {/* Package Content for non-standard units */}
+                {['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(localIngredient.unit) && (
+                    <div className="col-span-2 grid grid-cols-2 gap-4 mt-2">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Contiene cantidad
+                            </label>
+                            <CustomNumberInput
+                                value={specialUnit.containsAmount}
+                                onChange={(value) => setSpecialUnit({ ...specialUnit, containsAmount: value })}
+                                className="w-full h-[42px] sm:h-[52px]"
+                                min={0}
+                                max={10000}
+                                placeholder="250"
+                                allowDecimals={true}
+                                color='gray'
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Unidad de contenido
+                            </label>
+                            <CustomSelect
+                                value={specialUnit.containsUnit}
+                                onChange={(value) => setSpecialUnit({ ...specialUnit, containsUnit: value })}
+                                options={units}
+                                placeholder="Selecciona..."
+                                color="gray"
+                                className="w-full"
+                                showFullName={true}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Action Buttons */}
