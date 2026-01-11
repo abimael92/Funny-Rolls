@@ -38,13 +38,10 @@ export function RecipeCalculator() {
         mode: 'add'
     })
     
-    // Then change the useState line to:
     const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>(() => {
-        // Generate mock data for 2025
         return generateMockProductionData(products.map(p => p.recipe), products)
     })
     
-    // In RecipeCalculator component, add this state
     const [ingredientsInDatabase, setIngredientsInDatabase] = useState<Set<string>>(new Set());
 
     // Safe localStorage functions
@@ -224,8 +221,11 @@ export function RecipeCalculator() {
     
     // Call this in useEffect
     useEffect(() => {
-        loadIngredientsFromSupabase()
-    }, [])
+        const loadIngredients = async () => {
+            await loadIngredientsFromSupabase();
+        };
+        loadIngredients();
+    }, []);
 
     // Enhanced record production with validation
     const recordProduction = (recipeId: string, batchCount: number, date: Date = new Date()) => {
@@ -323,107 +323,128 @@ export function RecipeCalculator() {
                 .select('*')
                 .order('name', { ascending: true })
 
-            if (error) {
-                console.error('Supabase ingredients error:',
-                    error.message || 'Unknown error - check table permissions'
-                );
-
-                // Set default ingredients and empty set on error
-                setIngredientsInDatabase(new Set());
-                setIngredients(defaultIngredients);
-                return;
-            }
+            if (error) throw error;
 
             if (data && data.length > 0) {
-                // Create a Set of ingredient IDs from Supabase
-                const dbIngredientIds = new Set(data.map(dbIng => dbIng.id));
-                setIngredientsInDatabase(dbIngredientIds);
+                // Store Supabase IDs
+                const dbIds = new Set(data.map(dbIng => dbIng.id));
+                setIngredientsInDatabase(dbIds);
 
-                // Transform Supabase data to Ingredient type with defaults
-                const dbIngredients: Ingredient[] = data.map(dbIng => ({
+                // Get Supabase names (lowercase)
+                const supabaseNames = new Set(data.map(dbIng => dbIng.name.toLowerCase()));
+
+                // Get current local ingredients
+                const currentIngredients = [...ingredients];
+
+                // Filter: keep local ingredients that DON'T match Supabase names
+                const localOnlyIngredients = currentIngredients.filter(localIng =>
+                    !supabaseNames.has(localIng.name.toLowerCase())
+                );
+
+                // Convert Supabase data
+                const supabaseIngredients: Ingredient[] = data.map(dbIng => ({
                     id: dbIng.id,
-                    name: dbIng.name || 'Unknown',
-                    price: dbIng.price || 0,
-                    unit: dbIng.unit || 'unit',
-                    amount: dbIng.amount || 0,
+                    name: dbIng.name,
+                    price: dbIng.price,
+                    unit: dbIng.unit,
+                    amount: dbIng.amount,
                     minAmount: dbIng.min_amount || 0,
+                    minAmountUnit: dbIng.min_amount_unit || dbIng.unit,
                     containsAmount: dbIng.contains_amount || 0,
                     containsUnit: dbIng.contains_unit || 'unit'
-                }))
+                }));
 
-                // Merge with default ingredients, prioritizing Supabase data
-                const mergedIngredients = [...defaultIngredients];
-
-                dbIngredients.forEach(dbIng => {
-                    const existingIndex = mergedIngredients.findIndex(
-                        ing => ing.name.toLowerCase() === dbIng.name.toLowerCase() &&
-                            ing.unit === dbIng.unit
-                    );
-
-                    if (existingIndex >= 0) {
-                        mergedIngredients[existingIndex] = dbIng;
-                    } else {
-                        mergedIngredients.push(dbIng);
-                    }
-                });
-
-                setIngredients(mergedIngredients);
-            } else {
-                // No data returned, use defaults
-                setIngredientsInDatabase(new Set());
-                setIngredients(defaultIngredients);
+                // Combine: Supabase + local-only (non-duplicate names)
+                const allIngredients = [...supabaseIngredients, ...localOnlyIngredients];
+                setIngredients(allIngredients);
             }
         } catch (error) {
             console.error('Error loading ingredients:', error);
-            setIngredientsInDatabase(new Set());
-            setIngredients(defaultIngredients);
         }
     }
+
 
     // Update the saveIngredientToSupabase function to update the Set:
     const saveIngredientToSupabase = async (ingredient: Ingredient): Promise<Ingredient> => {
         try {
-            const { data, error } = await supabase
+            // First, check if ingredient exists in Supabase by name AND unit
+            const { data: existingIngredients, error: fetchError } = await supabase
                 .from('ingredients')
-                .upsert({
-                    id: ingredient.id,
-                    name: ingredient.name,
-                    price: ingredient.price,
-                    unit: ingredient.unit,
-                    amount: ingredient.amount,
-                    min_amount: ingredient.minAmount,
-                    contains_amount: ingredient.containsAmount,
-                    contains_unit: ingredient.containsUnit
-                })
-                .select()
-                .single()
+                .select('*')
+                .eq('name', ingredient.name)
+                .eq('unit', ingredient.unit)
+                .limit(1);
 
-            if (error) throw error
+            if (fetchError) throw fetchError;
 
-            const savedIngredient: Ingredient = {
-                id: data.id,
-                name: data.name,
-                price: data.price,
-                unit: data.unit,
-                amount: data.amount,
-                minAmount: data.min_amount,
-                containsAmount: data.contains_amount,
-                containsUnit: data.contains_unit
+            const ingredientData = {
+                name: ingredient.name,
+                price: ingredient.price,
+                unit: ingredient.unit,
+                amount: ingredient.amount,
+                min_amount: ingredient.minAmount || 0,
+                min_amount_unit: ingredient.minAmountUnit || ingredient.unit,
+                contains_amount: ingredient.containsAmount || null,
+                contains_unit: ingredient.containsUnit || null
+            };
+
+            if (existingIngredients && existingIngredients.length > 0) {
+                // UPDATE existing ingredient
+                const existingId = existingIngredients[0].id;
+                const { data, error } = await supabase
+                    .from('ingredients')
+                    .update(ingredientData)
+                    .eq('id', existingId)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                // Update the ingredientsInDatabase Set
+                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
+
+                return {
+                    id: data.id,
+                    name: data.name,
+                    price: data.price,
+                    unit: data.unit,
+                    amount: data.amount,
+                    minAmount: data.min_amount || 0,
+                    minAmountUnit: data.min_amount_unit || data.unit,
+                    containsAmount: data.contains_amount,
+                    containsUnit: data.contains_unit
+                };
+            } else {
+                // INSERT new ingredient
+                const { data, error } = await supabase
+                    .from('ingredients')
+                    .insert([ingredientData])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
+
+                return {
+                    id: data.id,
+                    name: data.name,
+                    price: data.price,
+                    unit: data.unit,
+                    amount: data.amount,
+                    minAmount: data.min_amount || 0,
+                    minAmountUnit: data.min_amount_unit || data.unit,
+                    containsAmount: data.contains_amount,
+                    containsUnit: data.contains_unit
+                };
             }
-
-            // After saving, update the ingredientsInDatabase Set
-            setIngredientsInDatabase(prev => {
-                const newSet = new Set(prev);
-                newSet.add(savedIngredient.id);
-                return newSet;
-            });
-
-            return savedIngredient;
         } catch (error) {
-            console.error('Failed to save ingredient to Supabase:', error);
+            console.error('Error saving ingredient to Supabase:', error);
             throw error;
         }
-    }
+    };
 
     // Update the deleteIngredientFromSupabase function:
     const deleteIngredientFromSupabase = async (ingredientId: string) => {
