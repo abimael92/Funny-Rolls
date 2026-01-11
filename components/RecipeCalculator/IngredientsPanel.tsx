@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeftRight, Calculator, Check, ChevronDown, CookingPot, Info, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench, Database } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
-import { getIngredientById, getIngredientCostPerUnit } from '@/lib/utils'
+import {  getIngredientCostPerUnit } from '@/lib/utils'
 import { DEFAULT_UNIT_CONVERSIONS } from '@/lib/unit-conversion'
 import { UnitConverter } from '@/lib/unit-conversion';
 import { EditableIngredientRow } from './EditableIngredientRow'
@@ -19,7 +19,7 @@ import { defaultTools, } from '@/lib/data';
 // List,
 interface IngredientsPanelProps {
     ingredients: Ingredient[]
-    setIngredients: (ingredients: Ingredient[]) => void
+    setIngredients: React.Dispatch<React.SetStateAction<Ingredient[]>>
     inventory: InventoryItem[]
     updateInventory: (ingredientId: string, newStock: number) => void
     addInventoryItem: (ingredientId: string, minimumStock: number) => void
@@ -148,24 +148,44 @@ export function IngredientsPanel({
             return
         }
 
-        // Check for duplicates in both local and database
+        // Check for duplicates in Supabase AND local
         const existingIngredient = ingredients.find(ing =>
             ing.name.toLowerCase() === newIngredient.name.toLowerCase()
-        )
+        );
 
-        if (existingIngredient) {
-            // Check if it's already in database
-            if (ingredientsInDatabase.has(existingIngredient.id)) {
-                setError(`"${newIngredient.name}" ya existe en la base de datos`)
-                return
-            } else {
-                setError(`Ya existe "${newIngredient.name}" con unidad "${newIngredient.unit}"`)
-                return
+        // Check in ingredientsInDatabase Set for any matching ingredients
+        const isInDatabase = Array.from(ingredientsInDatabase).some(id => {
+            const ing = ingredients.find(i => i.id === id);
+            return ing &&
+                ing.name.toLowerCase() === newIngredient.name.toLowerCase() &&
+                ing.unit === newIngredient.unit;
+        });
+
+        if (isInDatabase) {
+            setError(`"${newIngredient.name}" ya existe en la base de datos`)
+            // Optionally, find and edit the existing ingredient
+            const dbIngredient = ingredients.find(ing =>
+                ing.name.toLowerCase() === newIngredient.name.toLowerCase() &&
+                ing.unit === newIngredient.unit &&
+                ingredientsInDatabase.has(ing.id)
+            );
+            if (dbIngredient) {
+                setEditingIngredientId(dbIngredient.id)
+                setShowAddSection(false)
             }
+            return
         }
 
-        // For non-standard units, use the package content for calculations
-        if (['paquete', 'sobre', 'caja', 'lata'].includes(newIngredient.unit)) {
+        if (existingIngredient) {
+            // If it's only local, ask to edit instead
+            setError(`Ya existe "${newIngredient.name}" localmente. Edita el ingrediente existente.`)
+            setEditingIngredientId(existingIngredient.id)
+            setShowAddSection(false)
+            return
+        }
+
+        // For non-standard units, validate package content
+        if (['paquete', 'sobre', 'caja', 'lata', 'botella', 'bolsa', 'docena'].includes(newIngredient.unit)) {
             if (specialUnit.containsAmount <= 0) {
                 setError('La cantidad total del paquete debe ser mayor a 0')
                 return
@@ -174,8 +194,8 @@ export function IngredientsPanel({
 
         const ingredient: Ingredient = {
             ...newIngredient,
-            id: '',
-            minAmountUnit: newIngredient.minAmountUnit || newIngredient.unit, 
+            id: '', // Empty ID - Supabase will generate
+            minAmountUnit: newIngredient.minAmountUnit || newIngredient.unit,
             ...(specialUnit.containsAmount > 0 && {
                 containsAmount: specialUnit.containsAmount,
                 containsUnit: specialUnit.containsUnit
@@ -190,13 +210,17 @@ export function IngredientsPanel({
 
             // Use the saved ingredient ID
             addInventoryItem(savedIngredient.id, savedIngredient.minAmount)
+
+            // Reset form
+            setNewIngredient({ name: '', price: 0, unit: '', amount: 0, minAmount: 0, minAmountUnit: '' })
+            setSpecialUnit({ containsUnit: 'g', containsAmount: 0 })
+            setShowAddSection(false)
+
         } catch (error) {
             console.error('Failed to save ingredient:', error)
-            return // Don't add to local state if Supabase fails
+            setError('Error al guardar en la base de datos. Verifica tu conexión.')
+            return
         }
-
-        setNewIngredient({ name: '', price: 0, unit: '', amount: 0, minAmount: 0, minAmountUnit: '' })
-        setSpecialUnit({ containsUnit: 'g', containsAmount: 0 })
     }
 
     // Remove ingredient
@@ -209,19 +233,21 @@ export function IngredientsPanel({
     }
 
     // Save edited ingredient
-    const saveEditedIngredient = async (updatedIngredient: Ingredient) => {
+    const saveEditedIngredient = async (updatedIngredient: Ingredient): Promise<void> => {
         try {
-            // Save to Supabase database
             const savedIngredient = await saveIngredientToSupabase(updatedIngredient);
 
-            // Update local state with the saved ingredient (which has the database ID)
-            setIngredients(ingredients.map(ing =>
-                ing.id === savedIngredient.id ? savedIngredient : ing
-            ));
+            setIngredients(prev => {
+                const key = `${savedIngredient.name.toLowerCase()}|${savedIngredient.unit}`;
+                return [...prev.filter(ing =>
+                    `${ing.name.toLowerCase()}|${ing.unit}` !== key
+                ), savedIngredient];
+            });
+
             setEditingIngredientId(null);
         } catch (error) {
-            console.error('Failed to save ingredient to database:', error);
-            setError('Error al guardar el ingrediente en la base de datos');
+            console.error('Failed to save ingredient:', error);
+            setError('Error al guardar el ingrediente');
         }
     }
 
@@ -552,11 +578,8 @@ export function IngredientsPanel({
                         <div className="space-y-4 max-h-292 overflow-y-auto overflow-x-hidden pr-2">
                             {ingredients.map((ingredient) => {
                                 const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id)
-                                const currentIngredient = getIngredientById(ingredient.id);
                                 const currentStock = inventoryItem?.currentStock || 0
                                 const isLowStock = checkIfLowStock(ingredient, inventoryItem) 
-                                if (isLowStock) console.log('the item ', currentIngredient, 'isLowStock: ',isLowStock, 'since it has currentStock:', currentStock, 'and minAmount: ', ingredient.minAmount);
-                                
                                 const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit);
                                 const hasAmount = ingredient.amount > 0
                                 const isCompleted = isIngredientCompleted(ingredient.id)
@@ -575,13 +598,12 @@ export function IngredientsPanel({
                                     >
                                         {editingIngredientId === ingredient.id ? (
                                             <EditableIngredientRow
-                                                key='EditableIngredientRow'
+                                                key={`editable-${ingredient.id}`}
                                                 ingredient={ingredient}
                                                 onSave={saveEditedIngredient}
                                                 onCancel={() => setEditingIngredientId(null)}
                                             />
                                         ) : isCompleted ? (
-                                            // SIMPLE COMPLETED VIEW
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                             <div
@@ -759,19 +781,37 @@ export function IngredientsPanel({
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            {isLowStock && inventoryItem && (
-                                                                <div className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded mt-2">
-                                                                    <div className="flex items-center gap-2 font-semibold text-xs sm:text-sm mb-1">
-                                                                        Stock bajo
-                                                                    </div>
-                                                                    <div className="flex items-center p-1 sm:p-2 text-xs">
-                                                                        <span className="font-medium">Faltan:</span>
-                                                                        <span className="font-bold ml-1 text-red-700">
-                                                                                    {UnitConverter.convertToReadableUnit(Math.max(0, Number((ingredient.minAmount - currentStock).toFixed(2))), ingredient.unit)}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            )}
+                                                                    {isLowStock && inventoryItem && (
+                                                                        <div className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded mt-2">
+                                                                            <div className="flex items-center gap-2 font-semibold text-xs sm:text-sm mb-1">
+                                                                                Stock bajo
+                                                                            </div>
+                                                                            <div className="flex items-center p-1 sm:p-2 text-xs">
+                                                                                <span className="font-medium">Faltan:</span>
+                                                                                <span className="font-bold ml-1 text-red-700">
+                                                                                    {/* Convert both to same unit for proper calculation */}
+                                                                                    {(() => {
+                                                                                        try {
+                                                                                            const convertedCurrentStock = UnitConverter.convert(
+                                                                                                { value: currentStock, unit: inventoryItem.unit },
+                                                                                                ingredient.unit
+                                                                                            );
+                                                                                            if (convertedCurrentStock) {
+                                                                                                const missingAmount = Math.max(0, ingredient.minAmount - convertedCurrentStock.value);
+                                                                                                return UnitConverter.convertToReadableUnit(missingAmount, ingredient.unit);
+                                                                                            }
+                                                                                        } catch (error) {
+                                                                                            console.error('Conversion error:', error);
+                                                                                        }
+                                                                                        return UnitConverter.convertToReadableUnit(
+                                                                                            Math.max(0, Number((ingredient.minAmount - currentStock).toFixed(2))),
+                                                                                            ingredient.unit
+                                                                                        );
+                                                                                    })()}
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
                                                         </div>
                                                     </div>
                                                 </div>

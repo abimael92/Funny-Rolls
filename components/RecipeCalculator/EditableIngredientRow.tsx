@@ -52,6 +52,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
             })
         };
 
+
         onSave(ingredientToSave);
     };
 
@@ -139,7 +140,7 @@ export function EditableIngredientRow({ ingredient, onSave, onCancel }: Editable
                         color='gray'
                     />
                 </div>
-                
+
                 {/* Minimum Unit Field */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Unidad del stock mínimo</label>
