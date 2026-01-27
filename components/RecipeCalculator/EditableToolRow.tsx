@@ -43,7 +43,7 @@ export function EditableToolRow({ tool, onSave, onCancel }: EditableToolRowProps
                     className="px-3 py-2 border-2 border-blue-300 rounded-lg"
                 >
                     <option value="consumible">consumible</option>
-                    <option value="herramienta">herramientaio</option>
+                    <option value="herramienta">herramienta</option>
                     <option value="equipo">equipo</option>
                 </select>
 

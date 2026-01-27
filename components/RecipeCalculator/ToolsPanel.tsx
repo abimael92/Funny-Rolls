@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { ChevronDown, Info, Save, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
+import { ChevronDown, Info, Save, Trash2, Zap, Utensils, Star, DollarSign, Edit, Database } from "lucide-react";
 import { Tool, TOOL_CATEGORY_CONFIGS } from '@/lib/types';
 import { toolCategories } from '@/lib/data';
 import { CloseButton, ActionButton } from './ModalHelpers';
@@ -13,9 +13,18 @@ import { CustomNumberInput } from './CustomNumberInput';
 interface ToolsPanelProps {
     tools: Tool[]
     setTools: (tools: Tool[]) => void
+    saveToolToSupabase?: (tool: Tool) => Promise<Tool>
+    deleteToolFromSupabase?: (toolId: string) => Promise<void>
+    toolsInDatabase?: Set<string>
 }
 
-export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
+export function ToolsPanel({ 
+    tools, 
+    setTools,
+    saveToolToSupabase,
+    deleteToolFromSupabase,
+    toolsInDatabase = new Set()
+}: ToolsPanelProps) {
     const [error, setError] = useState<string | null>(null);
     const [showAddSection, setShowAddSection] = useState(false);
     const [editingToolId, setEditingToolId] = useState<string | null>(null)
@@ -49,8 +58,8 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
     // Total Batches = Years × 52
     //     Cost / Batch = Actual Cost ÷ Total Batches
 
-    // Add new tool
-    const addTool = () => {
+    // Add new tool - with Supabase support
+    const addTool = async () => {
         setError(null)
 
         if (!newTool.name.trim()) {
@@ -58,11 +67,44 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
             return
         }
 
+        // Check for duplicates by name+category (case-insensitive name)
+        const normalizedName = newTool.name.trim().toLowerCase();
+        const normalizedCategory = newTool.category.trim();
+        
+        const existingTool = tools.find(t =>
+            t.name.trim().toLowerCase() === normalizedName &&
+            t.category.trim() === normalizedCategory
+        );
+
+        if (existingTool) {
+            if (toolsInDatabase.has(existingTool.id)) {
+                setError(`"${newTool.name}" (${newTool.category}) ya existe en la base de datos. Edita la herramienta existente.`)
+            } else {
+                setError(`"${newTool.name}" (${newTool.category}) ya existe localmente. Edita la herramienta existente.`)
+            }
+            return
+        }
+
         const tool: Tool = {
             ...newTool,
-            id: Date.now().toString()
+            id: '', // Empty ID - Supabase will generate if saving to DB
         }
-        setTools([...tools, tool])
+
+        // If Supabase functions are available, save to DB
+        if (saveToolToSupabase) {
+            try {
+                // saveToolToSupabase already updates state, so we don't need to manually update
+                await saveToolToSupabase(tool)
+            } catch (error) {
+                console.error('Failed to save tool:', error)
+                setError('Error al guardar en la base de datos. Verifica tu conexión.')
+                return
+            }
+        } else {
+            // Local-only: use timestamp ID and update state directly
+            tool.id = Date.now().toString()
+            setTools([...tools, tool])
+        }
 
         const categoryConfig = TOOL_CATEGORY_CONFIGS[newTool.category] || TOOL_CATEGORY_CONFIGS.general;
         const totalBatches = categoryConfig.batchesPerYear * categoryConfig.yearsLifespan;
@@ -82,19 +124,70 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
         setShowAddSection(false)
     }
 
-    // Remove tool
-    const removeTool = (id: string) => {
-        if (window.confirm('¿Estás seguro de que quieres eliminar esta herramienta?')) {
-            setTools(tools.filter(tool => tool.id !== id))
+    // Remove tool - with Supabase support
+    const removeTool = async (id: string) => {
+        const tool = tools.find(t => t.id === id);
+        const isInDatabase = tool && toolsInDatabase.has(id);
+        
+        const confirmMessage = isInDatabase
+            ? `¿Estás seguro de que quieres eliminar "${tool?.name}" de la base de datos? Esta acción no se puede deshacer.`
+            : `¿Estás seguro de que quieres eliminar "${tool?.name}"?`;
+        
+        if (window.confirm(confirmMessage)) {
+            // If Supabase functions are available, delete from DB
+            if (deleteToolFromSupabase) {
+                try {
+                    // deleteToolFromSupabase already updates state, so we don't need to manually update
+                    await deleteToolFromSupabase(id)
+                } catch (error) {
+                    console.error('Failed to delete tool:', error)
+                    setError('Error al eliminar la herramienta. Verifica tu conexión.')
+                }
+            } else {
+                // Local-only: update state directly
+                setTools(tools.filter(tool => tool.id !== id))
+            }
         }
     }
 
-    // Save edited tool
-    const saveEditedTool = (updatedTool: Tool) => {
-        setTools(tools.map(tool =>
-            tool.id === updatedTool.id ? updatedTool : tool
-        ))
-        setEditingToolId(null)
+    // Save edited tool - with Supabase support
+    const saveEditedTool = async (updatedTool: Tool) => {
+        // Check for duplicates (excluding the current tool being edited)
+        const normalizedName = updatedTool.name.trim().toLowerCase();
+        const normalizedCategory = updatedTool.category.trim();
+        
+        const duplicate = tools.find(t =>
+            t.id !== updatedTool.id &&
+            t.name.trim().toLowerCase() === normalizedName &&
+            t.category.trim() === normalizedCategory
+        );
+
+        if (duplicate) {
+            if (toolsInDatabase.has(duplicate.id)) {
+                setError(`"${updatedTool.name}" (${updatedTool.category}) ya existe en la base de datos.`);
+            } else {
+                setError(`"${updatedTool.name}" (${updatedTool.category}) ya existe localmente.`);
+            }
+            return;
+        }
+
+        // If Supabase functions are available, save to DB
+        if (saveToolToSupabase) {
+            try {
+                // saveToolToSupabase already updates state, so we don't need to manually update
+                await saveToolToSupabase(updatedTool);
+                setEditingToolId(null);
+            } catch (error) {
+                console.error('Failed to save tool:', error);
+                setError('Error al guardar la herramienta. Verifica tu conexión.');
+            }
+        } else {
+            // Local-only: update state directly
+            setTools(tools.map(tool =>
+                tool.id === updatedTool.id ? updatedTool : tool
+            ))
+            setEditingToolId(null)
+        }
     }
 
     // Start editing tool
@@ -552,6 +645,20 @@ export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between gap-2 mb-3">
                                                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+                                                    {/* Database Indicator */}
+                                                    <div className="text-xs">
+                                                        {toolsInDatabase.has(tool.id) ? (
+                                                            <div className="flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full w-fit">
+                                                                <Database className="h-2.5 w-2.5" />
+                                                                <span className="text-[10px]">DB</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center gap-1 text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full w-fit">
+                                                                <Database className="h-2.5 w-2.5" />
+                                                                <span className="text-[10px]">Local</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
 
                                                     <div className="flex items-center gap-2 flex-1 min-w-0 max-w-[70%]">
                                                         {/* Name container with max width and wrapping */}
