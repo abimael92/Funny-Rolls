@@ -43,6 +43,10 @@ export function RecipeCalculator() {
     })
     
     const [ingredientsInDatabase, setIngredientsInDatabase] = useState<Set<string>>(new Set());
+    // recipesInDatabase: Tracks which recipes are in Supabase (for future DB indicators in UI)
+    const [recipesInDatabase, setRecipesInDatabase] = useState<Set<string>>(new Set());
+    const [toolsInDatabase, setToolsInDatabase] = useState<Set<string>>(new Set());
+    const [inventoryInDatabase, setInventoryInDatabase] = useState<Set<string>>(new Set()); // ingredientId -> in DB
 
     // Safe localStorage functions
     const safeSetLocalStorage = (key: string, data: unknown) => {
@@ -65,7 +69,7 @@ export function RecipeCalculator() {
         }
     }
 
-    // Add this function to load recipes from database:
+    // Improved loadDatabaseRecipes: Merge DB recipes with local, DB takes priority
     const loadDatabaseRecipes = async () => {
         setLoadingDatabase(true)
         try {
@@ -76,20 +80,69 @@ export function RecipeCalculator() {
 
             if (error) throw error
 
-            const transformedRecipes: Recipe[] = data.map(dbRecipe => ({
-                id: dbRecipe.id,
-                name: dbRecipe.name,
-                ingredients: dbRecipe.ingredients,
-                tools: dbRecipe.tools || [],
-                batchSize: dbRecipe.batch_size,
-                sellingPrice: dbRecipe.selling_price,
-                profitMargin: dbRecipe.profit_margin,
-                available: dbRecipe.available,
-                steps: dbRecipe.steps || [],
-                image: dbRecipe.image || ''
-            }))
+            // Store DB recipe IDs
+            const dbIds = new Set<string>();
+            const dbRecipeMap = new Map<string, Recipe>(); // key: "name" -> Recipe
 
-            setDatabaseRecipes(transformedRecipes)
+            // Convert Supabase data to Recipe format
+            const transformedRecipes: Recipe[] = (data || []).map(dbRecipe => {
+                const recipe: Recipe = {
+                    id: dbRecipe.id,
+                    name: dbRecipe.name,
+                    ingredients: dbRecipe.ingredients,
+                    tools: dbRecipe.tools || [],
+                    batchSize: dbRecipe.batch_size,
+                    sellingPrice: dbRecipe.selling_price,
+                    profitMargin: dbRecipe.profit_margin,
+                    available: dbRecipe.available,
+                    steps: dbRecipe.steps || [],
+                    image: dbRecipe.image || ''
+                };
+
+                dbIds.add(dbRecipe.id);
+                // Create unique key: name (lowercase, trimmed)
+                const uniqueKey = dbRecipe.name.toLowerCase().trim();
+                dbRecipeMap.set(uniqueKey, recipe);
+
+                return recipe;
+            });
+
+            setRecipesInDatabase(dbIds); // Track DB recipes for future UI indicators
+            setDatabaseRecipes(transformedRecipes);
+
+            // Merge with local recipes: DB takes priority, keep unique local-only recipes
+            setRecipes(prevRecipes => {
+                // Filter local recipes: only keep those with unique name not in DB
+                const localOnlyRecipes = prevRecipes.filter(localRecipe => {
+                    // Skip if already in database by ID
+                    if (dbIds.has(localRecipe.id)) {
+                        return false;
+                    }
+
+                    // Check if name exists in DB
+                    const uniqueKey = localRecipe.name.toLowerCase().trim();
+                    return !dbRecipeMap.has(uniqueKey);
+                });
+
+                // Combine: DB recipes (priority) + unique local-only recipes
+                const mergedRecipes = [...transformedRecipes, ...localOnlyRecipes];
+
+                // Sort by name for consistent display
+                mergedRecipes.sort((a, b) => a.name.localeCompare(b.name));
+
+                // Update selected recipe if it was deleted or if we need a default
+                if (mergedRecipes.length > 0) {
+                    setSelectedRecipe(prev => {
+                        // If current selected recipe still exists, keep it
+                        const stillExists = mergedRecipes.find(r => r.id === prev.id);
+                        if (stillExists) return prev;
+                        // Otherwise select first recipe
+                        return mergedRecipes[0];
+                    });
+                }
+
+                return mergedRecipes;
+            });
         } catch (err: unknown) {
             console.error('Error loading recipes from database:', err)
             setError(err instanceof Error ? err.message : 'Error al cargar recetas de la base de datos')
@@ -107,39 +160,63 @@ export function RecipeCalculator() {
         return Math.round(num * 100) / 100
     }
 
-    // Add this function to handle recipe saved:
+    // Improved handleRecipeSaved: Uses functional updates and syncs with DB state
     const handleRecipeSaved = (recipe: Recipe) => {
-        // Update local recipes
-        const existingIndex = recipes.findIndex(r => r.id === recipe.id)
-
-        if (existingIndex >= 0) {
-            // Update existing recipe
-            const updatedRecipes = [...recipes]
-            updatedRecipes[existingIndex] = recipe
-            setRecipes(updatedRecipes)
-
-            // Update selected recipe if it's the one being edited
-            if (selectedRecipe.id === recipe.id) {
-                setSelectedRecipe(recipe)
-            }
-        } else {
-            // Add new recipe
-            setRecipes(prev => [...prev, recipe])
+        // If recipe is saved to DB, mark it as in database
+        // recipesInDatabase is used to track which recipes are in Supabase (for future DB indicators)
+        if (recipe.id && !recipe.id.startsWith('recipe-')) {
+            // Recipe has DB ID (not a local-only ID)
+            setRecipesInDatabase(prev => new Set([...prev, recipe.id]));
         }
 
-        // Reload database recipes
+        setRecipes(prev => {
+            const existingIndex = prev.findIndex(r => r.id === recipe.id)
+            
+            if (existingIndex >= 0) {
+                // Update existing recipe
+                const updated = [...prev]
+                updated[existingIndex] = recipe
+                // Sort by name
+                updated.sort((a, b) => a.name.localeCompare(b.name))
+                return updated
+            } else {
+                // Add new recipe
+                const updated = [...prev, recipe]
+                // Sort by name
+                updated.sort((a, b) => a.name.localeCompare(b.name))
+                return updated
+            }
+        })
+
+        // Update selected recipe if it's the one being edited (use functional update)
+        setSelectedRecipe(prev => {
+            if (prev.id === recipe.id) {
+                return recipe
+            }
+            return prev
+        })
+
+        // Reload database recipes to ensure sync
         loadDatabaseRecipes()
     }
 
-    // Add this function to handle recipe deleted:
+    // Fixed handleRecipeDeleted: Uses functional updates to avoid stale state
     const handleRecipeDeleted = (recipeId: string) => {
-        // Remove from local recipes
-        setRecipes(prev => prev.filter(r => r.id !== recipeId))
-
-        // If deleted recipe was selected, select first recipe
-        if (selectedRecipe.id === recipeId && recipes.length > 1) {
-            setSelectedRecipe(recipes[0])
-        }
+        // Compute next recipes list locally to avoid stale state
+        setRecipes(prev => {
+            const nextRecipes = prev.filter(r => r.id !== recipeId)
+            
+            // Update selected recipe if the deleted one was selected
+            setSelectedRecipe(prevSelected => {
+                if (prevSelected.id === recipeId) {
+                    // Use nextRecipes (not prev/recipes) to avoid stale state
+                    return nextRecipes.length > 0 ? nextRecipes[0] : prevSelected
+                }
+                return prevSelected
+            })
+            
+            return nextRecipes
+        })
 
         // Reload database recipes
         loadDatabaseRecipes()
@@ -153,6 +230,7 @@ export function RecipeCalculator() {
         const savedInventory = safeGetLocalStorage('recipe-calculator-inventory', []);
         const savedTools = safeGetLocalStorage('recipe-calculator-tools', defaultTools);
 
+        // Set initial ingredients (will be merged with DB in loadIngredientsFromSupabase)
         setIngredients(savedIngredients);
         setTools(savedTools);
 
@@ -194,10 +272,27 @@ export function RecipeCalculator() {
         }
     }, [])
 
-    // Save to localStorage with error handling
+    // Save to localStorage with error handling - only save DB ingredients + unique local
     useEffect(() => {
-        safeSetLocalStorage('recipe-calculator-ingredients', ingredients)
-    }, [ingredients])
+        // Only save ingredients that are either in DB or truly unique local-only
+        // This ensures localStorage doesn't store duplicates that will be filtered out
+        const ingredientsToSave = ingredients.filter(ing => {
+            // Always save DB ingredients
+            if (ingredientsInDatabase.has(ing.id)) {
+                return true;
+            }
+            // For local ingredients, check if there's a DB duplicate by name+unit
+            const uniqueKey = `${ing.name.toLowerCase().trim()}|${ing.unit}`;
+            const hasDbDuplicate = ingredients.some(dbIng => 
+                ingredientsInDatabase.has(dbIng.id) &&
+                `${dbIng.name.toLowerCase().trim()}|${dbIng.unit}` === uniqueKey
+            );
+            // Only save if no DB duplicate exists
+            return !hasDbDuplicate;
+        });
+        
+        safeSetLocalStorage('recipe-calculator-ingredients', ingredientsToSave);
+    }, [ingredients, ingredientsInDatabase])
 
     useEffect(() => {
         safeSetLocalStorage('recipe-calculator-recipes', recipes)
@@ -207,24 +302,77 @@ export function RecipeCalculator() {
         safeSetLocalStorage('recipe-calculator-production-history', productionHistory)
     }, [productionHistory])
 
+    // Save to localStorage with error handling - only save DB inventory + unique local
     useEffect(() => {
-        safeSetLocalStorage('recipe-calculator-inventory', inventory)
-    }, [inventory]);
+        // Only save inventory items that are either in DB or truly unique local-only
+        const inventoryToSave = inventory.filter(item => {
+            // Always save DB inventory
+            if (inventoryInDatabase.has(item.ingredientId)) {
+                return true;
+            }
+            // For local items, check if there's a DB duplicate
+            const hasDbDuplicate = inventory.some(dbItem => 
+                inventoryInDatabase.has(dbItem.ingredientId) &&
+                dbItem.ingredientId === item.ingredientId
+            );
+            // Only save if no DB duplicate exists
+            return !hasDbDuplicate;
+        });
+        
+        safeSetLocalStorage('recipe-calculator-inventory', inventoryToSave);
+    }, [inventory, inventoryInDatabase]);
 
+    // Save to localStorage with error handling - only save DB tools + unique local
     useEffect(() => {
-        safeSetLocalStorage('recipe-calculator-tools', tools)
-    }, [tools])
+        // Only save tools that are either in DB or truly unique local-only
+        const toolsToSave = tools.filter(tool => {
+            // Always save DB tools
+            if (toolsInDatabase.has(tool.id)) {
+                return true;
+            }
+            // For local tools, check if there's a DB duplicate by name+category
+            const uniqueKey = `${tool.name.toLowerCase().trim()}|${tool.category}`;
+            const hasDbDuplicate = tools.some(dbTool => 
+                toolsInDatabase.has(dbTool.id) &&
+                `${dbTool.name.toLowerCase().trim()}|${dbTool.category}` === uniqueKey
+            );
+            // Only save if no DB duplicate exists
+            return !hasDbDuplicate;
+        });
+        
+        safeSetLocalStorage('recipe-calculator-tools', toolsToSave);
+    }, [tools, toolsInDatabase])
 
     useEffect(() => {
         loadDatabaseRecipes()
     }, [])
     
-    // Call this in useEffect
+    // Load ingredients from Supabase after initial localStorage load
+    // This ensures DB ingredients take priority over local duplicates
+    // Using functional state updates in loadIngredientsFromSupabase ensures we work with latest state
     useEffect(() => {
         const loadIngredients = async () => {
             await loadIngredientsFromSupabase();
         };
         loadIngredients();
+    }, []);
+
+    // Load tools from Supabase after initial localStorage load
+    // This ensures DB tools take priority over local duplicates
+    useEffect(() => {
+        const loadTools = async () => {
+            await loadToolsFromSupabase();
+        };
+        loadTools();
+    }, []);
+
+    // Load inventory from Supabase after initial localStorage load
+    // This ensures DB inventory takes priority over local duplicates
+    useEffect(() => {
+        const loadInventory = async () => {
+            await loadInventoryFromSupabase();
+        };
+        loadInventory();
     }, []);
 
     // Enhanced record production with validation
@@ -271,20 +419,32 @@ export function RecipeCalculator() {
         // Update production history
         setProductionHistory(prev => [productionRecord, ...prev])
 
-        // Update inventory (deduct ingredients used)
-        const updatedInventory = [...inventory]
-        recipe.ingredients.forEach(recipeIngredient => {
-            const inventoryItem = updatedInventory.find(item => item.ingredientId === recipeIngredient.ingredientId)
-            if (inventoryItem) {
-                const amountUsed = recipeIngredient.amount * validBatchCount
-                inventoryItem.currentStock = Math.max(0, inventoryItem.currentStock - amountUsed)
-            }
+        // Update inventory (deduct ingredients used) and sync to Supabase
+        setInventory(prev => {
+            const updatedInventory = [...prev]
+            recipe.ingredients.forEach(recipeIngredient => {
+                const inventoryItem = updatedInventory.find(item => item.ingredientId === recipeIngredient.ingredientId)
+                if (inventoryItem) {
+                    const amountUsed = recipeIngredient.amount * validBatchCount
+                    const newStock = Math.max(0, inventoryItem.currentStock - amountUsed)
+                    inventoryItem.currentStock = newStock
+                    inventoryItem.lastUpdated = new Date().toISOString()
+
+                    // Sync to Supabase if available
+                    if (saveInventoryToSupabase) {
+                        saveInventoryToSupabase(inventoryItem).catch(error => {
+                            console.error('Failed to sync inventory after production:', error)
+                            setError('Error al sincronizar inventario. Verifica tu conexión.')
+                        })
+                    }
+                }
+            })
+            return updatedInventory
         })
-        setInventory(updatedInventory)
     }
 
-    // Function to update inventory manually
-    const updateInventory = (ingredientId: string, newStock: number) => {
+    // Improved updateInventory: Syncs with Supabase when available
+    const updateInventory = async (ingredientId: string, newStock: number) => {
         const validStock = validateNumber(newStock.toString(), 0, 100000)
 
         setInventory(prev => {
@@ -294,28 +454,50 @@ export function RecipeCalculator() {
             if (existingItemIndex >= 0) {
                 // Update existing item
                 const updated = [...prev]
-                updated[existingItemIndex] = {
+                const updatedItem = {
                     ...updated[existingItemIndex],
-                    currentStock: validStock
+                    currentStock: validStock,
+                    lastUpdated: new Date().toISOString()
                 }
+                updated[existingItemIndex] = updatedItem
+
+                // Sync to Supabase if available
+                if (saveInventoryToSupabase) {
+                    saveInventoryToSupabase(updatedItem).catch(error => {
+                        console.error('Failed to sync inventory to Supabase:', error)
+                        setError('Error al sincronizar inventario. Verifica tu conexión.')
+                    })
+                }
+
                 return updated
             } else {
                 // Create new inventory item
                 const ingredient = ingredients.find(ing => ing.id === ingredientId)
                 if (!ingredient) return prev // Safety check
 
-                return [...prev, {
+                const newItem: InventoryItem = {
                     ingredientId,
                     currentStock: validStock,
                     unit: ingredient.unit,
                     minimumStock: 0,
                     lastUpdated: new Date().toISOString()
-                }]
+                }
+
+                // Sync to Supabase if available
+                if (saveInventoryToSupabase) {
+                    saveInventoryToSupabase(newItem).catch(error => {
+                        console.error('Failed to sync inventory to Supabase:', error)
+                        setError('Error al sincronizar inventario. Verifica tu conexión.')
+                    })
+                }
+
+                return [...prev, newItem]
             }
         })
     }
 
-    // Update the loadIngredientsFromSupabase function:
+    // Improved loadIngredientsFromSupabase: Prioritize DB, filter local duplicates
+    // Uses functional state update to ensure we work with latest ingredients state
     const loadIngredientsFromSupabase = async () => {
         try {
             const { data, error } = await supabase
@@ -325,24 +507,13 @@ export function RecipeCalculator() {
 
             if (error) throw error;
 
-            if (data && data.length > 0) {
-                // Store Supabase IDs
-                const dbIds = new Set(data.map(dbIng => dbIng.id));
-                setIngredientsInDatabase(dbIds);
+            // Store Supabase IDs
+            const dbIds = new Set<string>();
+            const dbIngredientMap = new Map<string, Ingredient>(); // key: "name|unit" -> Ingredient
 
-                // Get Supabase names (lowercase)
-                const supabaseNames = new Set(data.map(dbIng => dbIng.name.toLowerCase()));
-
-                // Get current local ingredients
-                const currentIngredients = [...ingredients];
-
-                // Filter: keep local ingredients that DON'T match Supabase names
-                const localOnlyIngredients = currentIngredients.filter(localIng =>
-                    !supabaseNames.has(localIng.name.toLowerCase())
-                );
-
-                // Convert Supabase data
-                const supabaseIngredients: Ingredient[] = data.map(dbIng => ({
+            // Convert Supabase data to Ingredient format
+            const supabaseIngredients: Ingredient[] = (data || []).map(dbIng => {
+                const ingredient: Ingredient = {
                     id: dbIng.id,
                     name: dbIng.name,
                     price: dbIng.price,
@@ -352,41 +523,77 @@ export function RecipeCalculator() {
                     minAmountUnit: dbIng.min_amount_unit || dbIng.unit,
                     containsAmount: dbIng.contains_amount || 0,
                     containsUnit: dbIng.contains_unit || 'unit'
-                }));
+                };
 
-                // Combine: Supabase + local-only (non-duplicate names)
-                const allIngredients = [...supabaseIngredients, ...localOnlyIngredients];
-                setIngredients(allIngredients);
-            }
+                dbIds.add(dbIng.id);
+                // Create unique key: name (lowercase) + unit
+                const uniqueKey = `${dbIng.name.toLowerCase().trim()}|${dbIng.unit}`;
+                dbIngredientMap.set(uniqueKey, ingredient);
+
+                return ingredient;
+            });
+
+            setIngredientsInDatabase(dbIds);
+
+            // Use functional update to get latest ingredients state
+            setIngredients(prevIngredients => {
+                // Filter local ingredients: only keep those with unique name+unit not in DB
+                const localOnlyIngredients = prevIngredients.filter(localIng => {
+                    // Skip if already in database by ID
+                    if (dbIds.has(localIng.id)) {
+                        return false;
+                    }
+
+                    // Check if name+unit combination exists in DB
+                    const uniqueKey = `${localIng.name.toLowerCase().trim()}|${localIng.unit}`;
+                    return !dbIngredientMap.has(uniqueKey);
+                });
+
+                // Combine: DB ingredients (priority) + unique local-only ingredients
+                const mergedIngredients = [...supabaseIngredients, ...localOnlyIngredients];
+
+                // Sort by name for consistent display
+                mergedIngredients.sort((a, b) => a.name.localeCompare(b.name));
+
+                return mergedIngredients;
+            });
         } catch (error) {
-            console.error('Error loading ingredients:', error);
+            console.error('Error loading ingredients from Supabase:', error);
+            setError('Error al cargar ingredientes de la base de datos');
         }
     }
 
 
-    // Update the saveIngredientToSupabase function to update the Set:
+    // Improved saveIngredientToSupabase: Better duplicate detection and state sync
     const saveIngredientToSupabase = async (ingredient: Ingredient): Promise<Ingredient> => {
         try {
-            // First, check if ingredient exists in Supabase by name AND unit
+            // Normalize name and unit for comparison
+            const normalizedName = ingredient.name.trim();
+            const normalizedUnit = ingredient.unit.trim();
+
+            // Check if ingredient exists in Supabase by name AND unit (case-insensitive name)
             const { data: existingIngredients, error: fetchError } = await supabase
                 .from('ingredients')
                 .select('*')
-                .eq('name', ingredient.name)
-                .eq('unit', ingredient.unit)
+                .ilike('name', normalizedName)
+                .eq('unit', normalizedUnit)
                 .limit(1);
 
             if (fetchError) throw fetchError;
 
             const ingredientData = {
-                name: ingredient.name,
+                name: normalizedName,
                 price: ingredient.price,
-                unit: ingredient.unit,
+                unit: normalizedUnit,
                 amount: ingredient.amount,
                 min_amount: ingredient.minAmount || 0,
-                min_amount_unit: ingredient.minAmountUnit || ingredient.unit,
+                min_amount_unit: ingredient.minAmountUnit || normalizedUnit,
                 contains_amount: ingredient.containsAmount || null,
-                contains_unit: ingredient.containsUnit || null
+                contains_unit: ingredient.containsUnit || null,
+                updated_at: new Date().toISOString()
             };
+
+            let savedIngredient: Ingredient;
 
             if (existingIngredients && existingIngredients.length > 0) {
                 // UPDATE existing ingredient
@@ -401,10 +608,7 @@ export function RecipeCalculator() {
                 if (error) throw error;
                 if (!data) throw new Error('No data returned from Supabase');
 
-                // Update the ingredientsInDatabase Set
-                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
-
-                return {
+                savedIngredient = {
                     id: data.id,
                     name: data.name,
                     price: data.price,
@@ -415,20 +619,24 @@ export function RecipeCalculator() {
                     containsAmount: data.contains_amount,
                     containsUnit: data.contains_unit
                 };
+
+                // Update the ingredientsInDatabase Set
+                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
             } else {
                 // INSERT new ingredient
                 const { data, error } = await supabase
                     .from('ingredients')
-                    .insert([ingredientData])
+                    .insert([{
+                        ...ingredientData,
+                        created_at: new Date().toISOString()
+                    }])
                     .select()
                     .single();
 
                 if (error) throw error;
                 if (!data) throw new Error('No data returned from Supabase');
 
-                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
-
-                return {
+                savedIngredient = {
                     id: data.id,
                     name: data.name,
                     price: data.price,
@@ -439,20 +647,53 @@ export function RecipeCalculator() {
                     containsAmount: data.contains_amount,
                     containsUnit: data.contains_unit
                 };
+
+                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
             }
+
+            // Sync state: Remove any local duplicates and add/update the saved ingredient
+            setIngredients(prev => {
+                const uniqueKey = `${savedIngredient.name.toLowerCase().trim()}|${savedIngredient.unit}`;
+                
+                // Remove any ingredients with the same name+unit (local or old DB versions)
+                const filtered = prev.filter(ing => {
+                    const ingKey = `${ing.name.toLowerCase().trim()}|${ing.unit}`;
+                    return ingKey !== uniqueKey || ing.id === savedIngredient.id;
+                });
+
+                // Add or replace with the saved ingredient
+                const existingIndex = filtered.findIndex(ing => ing.id === savedIngredient.id);
+                if (existingIndex >= 0) {
+                    filtered[existingIndex] = savedIngredient;
+                } else {
+                    filtered.push(savedIngredient);
+                }
+
+                // Sort by name
+                return filtered.sort((a, b) => a.name.localeCompare(b.name));
+            });
+
+            return savedIngredient;
         } catch (error) {
             console.error('Error saving ingredient to Supabase:', error);
             throw error;
         }
     };
 
-    // Update the deleteIngredientFromSupabase function:
+    // Improved deleteIngredientFromSupabase: Better state sync
     const deleteIngredientFromSupabase = async (ingredientId: string) => {
         try {
+            // Only delete if it's actually in the database
+            if (!ingredientsInDatabase.has(ingredientId)) {
+                // If it's a local-only ingredient, just remove from state
+                setIngredients(prev => prev.filter(ing => ing.id !== ingredientId));
+                return;
+            }
+
             const { error } = await supabase
                 .from('ingredients')
                 .delete()
-                .eq('id', ingredientId)
+                .eq('id', ingredientId);
 
             if (error) throw error;
 
@@ -463,15 +704,436 @@ export function RecipeCalculator() {
                 return newSet;
             });
 
-            console.log('Ingredient deleted from Supabase:', ingredientId);
+            // Remove from local state
+            setIngredients(prev => prev.filter(ing => ing.id !== ingredientId));
+
+            // Also remove from inventory if exists (use deleteInventoryFromSupabase if in DB)
+            const inventoryItem = inventory.find(item => item.ingredientId === ingredientId);
+            if (inventoryItem) {
+                if (inventoryInDatabase.has(ingredientId)) {
+                    await deleteInventoryFromSupabase(ingredientId);
+                } else {
+                    setInventory(prev => prev.filter(item => item.ingredientId !== ingredientId));
+                }
+            }
         } catch (error) {
             console.error('Failed to delete ingredient from Supabase:', error);
             throw error;
         }
     }
 
+    // ==================== TOOLS CRUD ====================
+    
+    // Load tools from Supabase: Merge DB tools with local, DB takes priority
+    const loadToolsFromSupabase = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('tools')
+                .select('*')
+                .order('name', { ascending: true })
+
+            if (error) throw error;
+
+            // Store DB tool IDs
+            const dbIds = new Set<string>();
+            const dbToolMap = new Map<string, Tool>(); // key: "name|category" -> Tool
+
+            // Convert Supabase data to Tool format
+            const supabaseTools: Tool[] = (data || []).map(dbTool => {
+                const tool: Tool = {
+                    id: dbTool.id,
+                    name: dbTool.name,
+                    type: dbTool.type,
+                    category: dbTool.category,
+                    description: dbTool.description || '',
+                    lifetime: dbTool.lifetime || '',
+                    totalBatches: dbTool.total_batches || 0,
+                    batchesUsed: dbTool.batches_used || 0,
+                    batchesPerYear: dbTool.batches_per_year || 0,
+                    totalInvestment: dbTool.total_investment || 0,
+                    recoveryValue: dbTool.recovery_value || 0,
+                    costPerBatch: dbTool.cost_per_batch || 0
+                };
+
+                dbIds.add(dbTool.id);
+                // Create unique key: name (lowercase) + category
+                const uniqueKey = `${dbTool.name.toLowerCase().trim()}|${dbTool.category}`;
+                dbToolMap.set(uniqueKey, tool);
+
+                return tool;
+            });
+
+            setToolsInDatabase(dbIds);
+
+            // Merge with local tools: DB takes priority, keep unique local-only tools
+            setTools(prevTools => {
+                // Filter local tools: only keep those with unique name+category not in DB
+                const localOnlyTools = prevTools.filter(localTool => {
+                    // Skip if already in database by ID
+                    if (dbIds.has(localTool.id)) {
+                        return false;
+                    }
+
+                    // Check if name+category combination exists in DB
+                    const uniqueKey = `${localTool.name.toLowerCase().trim()}|${localTool.category}`;
+                    return !dbToolMap.has(uniqueKey);
+                });
+
+                // Combine: DB tools (priority) + unique local-only tools
+                const mergedTools = [...supabaseTools, ...localOnlyTools];
+
+                // Sort by name for consistent display
+                mergedTools.sort((a, b) => a.name.localeCompare(b.name));
+
+                return mergedTools;
+            });
+        } catch (error) {
+            console.error('Error loading tools from Supabase:', error);
+            setError('Error al cargar herramientas de la base de datos');
+        }
+    }
+
+    // Save tool to Supabase: Better duplicate detection and state sync
+    const saveToolToSupabase = async (tool: Tool): Promise<Tool> => {
+        try {
+            // Normalize name and category for comparison
+            const normalizedName = tool.name.trim();
+            const normalizedCategory = tool.category.trim();
+
+            // Check if tool exists in Supabase by name AND category (case-insensitive name)
+            const { data: existingTools, error: fetchError } = await supabase
+                .from('tools')
+                .select('*')
+                .ilike('name', normalizedName)
+                .eq('category', normalizedCategory)
+                .limit(1);
+
+            if (fetchError) throw fetchError;
+
+            const toolData = {
+                name: normalizedName,
+                type: tool.type,
+                category: normalizedCategory,
+                description: tool.description || null,
+                lifetime: tool.lifetime || null,
+                total_batches: tool.totalBatches || 0,
+                batches_used: tool.batchesUsed || 0,
+                batches_per_year: tool.batchesPerYear || 0,
+                total_investment: tool.totalInvestment || 0,
+                recovery_value: tool.recoveryValue || 0,
+                cost_per_batch: tool.costPerBatch || 0,
+                updated_at: new Date().toISOString()
+            };
+
+            let savedTool: Tool;
+
+            if (existingTools && existingTools.length > 0) {
+                // UPDATE existing tool
+                const existingId = existingTools[0].id;
+                const { data, error } = await supabase
+                    .from('tools')
+                    .update(toolData)
+                    .eq('id', existingId)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                savedTool = {
+                    id: data.id,
+                    name: data.name,
+                    type: data.type,
+                    category: data.category,
+                    description: data.description || '',
+                    lifetime: data.lifetime || '',
+                    totalBatches: data.total_batches || 0,
+                    batchesUsed: data.batches_used || 0,
+                    batchesPerYear: data.batches_per_year || 0,
+                    totalInvestment: data.total_investment || 0,
+                    recoveryValue: data.recovery_value || 0,
+                    costPerBatch: data.cost_per_batch || 0
+                };
+
+                setToolsInDatabase(prev => new Set([...prev, data.id]));
+            } else {
+                // INSERT new tool
+                const { data, error } = await supabase
+                    .from('tools')
+                    .insert([{
+                        ...toolData,
+                        created_at: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                savedTool = {
+                    id: data.id,
+                    name: data.name,
+                    type: data.type,
+                    category: data.category,
+                    description: data.description || '',
+                    lifetime: data.lifetime || '',
+                    totalBatches: data.total_batches || 0,
+                    batchesUsed: data.batches_used || 0,
+                    batchesPerYear: data.batches_per_year || 0,
+                    totalInvestment: data.total_investment || 0,
+                    recoveryValue: data.recovery_value || 0,
+                    costPerBatch: data.cost_per_batch || 0
+                };
+
+                setToolsInDatabase(prev => new Set([...prev, data.id]));
+            }
+
+            // Sync state: Remove any local duplicates and add/update the saved tool
+            setTools(prev => {
+                const uniqueKey = `${savedTool.name.toLowerCase().trim()}|${savedTool.category}`;
+                
+                // Remove any tools with the same name+category (local or old DB versions)
+                const filtered = prev.filter(t => {
+                    const tKey = `${t.name.toLowerCase().trim()}|${t.category}`;
+                    return tKey !== uniqueKey || t.id === savedTool.id;
+                });
+
+                // Add or replace with the saved tool
+                const existingIndex = filtered.findIndex(t => t.id === savedTool.id);
+                if (existingIndex >= 0) {
+                    filtered[existingIndex] = savedTool;
+                } else {
+                    filtered.push(savedTool);
+                }
+
+                // Sort by name
+                return filtered.sort((a, b) => a.name.localeCompare(b.name));
+            });
+
+            return savedTool;
+        } catch (error) {
+            console.error('Error saving tool to Supabase:', error);
+            throw error;
+        }
+    }
+
+    // Delete tool from Supabase: Better state sync
+    const deleteToolFromSupabase = async (toolId: string) => {
+        try {
+            // Only delete if it's actually in the database
+            if (!toolsInDatabase.has(toolId)) {
+                // If it's a local-only tool, just remove from state
+                setTools(prev => prev.filter(t => t.id !== toolId));
+                return;
+            }
+
+            const { error } = await supabase
+                .from('tools')
+                .delete()
+                .eq('id', toolId);
+
+            if (error) throw error;
+
+            // Remove from toolsInDatabase Set
+            setToolsInDatabase(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(toolId);
+                return newSet;
+            });
+
+            // Remove from local state
+            setTools(prev => prev.filter(t => t.id !== toolId));
+        } catch (error) {
+            console.error('Failed to delete tool from Supabase:', error);
+            throw error;
+        }
+    }
+
+    // ==================== INVENTORY CRUD ====================
+    
+    // Load inventory from Supabase: Merge DB inventory with local, DB takes priority
+    const loadInventoryFromSupabase = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('inventory')
+                .select('*')
+                .order('ingredient_id', { ascending: true })
+
+            if (error) throw error;
+
+            // Store DB inventory ingredient IDs
+            const dbIngredientIds = new Set<string>();
+            const dbInventoryMap = new Map<string, InventoryItem>(); // key: ingredientId -> InventoryItem
+
+            // Convert Supabase data to InventoryItem format
+            const supabaseInventory: InventoryItem[] = (data || []).map(dbInv => {
+                const item: InventoryItem = {
+                    ingredientId: dbInv.ingredient_id,
+                    currentStock: dbInv.current_stock || 0,
+                    unit: dbInv.unit,
+                    minimumStock: dbInv.minimum_stock || 0,
+                    lastUpdated: dbInv.last_updated || new Date().toISOString(),
+                    costPerUnit: dbInv.cost_per_unit,
+                    supplier: dbInv.supplier
+                };
+
+                dbIngredientIds.add(dbInv.ingredient_id);
+                dbInventoryMap.set(dbInv.ingredient_id, item);
+
+                return item;
+            });
+
+            setInventoryInDatabase(dbIngredientIds);
+
+            // Merge with local inventory: DB takes priority, keep unique local-only items
+            setInventory(prevInventory => {
+                // Filter local inventory: only keep those with unique ingredientId not in DB
+                const localOnlyInventory = prevInventory.filter(localItem => {
+                    // Skip if already in database
+                    return !dbIngredientIds.has(localItem.ingredientId);
+                });
+
+                // Combine: DB inventory (priority) + unique local-only inventory
+                const mergedInventory = [...supabaseInventory, ...localOnlyInventory];
+
+                return mergedInventory;
+            });
+        } catch (error) {
+            console.error('Error loading inventory from Supabase:', error);
+            setError('Error al cargar inventario de la base de datos');
+        }
+    }
+
+    // Save inventory item to Supabase
+    const saveInventoryToSupabase = async (item: InventoryItem): Promise<InventoryItem> => {
+        try {
+            const inventoryData = {
+                ingredient_id: item.ingredientId,
+                current_stock: item.currentStock || 0,
+                unit: item.unit,
+                minimum_stock: item.minimumStock || 0,
+                last_updated: new Date().toISOString(),
+                cost_per_unit: item.costPerUnit || null,
+                supplier: item.supplier || null,
+                updated_at: new Date().toISOString()
+            };
+
+            // Check if inventory item exists
+            const { data: existing, error: fetchError } = await supabase
+                .from('inventory')
+                .select('*')
+                .eq('ingredient_id', item.ingredientId)
+                .limit(1);
+
+            if (fetchError) throw fetchError;
+
+            let savedItem: InventoryItem;
+
+            if (existing && existing.length > 0) {
+                // UPDATE existing inventory item
+                const { data, error } = await supabase
+                    .from('inventory')
+                    .update(inventoryData)
+                    .eq('ingredient_id', item.ingredientId)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                savedItem = {
+                    ingredientId: data.ingredient_id,
+                    currentStock: data.current_stock || 0,
+                    unit: data.unit,
+                    minimumStock: data.minimum_stock || 0,
+                    lastUpdated: data.last_updated || new Date().toISOString(),
+                    costPerUnit: data.cost_per_unit,
+                    supplier: data.supplier
+                };
+
+                setInventoryInDatabase(prev => new Set([...prev, data.ingredient_id]));
+            } else {
+                // INSERT new inventory item
+                const { data, error } = await supabase
+                    .from('inventory')
+                    .insert([{
+                        ...inventoryData,
+                        created_at: new Date().toISOString()
+                    }])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                savedItem = {
+                    ingredientId: data.ingredient_id,
+                    currentStock: data.current_stock || 0,
+                    unit: data.unit,
+                    minimumStock: data.minimum_stock || 0,
+                    lastUpdated: data.last_updated || new Date().toISOString(),
+                    costPerUnit: data.cost_per_unit,
+                    supplier: data.supplier
+                };
+
+                setInventoryInDatabase(prev => new Set([...prev, data.ingredient_id]));
+            }
+
+            // Sync state: Update or add the saved inventory item
+            setInventory(prev => {
+                const existingIndex = prev.findIndex(inv => inv.ingredientId === savedItem.ingredientId);
+                if (existingIndex >= 0) {
+                    const updated = [...prev];
+                    updated[existingIndex] = savedItem;
+                    return updated;
+                } else {
+                    return [...prev, savedItem];
+                }
+            });
+
+            return savedItem;
+        } catch (error) {
+            console.error('Error saving inventory to Supabase:', error);
+            throw error;
+        }
+    }
+
+    // Delete inventory item from Supabase
+    const deleteInventoryFromSupabase = async (ingredientId: string) => {
+        try {
+            // Only delete if it's actually in the database
+            if (!inventoryInDatabase.has(ingredientId)) {
+                // If it's a local-only item, just remove from state
+                setInventory(prev => prev.filter(item => item.ingredientId !== ingredientId));
+                return;
+            }
+
+            const { error } = await supabase
+                .from('inventory')
+                .delete()
+                .eq('ingredient_id', ingredientId);
+
+            if (error) throw error;
+
+            // Remove from inventoryInDatabase Set
+            setInventoryInDatabase(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(ingredientId);
+                return newSet;
+            });
+
+            // Remove from local state
+            setInventory(prev => prev.filter(item => item.ingredientId !== ingredientId));
+        } catch (error) {
+            console.error('Failed to delete inventory from Supabase:', error);
+            throw error;
+        }
+    }
+
+    // ==================== INVENTORY HELPERS ====================
+
     // Function to add inventory item
-    const addInventoryItem = (ingredientId: string, minimumStock: number = 0) => {
+    const addInventoryItem = async (ingredientId: string, minimumStock: number = 0) => {
         const ingredient = ingredients.find(ing => ing.id === ingredientId)
         if (!ingredient || inventory.find(item => item.ingredientId === ingredientId)) {
             setError('Ese ingrediente ya está en el inventario o no existe')
@@ -486,7 +1148,19 @@ export function RecipeCalculator() {
             minimumStock: validMinStock,
             lastUpdated: new Date().toISOString()
         }
-        setInventory(prev => [...prev, newInventoryItem])
+
+        // If Supabase is available, save to DB
+        if (saveInventoryToSupabase) {
+            try {
+                await saveInventoryToSupabase(newInventoryItem)
+            } catch (error) {
+                console.error('Failed to save inventory:', error)
+                setError('Error al guardar en la base de datos. Verifica tu conexión.')
+            }
+        } else {
+            // Local-only: update state directly
+            setInventory(prev => [...prev, newInventoryItem])
+        }
     }
 
     return (
@@ -648,13 +1322,15 @@ export function RecipeCalculator() {
                 <div className={`${mobileView === 'ingredients' ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
                     <IngredientsPanel
                         ingredients={ingredients}
-                        setIngredients={setIngredients}
                         inventory={inventory}
                         updateInventory={updateInventory}
                         addInventoryItem={addInventoryItem}
                         saveIngredientToSupabase={saveIngredientToSupabase}
                         deleteIngredientFromSupabase={deleteIngredientFromSupabase}
-                        ingredientsInDatabase={ingredientsInDatabase} 
+                        ingredientsInDatabase={ingredientsInDatabase}
+                        saveToolToSupabase={saveToolToSupabase}
+                        deleteToolFromSupabase={deleteToolFromSupabase}
+                        toolsInDatabase={toolsInDatabase}
                     />
                 </div>
 
