@@ -43,6 +43,7 @@ export function RecipeCalculator() {
     })
     
     const [ingredientsInDatabase, setIngredientsInDatabase] = useState<Set<string>>(new Set());
+    const [toolsInDatabase, setToolsInDatabase] = useState<Set<string>>(new Set());
 
     // Safe localStorage functions
     const safeSetLocalStorage = (key: string, data: unknown) => {
@@ -470,6 +471,120 @@ export function RecipeCalculator() {
         }
     }
 
+    // Save tool to Supabase
+    const saveToolToSupabase = async (tool: Tool): Promise<Tool> => {
+        try {
+            // First, check if tool exists in Supabase by name
+            const { data: existingTools, error: fetchError } = await supabase
+                .from('tools')
+                .select('*')
+                .eq('name', tool.name)
+                .limit(1);
+
+            if (fetchError) throw fetchError;
+
+            const toolData = {
+                name: tool.name,
+                type: tool.type,
+                category: tool.category,
+                description: tool.description || null,
+                lifetime: tool.lifetime || null,
+                total_batches: tool.totalBatches || null,
+                batches_used: tool.batchesUsed || 0,
+                batches_per_year: tool.batchesPerYear || null,
+                total_investment: tool.totalInvestment,
+                recovery_value: tool.recoveryValue,
+                cost_per_batch: tool.costPerBatch || null
+            };
+
+            if (existingTools && existingTools.length > 0) {
+                // UPDATE existing tool
+                const existingId = existingTools[0].id;
+                const { data, error } = await supabase
+                    .from('tools')
+                    .update(toolData)
+                    .eq('id', existingId)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                // Update the toolsInDatabase Set
+                setToolsInDatabase(prev => new Set([...prev, data.id]));
+
+                return {
+                    id: data.id,
+                    name: data.name,
+                    type: data.type,
+                    category: data.category,
+                    description: data.description,
+                    lifetime: data.lifetime,
+                    totalBatches: data.total_batches,
+                    batchesUsed: data.batches_used || 0,
+                    batchesPerYear: data.batches_per_year,
+                    totalInvestment: data.total_investment,
+                    recoveryValue: data.recovery_value,
+                    costPerBatch: data.cost_per_batch
+                };
+            } else {
+                // INSERT new tool
+                const { data, error } = await supabase
+                    .from('tools')
+                    .insert([toolData])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                setToolsInDatabase(prev => new Set([...prev, data.id]));
+
+                return {
+                    id: data.id,
+                    name: data.name,
+                    type: data.type,
+                    category: data.category,
+                    description: data.description,
+                    lifetime: data.lifetime,
+                    totalBatches: data.total_batches,
+                    batchesUsed: data.batches_used || 0,
+                    batchesPerYear: data.batches_per_year,
+                    totalInvestment: data.total_investment,
+                    recoveryValue: data.recovery_value,
+                    costPerBatch: data.cost_per_batch
+                };
+            }
+        } catch (error) {
+            console.error('Error saving tool to Supabase:', error);
+            throw error;
+        }
+    };
+
+    // Delete tool from Supabase
+    const deleteToolFromSupabase = async (toolId: string) => {
+        try {
+            const { error } = await supabase
+                .from('tools')
+                .delete()
+                .eq('id', toolId);
+
+            if (error) throw error;
+
+            // Remove from toolsInDatabase Set
+            setToolsInDatabase(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(toolId);
+                return newSet;
+            });
+
+            console.log('Tool deleted from Supabase:', toolId);
+        } catch (error) {
+            console.error('Failed to delete tool from Supabase:', error);
+            throw error;
+        }
+    };
+
     // Function to add inventory item
     const addInventoryItem = (ingredientId: string, minimumStock: number = 0) => {
         const ingredient = ingredients.find(ing => ing.id === ingredientId)
@@ -648,13 +763,15 @@ export function RecipeCalculator() {
                 <div className={`${mobileView === 'ingredients' ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
                     <IngredientsPanel
                         ingredients={ingredients}
-                        setIngredients={setIngredients}
                         inventory={inventory}
                         updateInventory={updateInventory}
                         addInventoryItem={addInventoryItem}
                         saveIngredientToSupabase={saveIngredientToSupabase}
                         deleteIngredientFromSupabase={deleteIngredientFromSupabase}
-                        ingredientsInDatabase={ingredientsInDatabase} 
+                        ingredientsInDatabase={ingredientsInDatabase}
+                        saveToolToSupabase={saveToolToSupabase}
+                        deleteToolFromSupabase={deleteToolFromSupabase}
+                        toolsInDatabase={toolsInDatabase}
                     />
                 </div>
 
