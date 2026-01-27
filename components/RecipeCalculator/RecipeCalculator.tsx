@@ -1,23 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { products, defaultIngredients, defaultTools } from "@/lib/data";
 import { Ingredient, InventoryItem, Recipe, ProductionRecord, Tool } from '@/lib/types';
 import { MobileViewSwitcher } from './MobileViewSwitcher'
 import { IngredientsPanel } from './IngredientsPanel'
 import { RecipeCalculatorPanel } from './RecipeCalculatorPanel'
 import { ProductionTrackerPanel } from './ProductionTrackerPanel'
-
 import { RecipeManagerModal } from './RecipeManagerModal'
 import { Database, BookOpen, ChevronDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-// Add import at top
 import { generateMockProductionData } from '@/lib/mock-data'
 
-
-
 export function RecipeCalculator() {
-    // Ingredients management
     const [ingredients, setIngredients] = useState<Ingredient[]>(defaultIngredients);
     const [tools, setTools] = useState<Tool[]>(defaultTools);
     const [recipes, setRecipes] = useState<Recipe[]>(products.map(p => p.recipe))
@@ -37,13 +32,61 @@ export function RecipeCalculator() {
         isOpen: false,
         mode: 'add'
     })
-    
+
     const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>(() => {
         return generateMockProductionData(products.map(p => p.recipe), products)
     })
-    
+
     const [ingredientsInDatabase, setIngredientsInDatabase] = useState<Set<string>>(new Set());
     const [toolsInDatabase, setToolsInDatabase] = useState<Set<string>>(new Set());
+
+    // Define loadIngredientsFromSupabase with useCallback early
+    const loadIngredientsFromSupabase = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from('ingredients')
+                .select('*')
+                .order('name', { ascending: true })
+
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                // Store Supabase IDs
+                const dbIds = new Set(data.map(dbIng => dbIng.id));
+                setIngredientsInDatabase(dbIds);
+
+                // Get Supabase names (lowercase)
+                const supabaseNames = new Set(data.map(dbIng => dbIng.name.toLowerCase()));
+
+                // Get current local ingredients
+                const currentIngredients = [...ingredients];
+
+                // Filter: keep local ingredients that DON'T match Supabase names
+                const localOnlyIngredients = currentIngredients.filter(localIng =>
+                    !supabaseNames.has(localIng.name.toLowerCase())
+                );
+
+                // Convert Supabase data
+                const supabaseIngredients: Ingredient[] = data.map(dbIng => ({
+                    id: dbIng.id,
+                    name: dbIng.name,
+                    price: dbIng.price,
+                    unit: dbIng.unit,
+                    amount: dbIng.amount,
+                    minAmount: dbIng.min_amount || 0,
+                    minAmountUnit: dbIng.min_amount_unit || dbIng.unit,
+                    containsAmount: dbIng.contains_amount || 0,
+                    containsUnit: dbIng.contains_unit || 'unit'
+                }));
+
+                // Combine: Supabase + local-only (non-duplicate names)
+                const allIngredients = [...supabaseIngredients, ...localOnlyIngredients];
+                setIngredients(allIngredients);
+            }
+        } catch (error) {
+            console.error('Error loading ingredients:', error);
+        }
+    }, [ingredients, setIngredients, setIngredientsInDatabase]);
 
     // Safe localStorage functions
     const safeSetLocalStorage = (key: string, data: unknown) => {
@@ -219,14 +262,14 @@ export function RecipeCalculator() {
     useEffect(() => {
         loadDatabaseRecipes()
     }, [])
-    
+
     // Call this in useEffect
     useEffect(() => {
         const loadIngredients = async () => {
             await loadIngredientsFromSupabase();
         };
         loadIngredients();
-    }, []);
+    }, [loadIngredientsFromSupabase]);
 
     // Enhanced record production with validation
     const recordProduction = (recipeId: string, batchCount: number, date: Date = new Date()) => {
@@ -315,55 +358,6 @@ export function RecipeCalculator() {
             }
         })
     }
-
-    // Update the loadIngredientsFromSupabase function:
-    const loadIngredientsFromSupabase = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('ingredients')
-                .select('*')
-                .order('name', { ascending: true })
-
-            if (error) throw error;
-
-            if (data && data.length > 0) {
-                // Store Supabase IDs
-                const dbIds = new Set(data.map(dbIng => dbIng.id));
-                setIngredientsInDatabase(dbIds);
-
-                // Get Supabase names (lowercase)
-                const supabaseNames = new Set(data.map(dbIng => dbIng.name.toLowerCase()));
-
-                // Get current local ingredients
-                const currentIngredients = [...ingredients];
-
-                // Filter: keep local ingredients that DON'T match Supabase names
-                const localOnlyIngredients = currentIngredients.filter(localIng =>
-                    !supabaseNames.has(localIng.name.toLowerCase())
-                );
-
-                // Convert Supabase data
-                const supabaseIngredients: Ingredient[] = data.map(dbIng => ({
-                    id: dbIng.id,
-                    name: dbIng.name,
-                    price: dbIng.price,
-                    unit: dbIng.unit,
-                    amount: dbIng.amount,
-                    minAmount: dbIng.min_amount || 0,
-                    minAmountUnit: dbIng.min_amount_unit || dbIng.unit,
-                    containsAmount: dbIng.contains_amount || 0,
-                    containsUnit: dbIng.contains_unit || 'unit'
-                }));
-
-                // Combine: Supabase + local-only (non-duplicate names)
-                const allIngredients = [...supabaseIngredients, ...localOnlyIngredients];
-                setIngredients(allIngredients);
-            }
-        } catch (error) {
-            console.error('Error loading ingredients:', error);
-        }
-    }
-
 
     // Update the saveIngredientToSupabase function to update the Set:
     const saveIngredientToSupabase = async (ingredient: Ingredient): Promise<Ingredient> => {

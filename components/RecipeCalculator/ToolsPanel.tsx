@@ -45,7 +45,8 @@ export function ToolsPanel({ tools, setTools, saveToolToSupabase, deleteToolFrom
         };
     });
 
-
+    console.log({ saveToolToSupabase, deleteToolFromSupabase, toolsInDatabase }); // Temporary
+    
     // Total Investment = Recovery Value × 10
     // Actual Cost = Total Investment - Recovery Value
     // Batches per Year = 52
