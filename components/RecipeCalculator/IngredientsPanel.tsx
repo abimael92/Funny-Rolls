@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowLeftRight, Calculator, Check, ChevronDown, CookingPot, Info, Save, Trash2, Edit, UtensilsCrossed, Utensils, Wrench, Database } from "lucide-react"
 import { Ingredient, InventoryItem } from '@/lib/types'
-import {  getIngredientCostPerUnit } from '@/lib/utils'
+import { getIngredientCostPerUnit } from '@/lib/utils'
 import { DEFAULT_UNIT_CONVERSIONS } from '@/lib/unit-conversion'
 import { UnitConverter } from '@/lib/unit-conversion';
 import { EditableIngredientRow } from './EditableIngredientRow'
@@ -19,24 +19,28 @@ import { defaultTools, } from '@/lib/data';
 // List,
 interface IngredientsPanelProps {
     ingredients: Ingredient[]
-    setIngredients: React.Dispatch<React.SetStateAction<Ingredient[]>>
     inventory: InventoryItem[]
     updateInventory: (ingredientId: string, newStock: number) => void
     addInventoryItem: (ingredientId: string, minimumStock: number) => void
     saveIngredientToSupabase: (ingredient: Ingredient) => Promise<Ingredient>
     deleteIngredientFromSupabase: (ingredientId: string) => Promise<void>
     ingredientsInDatabase: Set<string>
+    saveToolToSupabase?: (tool: Tool) => Promise<Tool>
+    deleteToolFromSupabase?: (toolId: string) => Promise<void>
+    toolsInDatabase?: Set<string>
 }
 
 export function IngredientsPanel({
     ingredients,
-    setIngredients,
     inventory,
     updateInventory,
     addInventoryItem,
     saveIngredientToSupabase,
     deleteIngredientFromSupabase,
-    ingredientsInDatabase
+    ingredientsInDatabase,
+    saveToolToSupabase,
+    deleteToolFromSupabase,
+    toolsInDatabase = new Set()
 }: IngredientsPanelProps) {
     const [error, setError] = useState<string | null>(null)
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
@@ -148,37 +152,22 @@ export function IngredientsPanel({
             return
         }
 
-        // Check for duplicates in Supabase AND local
+        // Check for duplicates by name+unit (case-insensitive name)
+        const normalizedName = newIngredient.name.trim().toLowerCase();
+        const normalizedUnit = newIngredient.unit.trim();
+
         const existingIngredient = ingredients.find(ing =>
-            ing.name.toLowerCase() === newIngredient.name.toLowerCase()
+            ing.name.trim().toLowerCase() === normalizedName &&
+            ing.unit.trim() === normalizedUnit
         );
 
-        // Check in ingredientsInDatabase Set for any matching ingredients
-        const isInDatabase = Array.from(ingredientsInDatabase).some(id => {
-            const ing = ingredients.find(i => i.id === id);
-            return ing &&
-                ing.name.toLowerCase() === newIngredient.name.toLowerCase() &&
-                ing.unit === newIngredient.unit;
-        });
-
-        if (isInDatabase) {
-            setError(`"${newIngredient.name}" ya existe en la base de datos`)
-            // Optionally, find and edit the existing ingredient
-            const dbIngredient = ingredients.find(ing =>
-                ing.name.toLowerCase() === newIngredient.name.toLowerCase() &&
-                ing.unit === newIngredient.unit &&
-                ingredientsInDatabase.has(ing.id)
-            );
-            if (dbIngredient) {
-                setEditingIngredientId(dbIngredient.id)
-                setShowAddSection(false)
-            }
-            return
-        }
-
         if (existingIngredient) {
-            // If it's only local, ask to edit instead
-            setError(`Ya existe "${newIngredient.name}" localmente. Edita el ingrediente existente.`)
+            // Check if it's in database
+            if (ingredientsInDatabase.has(existingIngredient.id)) {
+                setError(`"${newIngredient.name}" (${newIngredient.unit}) ya existe en la base de datos. Edita el ingrediente existente.`)
+            } else {
+                setError(`"${newIngredient.name}" (${newIngredient.unit}) ya existe localmente. Edita el ingrediente existente.`)
+            }
             setEditingIngredientId(existingIngredient.id)
             setShowAddSection(false)
             return
@@ -203,12 +192,10 @@ export function IngredientsPanel({
         }
 
         try {
+            // saveIngredientToSupabase already updates state, so we don't need to manually update
             const savedIngredient = await saveIngredientToSupabase(ingredient)
 
-            // Update local state with the REAL ID from Supabase
-            setIngredients([...ingredients, savedIngredient])
-
-            // Use the saved ingredient ID
+            // Use the saved ingredient ID for inventory
             addInventoryItem(savedIngredient.id, savedIngredient.minAmount)
 
             // Reset form
@@ -225,29 +212,52 @@ export function IngredientsPanel({
 
     // Remove ingredient
     const removeIngredient = async (id: string) => {
-        if (window.confirm('¿Estás seguro de que quieres eliminar este ingrediente?')) {
-            setIngredients(ingredients.filter(ing => ing.id !== id))
+        const ingredient = ingredients.find(ing => ing.id === id);
+        const isInDatabase = ingredient && ingredientsInDatabase.has(id);
 
-            await deleteIngredientFromSupabase(id)
+        const confirmMessage = isInDatabase
+            ? `¿Estás seguro de que quieres eliminar "${ingredient?.name}" de la base de datos? Esta acción no se puede deshacer.`
+            : `¿Estás seguro de que quieres eliminar "${ingredient?.name}"?`;
+
+        if (window.confirm(confirmMessage)) {
+            try {
+                // deleteIngredientFromSupabase already updates state, so we don't need to manually update
+                await deleteIngredientFromSupabase(id)
+            } catch (error) {
+                console.error('Failed to delete ingredient:', error)
+                setError('Error al eliminar el ingrediente. Verifica tu conexión.')
+            }
         }
     }
 
     // Save edited ingredient
     const saveEditedIngredient = async (updatedIngredient: Ingredient): Promise<void> => {
         try {
-            const savedIngredient = await saveIngredientToSupabase(updatedIngredient);
+            // Check for duplicates (excluding the current ingredient being edited)
+            const normalizedName = updatedIngredient.name.trim().toLowerCase();
+            const normalizedUnit = updatedIngredient.unit.trim();
 
-            setIngredients(prev => {
-                const key = `${savedIngredient.name.toLowerCase()}|${savedIngredient.unit}`;
-                return [...prev.filter(ing =>
-                    `${ing.name.toLowerCase()}|${ing.unit}` !== key
-                ), savedIngredient];
-            });
+            const duplicate = ingredients.find(ing =>
+                ing.id !== updatedIngredient.id &&
+                ing.name.trim().toLowerCase() === normalizedName &&
+                ing.unit.trim() === normalizedUnit
+            );
 
+            if (duplicate) {
+                if (ingredientsInDatabase.has(duplicate.id)) {
+                    setError(`"${updatedIngredient.name}" (${updatedIngredient.unit}) ya existe en la base de datos.`);
+                } else {
+                    setError(`"${updatedIngredient.name}" (${updatedIngredient.unit}) ya existe localmente.`);
+                }
+                return;
+            }
+
+            // saveIngredientToSupabase already updates state, so we don't need to manually update
+            await saveIngredientToSupabase(updatedIngredient);
             setEditingIngredientId(null);
         } catch (error) {
             console.error('Failed to save ingredient:', error);
-            setError('Error al guardar el ingrediente');
+            setError('Error al guardar el ingrediente. Verifica tu conexión.');
         }
     }
 
@@ -260,6 +270,33 @@ export function IngredientsPanel({
         return ingredientsInDatabase.has(ingredientId)
     }
 
+    // Normalize ingredient names for comparison: remove accents, convert to lowercase, trim
+    const normalizeName = (name: string): string => {
+        return name
+            .normalize('NFD') // Normalize to decomposed form to separate accents
+            .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks (accents)
+            .toLowerCase()
+            .trim();
+    };
+
+    // Filter ingredients for display: exclude local ingredients that have the same name as database ingredients
+    // Create a Set of database ingredient names (normalized) for fast lookup
+    const databaseIngredientNames = new Set<string>(
+        ingredients
+            .filter(ing => ingredientsInDatabase.has(ing.id))
+            .map(ing => normalizeName(ing.name))
+    )
+
+    // Filter ingredients: keep database ingredients and local ingredients with unique names
+    const displayedIngredients = ingredients.filter(ingredient => {
+        // Always show database ingredients
+        if (ingredientsInDatabase.has(ingredient.id)) {
+            return true
+        }
+        // For local ingredients, only show if normalized name doesn't match any database ingredient name
+        const normalizedName = normalizeName(ingredient.name)
+        return !databaseIngredientNames.has(normalizedName)
+    })
 
     return (
         <Card className="w-full">
@@ -304,7 +341,13 @@ export function IngredientsPanel({
             <CardContent className="space-y-4">
 
                 {showTools ? (
-                    <ToolsPanel tools={tools} setTools={setTools} />
+                    <ToolsPanel
+                        tools={tools}
+                        setTools={setTools}
+                        saveToolToSupabase={saveToolToSupabase}
+                        deleteToolFromSupabase={deleteToolFromSupabase}
+                        toolsInDatabase={toolsInDatabase}
+                    />
                 ) : (
 
                     <>
@@ -457,6 +500,18 @@ export function IngredientsPanel({
                                                 <div>
                                                     <label className="block text-sm font-medium text-amber-700 mb-2">
                                                         Contiene cantidad
+                                                        <span className="ml-1 relative inline-block align-middle">
+                                                            <Info
+                                                                className="h-4 w-4 inline text-amber-600 cursor-help tooltip-icon"
+                                                                onClick={() => toggleTooltip('contains-amount')}
+                                                            />
+                                                            {activeTooltip === 'contains-amount' && (
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-normal max-w-xs">
+                                                                    {`Unidades contenidas dentro del contenedor.`}
+                                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                                </div>
+                                                            )}
+                                                        </span>
                                                     </label>
                                                     <CustomNumberInput
                                                         value={specialUnit.containsAmount}
@@ -471,20 +526,31 @@ export function IngredientsPanel({
 
                                                 <div>
                                                     <label className="block text-sm font-medium text-amber-700 mb-2">
-                                                        Unidad de contenido
+                                                        Unidad/Contenido
+                                                        <span className="ml-1 relative inline-block align-middle">
+                                                            <Info
+                                                                className="h-4 w-4 inline text-amber-600 cursor-help tooltip-icon"
+                                                                onClick={() => toggleTooltip('contains-unit')}
+                                                            />
+                                                            {activeTooltip === 'contains-unit' && (
+                                                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg z-10 whitespace-normal max-w-xs">
+                                                                    {`La unidad de medida dentro del contenedor.`}
+                                                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                                                </div>
+                                                            )}
+                                                        </span>
                                                     </label>
                                                     <CustomSelect
                                                         value={specialUnit.containsUnit}
                                                         onChange={(value) => setSpecialUnit({ ...specialUnit, containsUnit: value })}
-                                                        options={units}
+                                                        options={units.filter(u => !['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas', ''].includes(u.value))}
                                                         color="amber"
                                                     />
                                                 </div>
                                             </div>
                                         )}
+                                            {/* Price */}
 
-                                        {/* Price and Min Amount Row */}
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-amber-700 mb-2">
                                                     Precio *
@@ -513,6 +579,9 @@ export function IngredientsPanel({
 
                                             </div>
 
+                                        {/* Price and Min Amount Row */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
                                             <div>
                                                 <label className="block text-sm font-medium text-amber-700 mb-2">
                                                     Stock Mínimo *
@@ -539,25 +608,26 @@ export function IngredientsPanel({
                                                     allowDecimals={true}
                                                 />
                                             </div>
-                                        </div>
-                                            {/* ADD THIS NEW SECTION - Minimum Unit Field for New Ingredients */}
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <div></div> {/* Empty column for alignment */}
-                                                <div>
-                                                    <label className="block text-sm font-medium text-amber-700 mb-2">
-                                                        Unidad del stock mínimo
-                                                    </label>
-                                                    <CustomSelect
-                                                        value={newIngredient.minAmountUnit || newIngredient.unit}
-                                                        onChange={(value) => setNewIngredient({
-                                                            ...newIngredient,
-                                                            minAmountUnit: value
-                                                        })}
-                                                        options={units}
-                                                        color="amber"
-                                                    />
-                                                </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-amber-700 mb-2">
+                                                    Unidad/Stock Mínimo
+                                                </label>
+                                                <CustomSelect
+                                                    value={newIngredient.minAmountUnit || newIngredient.unit}
+                                                    onChange={(value) => setNewIngredient({
+                                                        ...newIngredient,
+                                                        minAmountUnit: value
+                                                    })}
+                                                    options={units}
+                                                    color="amber"
+                                                />
                                             </div>
+                                        </div>
+                                        {/* ADD THIS NEW SECTION - Minimum Unit Field for New Ingredients */}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div></div> {/* Empty column for alignment */}
+                                        </div>
                                     </div>
                                     <Button onClick={addIngredient} className="w-full bg-amber-600 hover:bg-amber-700 text-sm sm:text-base py-2 sm:py-3 mt-4">
                                         <Save className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
@@ -576,10 +646,10 @@ export function IngredientsPanel({
 
                         {/* Ingredients List */}
                         <div className="space-y-4 max-h-292 overflow-y-auto overflow-x-hidden pr-2">
-                            {ingredients.map((ingredient) => {
+                            {displayedIngredients.map((ingredient) => {
                                 const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id)
                                 const currentStock = inventoryItem?.currentStock || 0
-                                const isLowStock = checkIfLowStock(ingredient, inventoryItem) 
+                                const isLowStock = checkIfLowStock(ingredient, inventoryItem)
                                 const isNonStandardUnit = ['botella', 'bolsa', 'docena', 'paquete', 'sobre', 'caja', 'latas'].includes(ingredient.unit);
                                 const hasAmount = ingredient.amount > 0
                                 const isCompleted = isIngredientCompleted(ingredient.id)
@@ -592,7 +662,7 @@ export function IngredientsPanel({
                                                 ? 'bg-red-50 border-red-200 hover:border-red-400'
                                                 : 'bg-amber-50 border-amber-200 hover:border-amber-400'
                                             } ${isCompleted
-                                            ? 'bg-gray-50 border-gray-200 opacity-80 hover:bg-gray-100 hover:border-gray-400 '
+                                                ? 'bg-gray-50 border-gray-200 opacity-80 hover:bg-gray-100 hover:border-gray-400 '
                                                 : ''
                                             }`}
                                     >
@@ -606,17 +676,17 @@ export function IngredientsPanel({
                                         ) : isCompleted ? (
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
-                                                            <div
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    if (!editingIngredientId) {
-                                                                        toggleIngredientCompletion(ingredient.id); // CLICK TO UNCHECK!
-                                                                    }
-                                                                }}
-                                                                className="shrink-0 w-5 h-5 bg-gray-500 rounded flex items-center justify-center cursor-pointer hover:bg-gray-600"
-                                                            >
-                                                                <Check className="h-3 w-3 text-white" />
-                                                            </div>
+                                                    <div
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (!editingIngredientId) {
+                                                                toggleIngredientCompletion(ingredient.id); // CLICK TO UNCHECK!
+                                                            }
+                                                        }}
+                                                        className="shrink-0 w-5 h-5 bg-gray-500 rounded flex items-center justify-center cursor-pointer hover:bg-gray-600"
+                                                    >
+                                                        <Check className="h-3 w-3 text-white" />
+                                                    </div>
                                                     <div className="line-through text-gray-500">{ingredient.name}</div>
                                                     <div className="text-sm text-gray-600">
                                                         Comprado: {ingredient.amount} {ingredient.unit} - ${ingredient.price}
@@ -637,88 +707,88 @@ export function IngredientsPanel({
                                                 {/* Main Content */}
                                                 <div className="flex items-start justify-between overflow-visible">
                                                     {/* Ingredient Info */}
-                                                            <div className="flex-1 min-w-0">
-                                                                {/* Compact Database Indicator - positioned absolutely or in corner */}
-                                                                <div className="flex justify-between items-start mb-1">
-                                                                    <div className="text-xs">
-                                                                        {isIngredientInDatabase(ingredient.id) ? (
-                                                                            <div className="flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full w-fit">
-                                                                                <Database className="h-2.5 w-2.5" />
-                                                                                <span className="text-[10px]">DB</span>
-                                                                            </div>
-                                                                        ) : (
-                                                                            <div className="flex items-center gap-1 text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full w-fit">
-                                                                                <Database className="h-2.5 w-2.5" />
-                                                                                <span className="text-[10px]">Local</span>
-                                                                            </div>
-                                                                        )}
+                                                    <div className="flex-1 min-w-0">
+                                                        {/* Compact Database Indicator - positioned absolutely or in corner */}
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <div className="text-xs">
+                                                                {isIngredientInDatabase(ingredient.id) ? (
+                                                                    <div className="flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full w-fit">
+                                                                        <Database className="h-2.5 w-2.5" />
+                                                                        <span className="text-[10px]">DB</span>
                                                                     </div>
-                                                                    {/* Optional: Move low stock indicator here if needed */}
-                                                                    {/* {isLowStock && (
+                                                                ) : (
+                                                                    <div className="flex items-center gap-1 text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full w-fit">
+                                                                        <Database className="h-2.5 w-2.5" />
+                                                                        <span className="text-[10px]">Local</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {/* Optional: Move low stock indicator here if needed */}
+                                                            {/* {isLowStock && (
                                                                         <div className="text-[10px] text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
                                                                             Stock bajo
                                                                         </div>
                                                                     )} */}
-                                                                    
-                                                                    <div className="flex items-center gap-1 shrink-0 ">
 
-                                                                        {(!hasAmount || !isCompleted) && (
-                                                                            <>
-                                                                                <button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation()
-                                                                                        setEditingIngredientId(ingredient.id)
-                                                                                    }}
-                                                                                    className="p-1 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                                                    title="Editar ingrediente"
-                                                                                >
-                                                                                    <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
-                                                                                </button>
-                                                                                <button
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        removeIngredient(ingredient.id);
-                                                                                    }}
-                                                                                    className="p-1 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
-                                                                                    title="Eliminar ingrediente"
-                                                                                >
-                                                                                    <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
-                                                                                </button>
-                                                                            </>
-                                                                        )}
-                                                                    </div>
-                                                                    
-                                                                </div>
+                                                            <div className="flex items-center gap-1 shrink-0 ">
+
+                                                                {(!hasAmount || !isCompleted) && (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation()
+                                                                                setEditingIngredientId(ingredient.id)
+                                                                            }}
+                                                                            className="p-1 sm:p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                                            title="Editar ingrediente"
+                                                                        >
+                                                                            <Edit className="h-4 w-4 sm:h-5 sm:w-5" />
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                removeIngredient(ingredient.id);
+                                                                            }}
+                                                                            className="p-1 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-lg transition-all duration-200 transform hover:scale-110 active:scale-95"
+                                                                            title="Eliminar ingrediente"
+                                                                        >
+                                                                            <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                            </div>
+
+                                                        </div>
                                                         <div className="flex items-center justify-between gap-2 mb-3">
-                                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1">
-                                                                        <div className="flex items-center justify-between gap-2 flex-1">
-                                                                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                                    {/* Checkbox for ingredients with amount */}
-                                                                            {hasAmount && currentStock > 0 && (
-                                                                                <div
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        if (!editingIngredientId) {
-                                                                                            toggleIngredientCompletion(ingredient.id);
-                                                                                        }
-                                                                                    }}
-                                                                                    className={`shrink-0 w-5 h-5 sm:w-6 sm:h-6 border-2 rounded flex items-center justify-center transition-all duration-200 cursor-pointer ${isCompleted
-                                                                                        ? 'bg-green-500 border-green-500 text-white'
-                                                                                        : 'border-amber-400 bg-white hover:border-amber-500'
-                                                                                        }`}
-                                                                                >
-                                                                                    {isCompleted && <Check className="h-3 w-3 sm:h-4 sm:w-4" />}
-                                                                                </div>
-                                                                            )}
-
-                                                                                <div className="font-semibold text-gray-900 text-lg sm:text-xl wrap-break-word flex-1 min-w-0">
-                                                                                {ingredient.name}
+                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1">
+                                                                <div className="flex items-center justify-between gap-2 flex-1">
+                                                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                                        {/* Checkbox for ingredients with amount */}
+                                                                        {hasAmount && currentStock > 0 && (
+                                                                            <div
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    if (!editingIngredientId) {
+                                                                                        toggleIngredientCompletion(ingredient.id);
+                                                                                    }
+                                                                                }}
+                                                                                className={`shrink-0 w-5 h-5 sm:w-6 sm:h-6 border-2 rounded flex items-center justify-center transition-all duration-200 cursor-pointer ${isCompleted
+                                                                                    ? 'bg-green-500 border-green-500 text-white'
+                                                                                    : 'border-amber-400 bg-white hover:border-amber-500'
+                                                                                    }`}
+                                                                            >
+                                                                                {isCompleted && <Check className="h-3 w-3 sm:h-4 sm:w-4" />}
                                                                             </div>
+                                                                        )}
 
-                                                                                <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm:py-1 rounded-full font-medium whitespace-nowrap shrink-0">
-                                                                                    ${(ingredient.price).toFixed(2)} • {ingredient.amount} {ingredient.unit}
-                                                                                </div>
-                                                                            </div>
+                                                                        <div className="font-semibold text-gray-900 text-lg sm:text-xl wrap-break-word flex-1 min-w-0">
+                                                                            {ingredient.name}
+                                                                        </div>
+
+                                                                        <div className="text-xs sm:text-sm text-amber-600 bg-amber-100 px-2 sm:py-1 rounded-full font-medium whitespace-nowrap shrink-0">
+                                                                            ${(ingredient.price).toFixed(2)} • {ingredient.amount} {ingredient.unit}
+                                                                        </div>
+                                                                    </div>
 
                                                                 </div>
 
@@ -726,8 +796,8 @@ export function IngredientsPanel({
 
                                                             {/* Action Buttons */}
                                                             {/* <div className="flex items-center gap-1 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300"> */}
-                                                            
-                                      
+
+
                                                         </div>
 
                                                         {/* Special Unit Cost Info */}
@@ -767,8 +837,10 @@ export function IngredientsPanel({
                                                                     {/* Number Input */}
                                                                     <CustomNumberInput
                                                                         value={currentStock || 0}
-                                                                                onChange={(value) => { console.log("Updating inventory for", ingredient.id, "to", value); 
-                                                                                updateInventory(ingredient.id, value)}}
+                                                                        onChange={(value) => {
+                                                                            console.log("Updating inventory for", ingredient.id, "to", value);
+                                                                            updateInventory(ingredient.id, value)
+                                                                        }}
                                                                         min={0}
                                                                         max={10000}
                                                                         placeholder="0"
@@ -781,37 +853,37 @@ export function IngredientsPanel({
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                                    {isLowStock && inventoryItem && (
-                                                                        <div className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded mt-2">
-                                                                            <div className="flex items-center gap-2 font-semibold text-xs sm:text-sm mb-1">
-                                                                                Stock bajo
-                                                                            </div>
-                                                                            <div className="flex items-center p-1 sm:p-2 text-xs">
-                                                                                <span className="font-medium">Faltan:</span>
-                                                                                <span className="font-bold ml-1 text-red-700">
-                                                                                    {/* Convert both to same unit for proper calculation */}
-                                                                                    {(() => {
-                                                                                        try {
-                                                                                            const convertedCurrentStock = UnitConverter.convert(
-                                                                                                { value: currentStock, unit: inventoryItem.unit },
-                                                                                                ingredient.unit
-                                                                                            );
-                                                                                            if (convertedCurrentStock) {
-                                                                                                const missingAmount = Math.max(0, ingredient.minAmount - convertedCurrentStock.value);
-                                                                                                return UnitConverter.convertToReadableUnit(missingAmount, ingredient.unit);
-                                                                                            }
-                                                                                        } catch (error) {
-                                                                                            console.error('Conversion error:', error);
-                                                                                        }
-                                                                                        return UnitConverter.convertToReadableUnit(
-                                                                                            Math.max(0, Number((ingredient.minAmount - currentStock).toFixed(2))),
-                                                                                            ingredient.unit
-                                                                                        );
-                                                                                    })()}
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
+                                                            {isLowStock && inventoryItem && (
+                                                                <div className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded mt-2">
+                                                                    <div className="flex items-center gap-2 font-semibold text-xs sm:text-sm mb-1">
+                                                                        Stock bajo
+                                                                    </div>
+                                                                    <div className="flex items-center p-1 sm:p-2 text-xs">
+                                                                        <span className="font-medium">Faltan:</span>
+                                                                        <span className="font-bold ml-1 text-red-700">
+                                                                            {/* Convert both to same unit for proper calculation */}
+                                                                            {(() => {
+                                                                                try {
+                                                                                    const convertedCurrentStock = UnitConverter.convert(
+                                                                                        { value: currentStock, unit: inventoryItem.unit },
+                                                                                        ingredient.unit
+                                                                                    );
+                                                                                    if (convertedCurrentStock) {
+                                                                                        const missingAmount = Math.max(0, ingredient.minAmount - convertedCurrentStock.value);
+                                                                                        return UnitConverter.convertToReadableUnit(missingAmount, ingredient.unit);
+                                                                                    }
+                                                                                } catch (error) {
+                                                                                    console.error('Conversion error:', error);
+                                                                                }
+                                                                                return UnitConverter.convertToReadableUnit(
+                                                                                    Math.max(0, Number((ingredient.minAmount - currentStock).toFixed(2))),
+                                                                                    ingredient.unit
+                                                                                );
+                                                                            })()}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -822,7 +894,7 @@ export function IngredientsPanel({
                             })}
 
                             {/* Empty State */}
-                            {ingredients.length === 0 && (
+                            {displayedIngredients.length === 0 && (
                                 <div className="text-center py-8 sm:py-12 bg-gradient-to-br from-gray-50 to-blue-50 border-2 border-dashed border-gray-300 rounded-xl">
                                     <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
                                         <Calculator className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
@@ -838,7 +910,7 @@ export function IngredientsPanel({
                 {/* Divider */}
                 <div className="relative flex items-center my-6">
                     <div className="grow border-t border-amber-300"></div>
-                
+
                     <div className="grow border-t border-amber-300"></div>
                 </div>
             </CardContent>
@@ -865,7 +937,7 @@ export function IngredientsPanel({
                                 onClick={() => setShowIngredientsModal(true)}
                             >
                                 <div className="text-xs sm:text-sm text-gray-600">Ingredientes</div>
-                                <div className="text-base sm:text-lg font-bold text-green-700">{ingredients.length}</div>
+                                <div className="text-base sm:text-lg font-bold text-green-700">{displayedIngredients.length}</div>
                             </div>
                         </div>
                     </div>
@@ -940,7 +1012,7 @@ export function IngredientsPanel({
                                         </div>
                                         <div>
                                             <h3 className="text-xl font-bold text-green-800">Todos los Ingredientes</h3>
-                                            <p className="text-sm text-green-600">Inventario completo ({ingredients.length} ingredientes)</p>
+                                            <p className="text-sm text-green-600">Inventario completo ({displayedIngredients.length} ingredientes)</p>
                                         </div>
                                     </div>
                                     <CloseButton onClose={() => setShowIngredientsModal(false)} />
@@ -950,7 +1022,7 @@ export function IngredientsPanel({
                             {/* Content */}
                             <div className="p-6 overflow-y-auto max-h-96">
                                 <div className="space-y-3">
-                                    {ingredients.map((ingredient) => {
+                                    {displayedIngredients.map((ingredient) => {
                                         const inventoryItem = inventory.find(item => item.ingredientId === ingredient.id);
                                         const currentStock = inventoryItem?.currentStock || 0;
                                         const isLowStock = checkIfLowStock(ingredient, inventoryItem);
