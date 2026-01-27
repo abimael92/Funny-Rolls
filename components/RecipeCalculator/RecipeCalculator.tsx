@@ -1346,7 +1346,6 @@ export function RecipeCalculator() {
                 <div className={`${mobileView === 'ingredients' ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
                     <IngredientsPanel
                         ingredients={ingredients}
-                        setIngredients={setIngredients}
                         inventory={inventory}
                         updateInventory={updateInventory}
                         addInventoryItem={addInventoryItem}
