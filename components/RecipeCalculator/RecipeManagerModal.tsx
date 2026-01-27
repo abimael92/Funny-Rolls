@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { Recipe, Ingredient, Tool } from "@/lib/types"
 import { X, Plus, Trash2, Save, Check, ChevronUp, ChevronDown, FileText, Egg, Wrench, ListChecks } from "lucide-react"
 import { supabase } from "@/lib/supabase"
@@ -28,7 +29,7 @@ export function RecipeManagerModal({
     ingredients,
     tools,
     onRecipeSaved,
-    // onRecipeDeleted,
+    onRecipeDeleted,
     initialRecipe
 }: RecipeManagerModalProps) {
     const [activeTab, setActiveTab] = useState<'basic' | 'ingredients' | 'tools' | 'steps'>('basic')
@@ -103,7 +104,7 @@ export function RecipeManagerModal({
                     'Extender la masa en rectángulo de 40x30 cm',
                     'Espolvorear canela y azúcar uniformemente',
                     'Enrollar firmemente desde el lado largo',
-                    'Cortar en 12 porciones iguales',
+                    'Cortar en 10 porciones iguales',
                     'Colocar en molde engrasado y dejar reposar 30 minutos',
                     'Hornear a 180°C por 25-30 minutos hasta dorar',
                     'Dejar enfriar y decorar con glaseado de crema',
@@ -113,7 +114,7 @@ export function RecipeManagerModal({
             setFormData(classicRollRecipe)
         }
     }, [isOpen, mode, initialRecipe])
-    
+
     useEffect(() => {
         if (initialRecipe?.image) {
             setPreviewImage(initialRecipe.image)
@@ -211,29 +212,42 @@ export function RecipeManagerModal({
         }
     }
 
-    // const handleDelete = async () => {
-    //     if (!window.confirm('¿Estás seguro de que quieres eliminar esta receta?')) return
+    // Improved handleDelete: Delete recipe from DB and clean up image if needed
+    const handleDelete = async () => {
+        if (!window.confirm('¿Estás seguro de que quieres eliminar esta receta? Esta acción no se puede deshacer.')) return
 
-    //     setLoading(true)
-    //     try {
-    //         if (saveType === 'database') {
-    //             const { error } = await supabase
-    //                 .from('recipes')
-    //                 .delete()
-    //                 .eq('id', formData.id)
+        setLoading(true)
+        try {
+            if (saveType === 'database' && formData.id) {
+                // Delete image from S3 if it exists
+                if (formData.image && formData.image.startsWith('https://')) {
+                    try {
+                        await deleteFileFromS3(formData.image)
+                    } catch (imageError) {
+                        console.error('Error deleting image:', imageError)
+                        // Continue with recipe deletion even if image deletion fails
+                    }
+                }
 
-    //             if (error) throw error
-    //         }
+                // Delete recipe from Supabase
+                const { error } = await supabase
+                    .from('recipes')
+                    .delete()
+                    .eq('id', formData.id)
 
-    //         onRecipeDeleted?.(formData.id)
-    //         setSuccess('Receta eliminada exitosamente')
-    //         setTimeout(() => onClose(), 1000)
-    //     } catch (err: unknown) {
-    //         setError(err instanceof Error ? err.message : 'Error al eliminar la receta')
-    //     } finally {
-    //         setLoading(false)
-    //     }
-    // }
+                if (error) throw error
+            }
+
+            // Call parent handler to update state
+            onRecipeDeleted?.(formData.id)
+            setSuccess('Receta eliminada exitosamente')
+            setTimeout(() => onClose(), 1000)
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Error al eliminar la receta')
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const addIngredient = () => {
         if (!selectedIngredient || !ingredientAmount || parseFloat(ingredientAmount) <= 0) return
@@ -330,7 +344,7 @@ export function RecipeManagerModal({
             setFormData(prev => ({ ...prev, steps: newSteps }))
         }
     }
-    
+
     const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) return
@@ -352,7 +366,7 @@ export function RecipeManagerModal({
         }
         reader.readAsDataURL(file)
     }
-    
+
     const removeImage = async () => {
         try {
             // Delete from S3 if there's an existing image URL
@@ -538,10 +552,12 @@ export function RecipeManagerModal({
                                         {previewImage || formData.image ? (
                                             <div className="space-y-3">
                                                 <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-300 bg-gray-100">
-                                                    <img
-                                                        src={previewImage || formData.image}
+                                                    <Image
+                                                        src={previewImage || formData.image || '/placeholder.svg'}
                                                         alt="Recipe preview"
-                                                        className="w-full h-full object-cover"
+                                                        fill
+                                                        className="object-cover"
+                                                        unoptimized={previewImage?.startsWith('blob:') || formData.image?.startsWith('blob:')}
                                                     />
                                                     {mode !== 'view' && (
                                                         <button
@@ -1012,7 +1028,7 @@ export function RecipeManagerModal({
                         <div className="sticky bottom-0 bg-white pt-4 border-t mt-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    {/* {mode === 'edit' && onRecipeDeleted && (
+                                    {mode === 'edit' && onRecipeDeleted && (
                                         <button
                                             type="button"
                                             onClick={handleDelete}
@@ -1022,7 +1038,7 @@ export function RecipeManagerModal({
                                             <Trash2 className="h-4 w-4" />
                                             Eliminar Receta
                                         </button>
-                                    )} */}
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <button
