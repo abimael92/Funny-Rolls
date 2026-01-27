@@ -1225,12 +1225,19 @@ export function RecipeCalculator() {
                                                 className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-200 rounded-lg transition-colors active:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-inset"
                                             >
                                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                                    <BookOpen className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                                                    <BookOpen className="h-3 w-3 text-amber-500 shrink-0" />
+                                                    {/* Database indicator */}
+                                                    {recipesInDatabase.has(recipe.id) && (
+                                                        <div className="flex items-center gap-1 text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full shrink-0">
+                                                            <Database className="h-2.5 w-2.5" />
+                                                            <span className="text-[10px]">DB</span>
+                                                        </div>
+                                                    )}
                                                     <span className="text-sm font-medium text-gray-900 truncate">
                                                         {recipe.name}
                                                     </span>
                                                     {!recipe.available && (
-                                                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded flex-shrink-0">
+                                                        <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded shrink-0">
                                                             Inactivo
                                                         </span>
                                                     )}
@@ -1255,11 +1262,23 @@ export function RecipeCalculator() {
                                             className="w-full text-left flex items-center justify-between p-2 hover:bg-amber-200 rounded-lg transition-colors active:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:ring-inset"
                                         >
                                             <div className="flex items-center gap-2 flex-1 min-w-0">
+                                                {/* Database indicator */}
+                                                {recipesInDatabase.has(recipe.id) ? (
+                                                    <div className="flex items-center gap-1 text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-full shrink-0">
+                                                        <Database className="h-2.5 w-2.5" />
+                                                        <span className="text-[10px]">DB</span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1 text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full shrink-0">
+                                                        <Database className="h-2.5 w-2.5" />
+                                                        <span className="text-[10px]">Local</span>
+                                                    </div>
+                                                )}
                                                 <span className="text-sm font-medium text-gray-900 truncate">
                                                     {recipe.name}
                                                 </span>
                                                 {recipe.id === selectedRecipe.id && (
-                                                    <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-600 rounded flex-shrink-0">
+                                                    <span className="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-600 rounded shrink-0">
                                                         Seleccionada
                                                     </span>
                                                 )}
