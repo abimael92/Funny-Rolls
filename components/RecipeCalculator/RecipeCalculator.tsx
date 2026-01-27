@@ -153,6 +153,7 @@ export function RecipeCalculator() {
         const savedInventory = safeGetLocalStorage('recipe-calculator-inventory', []);
         const savedTools = safeGetLocalStorage('recipe-calculator-tools', defaultTools);
 
+        // Set initial ingredients (will be merged with DB in loadIngredientsFromSupabase)
         setIngredients(savedIngredients);
         setTools(savedTools);
 
@@ -194,10 +195,27 @@ export function RecipeCalculator() {
         }
     }, [])
 
-    // Save to localStorage with error handling
+    // Save to localStorage with error handling - only save DB ingredients + unique local
     useEffect(() => {
-        safeSetLocalStorage('recipe-calculator-ingredients', ingredients)
-    }, [ingredients])
+        // Only save ingredients that are either in DB or truly unique local-only
+        // This ensures localStorage doesn't store duplicates that will be filtered out
+        const ingredientsToSave = ingredients.filter(ing => {
+            // Always save DB ingredients
+            if (ingredientsInDatabase.has(ing.id)) {
+                return true;
+            }
+            // For local ingredients, check if there's a DB duplicate by name+unit
+            const uniqueKey = `${ing.name.toLowerCase().trim()}|${ing.unit}`;
+            const hasDbDuplicate = ingredients.some(dbIng => 
+                ingredientsInDatabase.has(dbIng.id) &&
+                `${dbIng.name.toLowerCase().trim()}|${dbIng.unit}` === uniqueKey
+            );
+            // Only save if no DB duplicate exists
+            return !hasDbDuplicate;
+        });
+        
+        safeSetLocalStorage('recipe-calculator-ingredients', ingredientsToSave);
+    }, [ingredients, ingredientsInDatabase])
 
     useEffect(() => {
         safeSetLocalStorage('recipe-calculator-recipes', recipes)
@@ -219,7 +237,9 @@ export function RecipeCalculator() {
         loadDatabaseRecipes()
     }, [])
     
-    // Call this in useEffect
+    // Load ingredients from Supabase after initial localStorage load
+    // This ensures DB ingredients take priority over local duplicates
+    // Using functional state updates in loadIngredientsFromSupabase ensures we work with latest state
     useEffect(() => {
         const loadIngredients = async () => {
             await loadIngredientsFromSupabase();
@@ -315,7 +335,8 @@ export function RecipeCalculator() {
         })
     }
 
-    // Update the loadIngredientsFromSupabase function:
+    // Improved loadIngredientsFromSupabase: Prioritize DB, filter local duplicates
+    // Uses functional state update to ensure we work with latest ingredients state
     const loadIngredientsFromSupabase = async () => {
         try {
             const { data, error } = await supabase
@@ -325,24 +346,13 @@ export function RecipeCalculator() {
 
             if (error) throw error;
 
-            if (data && data.length > 0) {
-                // Store Supabase IDs
-                const dbIds = new Set(data.map(dbIng => dbIng.id));
-                setIngredientsInDatabase(dbIds);
+            // Store Supabase IDs
+            const dbIds = new Set<string>();
+            const dbIngredientMap = new Map<string, Ingredient>(); // key: "name|unit" -> Ingredient
 
-                // Get Supabase names (lowercase)
-                const supabaseNames = new Set(data.map(dbIng => dbIng.name.toLowerCase()));
-
-                // Get current local ingredients
-                const currentIngredients = [...ingredients];
-
-                // Filter: keep local ingredients that DON'T match Supabase names
-                const localOnlyIngredients = currentIngredients.filter(localIng =>
-                    !supabaseNames.has(localIng.name.toLowerCase())
-                );
-
-                // Convert Supabase data
-                const supabaseIngredients: Ingredient[] = data.map(dbIng => ({
+            // Convert Supabase data to Ingredient format
+            const supabaseIngredients: Ingredient[] = (data || []).map(dbIng => {
+                const ingredient: Ingredient = {
                     id: dbIng.id,
                     name: dbIng.name,
                     price: dbIng.price,
@@ -352,41 +362,77 @@ export function RecipeCalculator() {
                     minAmountUnit: dbIng.min_amount_unit || dbIng.unit,
                     containsAmount: dbIng.contains_amount || 0,
                     containsUnit: dbIng.contains_unit || 'unit'
-                }));
+                };
 
-                // Combine: Supabase + local-only (non-duplicate names)
-                const allIngredients = [...supabaseIngredients, ...localOnlyIngredients];
-                setIngredients(allIngredients);
-            }
+                dbIds.add(dbIng.id);
+                // Create unique key: name (lowercase) + unit
+                const uniqueKey = `${dbIng.name.toLowerCase().trim()}|${dbIng.unit}`;
+                dbIngredientMap.set(uniqueKey, ingredient);
+
+                return ingredient;
+            });
+
+            setIngredientsInDatabase(dbIds);
+
+            // Use functional update to get latest ingredients state
+            setIngredients(prevIngredients => {
+                // Filter local ingredients: only keep those with unique name+unit not in DB
+                const localOnlyIngredients = prevIngredients.filter(localIng => {
+                    // Skip if already in database by ID
+                    if (dbIds.has(localIng.id)) {
+                        return false;
+                    }
+
+                    // Check if name+unit combination exists in DB
+                    const uniqueKey = `${localIng.name.toLowerCase().trim()}|${localIng.unit}`;
+                    return !dbIngredientMap.has(uniqueKey);
+                });
+
+                // Combine: DB ingredients (priority) + unique local-only ingredients
+                const mergedIngredients = [...supabaseIngredients, ...localOnlyIngredients];
+
+                // Sort by name for consistent display
+                mergedIngredients.sort((a, b) => a.name.localeCompare(b.name));
+
+                return mergedIngredients;
+            });
         } catch (error) {
-            console.error('Error loading ingredients:', error);
+            console.error('Error loading ingredients from Supabase:', error);
+            setError('Error al cargar ingredientes de la base de datos');
         }
     }
 
 
-    // Update the saveIngredientToSupabase function to update the Set:
+    // Improved saveIngredientToSupabase: Better duplicate detection and state sync
     const saveIngredientToSupabase = async (ingredient: Ingredient): Promise<Ingredient> => {
         try {
-            // First, check if ingredient exists in Supabase by name AND unit
+            // Normalize name and unit for comparison
+            const normalizedName = ingredient.name.trim();
+            const normalizedUnit = ingredient.unit.trim();
+
+            // Check if ingredient exists in Supabase by name AND unit (case-insensitive name)
             const { data: existingIngredients, error: fetchError } = await supabase
                 .from('ingredients')
                 .select('*')
-                .eq('name', ingredient.name)
-                .eq('unit', ingredient.unit)
+                .ilike('name', normalizedName)
+                .eq('unit', normalizedUnit)
                 .limit(1);
 
             if (fetchError) throw fetchError;
 
             const ingredientData = {
-                name: ingredient.name,
+                name: normalizedName,
                 price: ingredient.price,
-                unit: ingredient.unit,
+                unit: normalizedUnit,
                 amount: ingredient.amount,
                 min_amount: ingredient.minAmount || 0,
-                min_amount_unit: ingredient.minAmountUnit || ingredient.unit,
+                min_amount_unit: ingredient.minAmountUnit || normalizedUnit,
                 contains_amount: ingredient.containsAmount || null,
-                contains_unit: ingredient.containsUnit || null
+                contains_unit: ingredient.containsUnit || null,
+                updated_at: new Date().toISOString()
             };
+
+            let savedIngredient: Ingredient;
 
             if (existingIngredients && existingIngredients.length > 0) {
                 // UPDATE existing ingredient
@@ -401,10 +447,7 @@ export function RecipeCalculator() {
                 if (error) throw error;
                 if (!data) throw new Error('No data returned from Supabase');
 
-                // Update the ingredientsInDatabase Set
-                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
-
-                return {
+                savedIngredient = {
                     id: data.id,
                     name: data.name,
                     price: data.price,
@@ -415,20 +458,24 @@ export function RecipeCalculator() {
                     containsAmount: data.contains_amount,
                     containsUnit: data.contains_unit
                 };
+
+                // Update the ingredientsInDatabase Set
+                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
             } else {
                 // INSERT new ingredient
                 const { data, error } = await supabase
                     .from('ingredients')
-                    .insert([ingredientData])
+                    .insert([{
+                        ...ingredientData,
+                        created_at: new Date().toISOString()
+                    }])
                     .select()
                     .single();
 
                 if (error) throw error;
                 if (!data) throw new Error('No data returned from Supabase');
 
-                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
-
-                return {
+                savedIngredient = {
                     id: data.id,
                     name: data.name,
                     price: data.price,
@@ -439,20 +486,53 @@ export function RecipeCalculator() {
                     containsAmount: data.contains_amount,
                     containsUnit: data.contains_unit
                 };
+
+                setIngredientsInDatabase(prev => new Set([...prev, data.id]));
             }
+
+            // Sync state: Remove any local duplicates and add/update the saved ingredient
+            setIngredients(prev => {
+                const uniqueKey = `${savedIngredient.name.toLowerCase().trim()}|${savedIngredient.unit}`;
+                
+                // Remove any ingredients with the same name+unit (local or old DB versions)
+                const filtered = prev.filter(ing => {
+                    const ingKey = `${ing.name.toLowerCase().trim()}|${ing.unit}`;
+                    return ingKey !== uniqueKey || ing.id === savedIngredient.id;
+                });
+
+                // Add or replace with the saved ingredient
+                const existingIndex = filtered.findIndex(ing => ing.id === savedIngredient.id);
+                if (existingIndex >= 0) {
+                    filtered[existingIndex] = savedIngredient;
+                } else {
+                    filtered.push(savedIngredient);
+                }
+
+                // Sort by name
+                return filtered.sort((a, b) => a.name.localeCompare(b.name));
+            });
+
+            return savedIngredient;
         } catch (error) {
             console.error('Error saving ingredient to Supabase:', error);
             throw error;
         }
     };
 
-    // Update the deleteIngredientFromSupabase function:
+    // Improved deleteIngredientFromSupabase: Better state sync
     const deleteIngredientFromSupabase = async (ingredientId: string) => {
         try {
+            // Only delete if it's actually in the database
+            if (!ingredientsInDatabase.has(ingredientId)) {
+                // If it's a local-only ingredient, just remove from state
+                setIngredients(prev => prev.filter(ing => ing.id !== ingredientId));
+                return;
+            }
+
             const { error } = await supabase
                 .from('ingredients')
                 .delete()
-                .eq('id', ingredientId)
+                .eq('id', ingredientId);
 
             if (error) throw error;
 
@@ -463,7 +543,11 @@ export function RecipeCalculator() {
                 return newSet;
             });
 
-            console.log('Ingredient deleted from Supabase:', ingredientId);
+            // Remove from local state
+            setIngredients(prev => prev.filter(ing => ing.id !== ingredientId));
+
+            // Also remove from inventory if exists
+            setInventory(prev => prev.filter(item => item.ingredientId !== ingredientId));
         } catch (error) {
             console.error('Failed to delete ingredient from Supabase:', error);
             throw error;

@@ -148,37 +148,22 @@ export function IngredientsPanel({
             return
         }
 
-        // Check for duplicates in Supabase AND local
+        // Check for duplicates by name+unit (case-insensitive name)
+        const normalizedName = newIngredient.name.trim().toLowerCase();
+        const normalizedUnit = newIngredient.unit.trim();
+        
         const existingIngredient = ingredients.find(ing =>
-            ing.name.toLowerCase() === newIngredient.name.toLowerCase()
+            ing.name.trim().toLowerCase() === normalizedName &&
+            ing.unit.trim() === normalizedUnit
         );
 
-        // Check in ingredientsInDatabase Set for any matching ingredients
-        const isInDatabase = Array.from(ingredientsInDatabase).some(id => {
-            const ing = ingredients.find(i => i.id === id);
-            return ing &&
-                ing.name.toLowerCase() === newIngredient.name.toLowerCase() &&
-                ing.unit === newIngredient.unit;
-        });
-
-        if (isInDatabase) {
-            setError(`"${newIngredient.name}" ya existe en la base de datos`)
-            // Optionally, find and edit the existing ingredient
-            const dbIngredient = ingredients.find(ing =>
-                ing.name.toLowerCase() === newIngredient.name.toLowerCase() &&
-                ing.unit === newIngredient.unit &&
-                ingredientsInDatabase.has(ing.id)
-            );
-            if (dbIngredient) {
-                setEditingIngredientId(dbIngredient.id)
-                setShowAddSection(false)
-            }
-            return
-        }
-
         if (existingIngredient) {
-            // If it's only local, ask to edit instead
-            setError(`Ya existe "${newIngredient.name}" localmente. Edita el ingrediente existente.`)
+            // Check if it's in database
+            if (ingredientsInDatabase.has(existingIngredient.id)) {
+                setError(`"${newIngredient.name}" (${newIngredient.unit}) ya existe en la base de datos. Edita el ingrediente existente.`)
+            } else {
+                setError(`"${newIngredient.name}" (${newIngredient.unit}) ya existe localmente. Edita el ingrediente existente.`)
+            }
             setEditingIngredientId(existingIngredient.id)
             setShowAddSection(false)
             return
@@ -203,12 +188,10 @@ export function IngredientsPanel({
         }
 
         try {
+            // saveIngredientToSupabase already updates state, so we don't need to manually update
             const savedIngredient = await saveIngredientToSupabase(ingredient)
 
-            // Update local state with the REAL ID from Supabase
-            setIngredients([...ingredients, savedIngredient])
-
-            // Use the saved ingredient ID
+            // Use the saved ingredient ID for inventory
             addInventoryItem(savedIngredient.id, savedIngredient.minAmount)
 
             // Reset form
@@ -225,29 +208,52 @@ export function IngredientsPanel({
 
     // Remove ingredient
     const removeIngredient = async (id: string) => {
-        if (window.confirm('¿Estás seguro de que quieres eliminar este ingrediente?')) {
-            setIngredients(ingredients.filter(ing => ing.id !== id))
-
-            await deleteIngredientFromSupabase(id)
+        const ingredient = ingredients.find(ing => ing.id === id);
+        const isInDatabase = ingredient && ingredientsInDatabase.has(id);
+        
+        const confirmMessage = isInDatabase
+            ? `¿Estás seguro de que quieres eliminar "${ingredient?.name}" de la base de datos? Esta acción no se puede deshacer.`
+            : `¿Estás seguro de que quieres eliminar "${ingredient?.name}"?`;
+        
+        if (window.confirm(confirmMessage)) {
+            try {
+                // deleteIngredientFromSupabase already updates state, so we don't need to manually update
+                await deleteIngredientFromSupabase(id)
+            } catch (error) {
+                console.error('Failed to delete ingredient:', error)
+                setError('Error al eliminar el ingrediente. Verifica tu conexión.')
+            }
         }
     }
 
     // Save edited ingredient
     const saveEditedIngredient = async (updatedIngredient: Ingredient): Promise<void> => {
         try {
-            const savedIngredient = await saveIngredientToSupabase(updatedIngredient);
+            // Check for duplicates (excluding the current ingredient being edited)
+            const normalizedName = updatedIngredient.name.trim().toLowerCase();
+            const normalizedUnit = updatedIngredient.unit.trim();
+            
+            const duplicate = ingredients.find(ing =>
+                ing.id !== updatedIngredient.id &&
+                ing.name.trim().toLowerCase() === normalizedName &&
+                ing.unit.trim() === normalizedUnit
+            );
 
-            setIngredients(prev => {
-                const key = `${savedIngredient.name.toLowerCase()}|${savedIngredient.unit}`;
-                return [...prev.filter(ing =>
-                    `${ing.name.toLowerCase()}|${ing.unit}` !== key
-                ), savedIngredient];
-            });
+            if (duplicate) {
+                if (ingredientsInDatabase.has(duplicate.id)) {
+                    setError(`"${updatedIngredient.name}" (${updatedIngredient.unit}) ya existe en la base de datos.`);
+                } else {
+                    setError(`"${updatedIngredient.name}" (${updatedIngredient.unit}) ya existe localmente.`);
+                }
+                return;
+            }
 
+            // saveIngredientToSupabase already updates state, so we don't need to manually update
+            await saveIngredientToSupabase(updatedIngredient);
             setEditingIngredientId(null);
         } catch (error) {
             console.error('Failed to save ingredient:', error);
-            setError('Error al guardar el ingrediente');
+            setError('Error al guardar el ingrediente. Verifica tu conexión.');
         }
     }
 
