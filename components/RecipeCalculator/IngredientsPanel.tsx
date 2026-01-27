@@ -26,6 +26,9 @@ interface IngredientsPanelProps {
     saveIngredientToSupabase: (ingredient: Ingredient) => Promise<Ingredient>
     deleteIngredientFromSupabase: (ingredientId: string) => Promise<void>
     ingredientsInDatabase: Set<string>
+    saveToolToSupabase?: (tool: Tool) => Promise<Tool>
+    deleteToolFromSupabase?: (toolId: string) => Promise<void>
+    toolsInDatabase?: Set<string>
 }
 
 export function IngredientsPanel({
@@ -36,7 +39,10 @@ export function IngredientsPanel({
     addInventoryItem,
     saveIngredientToSupabase,
     deleteIngredientFromSupabase,
-    ingredientsInDatabase
+    ingredientsInDatabase,
+    saveToolToSupabase,
+    deleteToolFromSupabase,
+    toolsInDatabase = new Set()
 }: IngredientsPanelProps) {
     const [error, setError] = useState<string | null>(null)
     const [editingIngredientId, setEditingIngredientId] = useState<string | null>(null)
@@ -310,7 +316,13 @@ export function IngredientsPanel({
             <CardContent className="space-y-4">
 
                 {showTools ? (
-                    <ToolsPanel tools={tools} setTools={setTools} />
+                    <ToolsPanel 
+                        tools={tools} 
+                        setTools={setTools}
+                        saveToolToSupabase={saveToolToSupabase}
+                        deleteToolFromSupabase={deleteToolFromSupabase}
+                        toolsInDatabase={toolsInDatabase}
+                    />
                 ) : (
 
                     <>
