@@ -13,9 +13,12 @@ import { CustomNumberInput } from './CustomNumberInput';
 interface ToolsPanelProps {
     tools: Tool[]
     setTools: (tools: Tool[]) => void
+    saveToolToSupabase?: (tool: Tool) => Promise<Tool>
+    deleteToolFromSupabase?: (toolId: string) => Promise<void>
+    toolsInDatabase?: Set<string>
 }
 
-export function ToolsPanel({ tools, setTools }: ToolsPanelProps) {
+export function ToolsPanel({ tools, setTools, saveToolToSupabase, deleteToolFromSupabase, toolsInDatabase = new Set() }: ToolsPanelProps) {
     const [error, setError] = useState<string | null>(null);
     const [showAddSection, setShowAddSection] = useState(false);
     const [editingToolId, setEditingToolId] = useState<string | null>(null)
