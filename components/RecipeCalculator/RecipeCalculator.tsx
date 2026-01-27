@@ -43,6 +43,7 @@ export function RecipeCalculator() {
     })
     
     const [ingredientsInDatabase, setIngredientsInDatabase] = useState<Set<string>>(new Set());
+    // recipesInDatabase: Tracks which recipes are in Supabase (for future DB indicators in UI)
     const [recipesInDatabase, setRecipesInDatabase] = useState<Set<string>>(new Set());
     const [toolsInDatabase, setToolsInDatabase] = useState<Set<string>>(new Set());
     const [inventoryInDatabase, setInventoryInDatabase] = useState<Set<string>>(new Set()); // ingredientId -> in DB
@@ -106,7 +107,7 @@ export function RecipeCalculator() {
                 return recipe;
             });
 
-            setRecipesInDatabase(dbIds);
+            setRecipesInDatabase(dbIds); // Track DB recipes for future UI indicators
             setDatabaseRecipes(transformedRecipes);
 
             // Merge with local recipes: DB takes priority, keep unique local-only recipes
@@ -162,7 +163,8 @@ export function RecipeCalculator() {
     // Improved handleRecipeSaved: Uses functional updates and syncs with DB state
     const handleRecipeSaved = (recipe: Recipe) => {
         // If recipe is saved to DB, mark it as in database
-        if (recipe.id && recipe.id.startsWith('recipe-') === false) {
+        // recipesInDatabase is used to track which recipes are in Supabase (for future DB indicators)
+        if (recipe.id && !recipe.id.startsWith('recipe-')) {
             // Recipe has DB ID (not a local-only ID)
             setRecipesInDatabase(prev => new Set([...prev, recipe.id]));
         }
@@ -705,8 +707,15 @@ export function RecipeCalculator() {
             // Remove from local state
             setIngredients(prev => prev.filter(ing => ing.id !== ingredientId));
 
-            // Also remove from inventory if exists
-            setInventory(prev => prev.filter(item => item.ingredientId !== ingredientId));
+            // Also remove from inventory if exists (use deleteInventoryFromSupabase if in DB)
+            const inventoryItem = inventory.find(item => item.ingredientId === ingredientId);
+            if (inventoryItem) {
+                if (inventoryInDatabase.has(ingredientId)) {
+                    await deleteInventoryFromSupabase(ingredientId);
+                } else {
+                    setInventory(prev => prev.filter(item => item.ingredientId !== ingredientId));
+                }
+            }
         } catch (error) {
             console.error('Failed to delete ingredient from Supabase:', error);
             throw error;
@@ -1313,7 +1322,6 @@ export function RecipeCalculator() {
                 <div className={`${mobileView === 'ingredients' ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
                     <IngredientsPanel
                         ingredients={ingredients}
-                        setIngredients={setIngredients}
                         inventory={inventory}
                         updateInventory={updateInventory}
                         addInventoryItem={addInventoryItem}
