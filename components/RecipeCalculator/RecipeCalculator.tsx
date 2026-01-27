@@ -1,23 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { products, defaultIngredients, defaultTools } from "@/lib/data";
 import { Ingredient, InventoryItem, Recipe, ProductionRecord, Tool } from '@/lib/types';
 import { MobileViewSwitcher } from './MobileViewSwitcher'
 import { IngredientsPanel } from './IngredientsPanel'
 import { RecipeCalculatorPanel } from './RecipeCalculatorPanel'
 import { ProductionTrackerPanel } from './ProductionTrackerPanel'
-
 import { RecipeManagerModal } from './RecipeManagerModal'
 import { Database, BookOpen, ChevronDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-// Add import at top
 import { generateMockProductionData } from '@/lib/mock-data'
 
-
-
 export function RecipeCalculator() {
-    // Ingredients management
     const [ingredients, setIngredients] = useState<Ingredient[]>(defaultIngredients);
     const [tools, setTools] = useState<Tool[]>(defaultTools);
     const [recipes, setRecipes] = useState<Recipe[]>(products.map(p => p.recipe))
@@ -37,12 +32,61 @@ export function RecipeCalculator() {
         isOpen: false,
         mode: 'add'
     })
-    
+
     const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>(() => {
         return generateMockProductionData(products.map(p => p.recipe), products)
     })
-    
+
     const [ingredientsInDatabase, setIngredientsInDatabase] = useState<Set<string>>(new Set());
+    const [toolsInDatabase, setToolsInDatabase] = useState<Set<string>>(new Set());
+
+    // Define loadIngredientsFromSupabase with useCallback early
+    const loadIngredientsFromSupabase = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from('ingredients')
+                .select('*')
+                .order('name', { ascending: true })
+
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                // Store Supabase IDs
+                const dbIds = new Set(data.map(dbIng => dbIng.id));
+                setIngredientsInDatabase(dbIds);
+
+                // Get Supabase names (lowercase)
+                const supabaseNames = new Set(data.map(dbIng => dbIng.name.toLowerCase()));
+
+                // Get current local ingredients
+                const currentIngredients = [...ingredients];
+
+                // Filter: keep local ingredients that DON'T match Supabase names
+                const localOnlyIngredients = currentIngredients.filter(localIng =>
+                    !supabaseNames.has(localIng.name.toLowerCase())
+                );
+
+                // Convert Supabase data
+                const supabaseIngredients: Ingredient[] = data.map(dbIng => ({
+                    id: dbIng.id,
+                    name: dbIng.name,
+                    price: dbIng.price,
+                    unit: dbIng.unit,
+                    amount: dbIng.amount,
+                    minAmount: dbIng.min_amount || 0,
+                    minAmountUnit: dbIng.min_amount_unit || dbIng.unit,
+                    containsAmount: dbIng.contains_amount || 0,
+                    containsUnit: dbIng.contains_unit || 'unit'
+                }));
+
+                // Combine: Supabase + local-only (non-duplicate names)
+                const allIngredients = [...supabaseIngredients, ...localOnlyIngredients];
+                setIngredients(allIngredients);
+            }
+        } catch (error) {
+            console.error('Error loading ingredients:', error);
+        }
+    }, [ingredients, setIngredients, setIngredientsInDatabase]);
 
     // Safe localStorage functions
     const safeSetLocalStorage = (key: string, data: unknown) => {
@@ -218,14 +262,14 @@ export function RecipeCalculator() {
     useEffect(() => {
         loadDatabaseRecipes()
     }, [])
-    
+
     // Call this in useEffect
     useEffect(() => {
         const loadIngredients = async () => {
             await loadIngredientsFromSupabase();
         };
         loadIngredients();
-    }, []);
+    }, [loadIngredientsFromSupabase]);
 
     // Enhanced record production with validation
     const recordProduction = (recipeId: string, batchCount: number, date: Date = new Date()) => {
@@ -314,55 +358,6 @@ export function RecipeCalculator() {
             }
         })
     }
-
-    // Update the loadIngredientsFromSupabase function:
-    const loadIngredientsFromSupabase = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('ingredients')
-                .select('*')
-                .order('name', { ascending: true })
-
-            if (error) throw error;
-
-            if (data && data.length > 0) {
-                // Store Supabase IDs
-                const dbIds = new Set(data.map(dbIng => dbIng.id));
-                setIngredientsInDatabase(dbIds);
-
-                // Get Supabase names (lowercase)
-                const supabaseNames = new Set(data.map(dbIng => dbIng.name.toLowerCase()));
-
-                // Get current local ingredients
-                const currentIngredients = [...ingredients];
-
-                // Filter: keep local ingredients that DON'T match Supabase names
-                const localOnlyIngredients = currentIngredients.filter(localIng =>
-                    !supabaseNames.has(localIng.name.toLowerCase())
-                );
-
-                // Convert Supabase data
-                const supabaseIngredients: Ingredient[] = data.map(dbIng => ({
-                    id: dbIng.id,
-                    name: dbIng.name,
-                    price: dbIng.price,
-                    unit: dbIng.unit,
-                    amount: dbIng.amount,
-                    minAmount: dbIng.min_amount || 0,
-                    minAmountUnit: dbIng.min_amount_unit || dbIng.unit,
-                    containsAmount: dbIng.contains_amount || 0,
-                    containsUnit: dbIng.contains_unit || 'unit'
-                }));
-
-                // Combine: Supabase + local-only (non-duplicate names)
-                const allIngredients = [...supabaseIngredients, ...localOnlyIngredients];
-                setIngredients(allIngredients);
-            }
-        } catch (error) {
-            console.error('Error loading ingredients:', error);
-        }
-    }
-
 
     // Update the saveIngredientToSupabase function to update the Set:
     const saveIngredientToSupabase = async (ingredient: Ingredient): Promise<Ingredient> => {
@@ -469,6 +464,120 @@ export function RecipeCalculator() {
             throw error;
         }
     }
+
+    // Save tool to Supabase
+    const saveToolToSupabase = async (tool: Tool): Promise<Tool> => {
+        try {
+            // First, check if tool exists in Supabase by name
+            const { data: existingTools, error: fetchError } = await supabase
+                .from('tools')
+                .select('*')
+                .eq('name', tool.name)
+                .limit(1);
+
+            if (fetchError) throw fetchError;
+
+            const toolData = {
+                name: tool.name,
+                type: tool.type,
+                category: tool.category,
+                description: tool.description || null,
+                lifetime: tool.lifetime || null,
+                total_batches: tool.totalBatches || null,
+                batches_used: tool.batchesUsed || 0,
+                batches_per_year: tool.batchesPerYear || null,
+                total_investment: tool.totalInvestment,
+                recovery_value: tool.recoveryValue,
+                cost_per_batch: tool.costPerBatch || null
+            };
+
+            if (existingTools && existingTools.length > 0) {
+                // UPDATE existing tool
+                const existingId = existingTools[0].id;
+                const { data, error } = await supabase
+                    .from('tools')
+                    .update(toolData)
+                    .eq('id', existingId)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                // Update the toolsInDatabase Set
+                setToolsInDatabase(prev => new Set([...prev, data.id]));
+
+                return {
+                    id: data.id,
+                    name: data.name,
+                    type: data.type,
+                    category: data.category,
+                    description: data.description,
+                    lifetime: data.lifetime,
+                    totalBatches: data.total_batches,
+                    batchesUsed: data.batches_used || 0,
+                    batchesPerYear: data.batches_per_year,
+                    totalInvestment: data.total_investment,
+                    recoveryValue: data.recovery_value,
+                    costPerBatch: data.cost_per_batch
+                };
+            } else {
+                // INSERT new tool
+                const { data, error } = await supabase
+                    .from('tools')
+                    .insert([toolData])
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                if (!data) throw new Error('No data returned from Supabase');
+
+                setToolsInDatabase(prev => new Set([...prev, data.id]));
+
+                return {
+                    id: data.id,
+                    name: data.name,
+                    type: data.type,
+                    category: data.category,
+                    description: data.description,
+                    lifetime: data.lifetime,
+                    totalBatches: data.total_batches,
+                    batchesUsed: data.batches_used || 0,
+                    batchesPerYear: data.batches_per_year,
+                    totalInvestment: data.total_investment,
+                    recoveryValue: data.recovery_value,
+                    costPerBatch: data.cost_per_batch
+                };
+            }
+        } catch (error) {
+            console.error('Error saving tool to Supabase:', error);
+            throw error;
+        }
+    };
+
+    // Delete tool from Supabase
+    const deleteToolFromSupabase = async (toolId: string) => {
+        try {
+            const { error } = await supabase
+                .from('tools')
+                .delete()
+                .eq('id', toolId);
+
+            if (error) throw error;
+
+            // Remove from toolsInDatabase Set
+            setToolsInDatabase(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(toolId);
+                return newSet;
+            });
+
+            console.log('Tool deleted from Supabase:', toolId);
+        } catch (error) {
+            console.error('Failed to delete tool from Supabase:', error);
+            throw error;
+        }
+    };
 
     // Function to add inventory item
     const addInventoryItem = (ingredientId: string, minimumStock: number = 0) => {
@@ -648,13 +757,15 @@ export function RecipeCalculator() {
                 <div className={`${mobileView === 'ingredients' ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
                     <IngredientsPanel
                         ingredients={ingredients}
-                        setIngredients={setIngredients}
                         inventory={inventory}
                         updateInventory={updateInventory}
                         addInventoryItem={addInventoryItem}
                         saveIngredientToSupabase={saveIngredientToSupabase}
                         deleteIngredientFromSupabase={deleteIngredientFromSupabase}
-                        ingredientsInDatabase={ingredientsInDatabase} 
+                        ingredientsInDatabase={ingredientsInDatabase}
+                        saveToolToSupabase={saveToolToSupabase}
+                        deleteToolFromSupabase={deleteToolFromSupabase}
+                        toolsInDatabase={toolsInDatabase}
                     />
                 </div>
 
