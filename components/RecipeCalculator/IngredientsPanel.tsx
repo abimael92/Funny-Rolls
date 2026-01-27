@@ -19,7 +19,6 @@ import { defaultTools, } from '@/lib/data';
 // List,
 interface IngredientsPanelProps {
     ingredients: Ingredient[]
-    setIngredients: React.Dispatch<React.SetStateAction<Ingredient[]>>
     inventory: InventoryItem[]
     updateInventory: (ingredientId: string, newStock: number) => void
     addInventoryItem: (ingredientId: string, minimumStock: number) => void
@@ -33,7 +32,6 @@ interface IngredientsPanelProps {
 
 export function IngredientsPanel({
     ingredients,
-    setIngredients,
     inventory,
     updateInventory,
     addInventoryItem,

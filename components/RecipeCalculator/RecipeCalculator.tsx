@@ -705,8 +705,22 @@ export function RecipeCalculator() {
             // Remove from local state
             setIngredients(prev => prev.filter(ing => ing.id !== ingredientId));
 
-            // Also remove from inventory if exists
-            setInventory(prev => prev.filter(item => item.ingredientId !== ingredientId));
+            // Also remove from inventory if exists (use deleteInventoryFromSupabase if in DB)
+            const inventoryItem = inventory.find(item => item.ingredientId === ingredientId);
+            if (inventoryItem) {
+                if (inventoryInDatabase.has(ingredientId)) {
+                    // Delete inventory from Supabase
+                    try {
+                        await deleteInventoryFromSupabase(ingredientId);
+                    } catch (invError) {
+                        console.error('Failed to delete inventory:', invError);
+                        // Still remove from local state even if DB delete fails
+                        setInventory(prev => prev.filter(item => item.ingredientId !== ingredientId));
+                    }
+                } else {
+                    setInventory(prev => prev.filter(item => item.ingredientId !== ingredientId));
+                }
+            }
         } catch (error) {
             console.error('Failed to delete ingredient from Supabase:', error);
             throw error;

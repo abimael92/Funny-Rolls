@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { Recipe, Ingredient, Tool } from "@/lib/types"
 import { X, Plus, Trash2, Save, Check, ChevronUp, ChevronDown, FileText, Egg, Wrench, ListChecks } from "lucide-react"
 import { supabase } from "@/lib/supabase"
@@ -551,10 +552,12 @@ export function RecipeManagerModal({
                                         {previewImage || formData.image ? (
                                             <div className="space-y-3">
                                                 <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-300 bg-gray-100">
-                                                    <img
-                                                        src={previewImage || formData.image}
+                                                    <Image
+                                                        src={previewImage || formData.image || '/placeholder.svg'}
                                                         alt="Recipe preview"
-                                                        className="w-full h-full object-cover"
+                                                        fill
+                                                        className="object-cover"
+                                                        unoptimized={previewImage?.startsWith('blob:') || formData.image?.startsWith('blob:')}
                                                     />
                                                     {mode !== 'view' && (
                                                         <button
