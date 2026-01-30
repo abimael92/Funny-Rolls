@@ -113,6 +113,30 @@ export interface PaymentIntent {
 	createdAt: string;
 }
 
+// -----------------------------------------------------------------------------
+// Order (POS Phase 1 – mock-only)
+// -----------------------------------------------------------------------------
+
+export type OrderStatus = "pending" | "completed" | "cancelled";
+
+export interface OrderItem {
+	productId: number;
+	productName?: string;
+	quantity: number;
+	unitPrice: number;
+	lineTotal: number;
+}
+
+export interface Order {
+	id: string;
+	items: OrderItem[];
+	subtotal: number;
+	tax: number;
+	total: number;
+	status: OrderStatus;
+	createdAt: string;
+}
+
 
 
 export const PRODUCTION_STATUSES = [
