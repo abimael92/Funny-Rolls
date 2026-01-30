@@ -14,7 +14,7 @@ import { CustomSelect } from './CustomSelect';
 import { ToolsPanel } from './ToolsPanel';
 import { CloseButton, ActionButton } from './ModalHelpers';
 import { Tool } from '@/lib/types';
-import { defaultTools, } from '@/lib/data';
+import { getTools } from '@/lib/services';
 
 // List,
 interface IngredientsPanelProps {
@@ -49,7 +49,7 @@ export function IngredientsPanel({
         name: '', price: 0, unit: '', amount: 0, minAmount: 0, minAmountUnit: ''
     });
     const [showTotalCostModal, setShowTotalCostModal] = useState(false);
-    const [tools, setTools] = useState<Tool[]>(defaultTools);
+    const [tools, setTools] = useState<Tool[]>(() => [...getTools()]);
     const [showTools, setShowTools] = useState(false);
     const [showIngredientsModal, setShowIngredientsModal] = useState(false);
     const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
