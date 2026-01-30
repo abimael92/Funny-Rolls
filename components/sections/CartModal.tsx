@@ -8,16 +8,27 @@ export function CartModal({
   cart,
   updateQuantity,
   removeFromCart,
-  totalPrice,
+  subtotal,
+  tax,
+  total,
+  onPay,
 }: {
   isOpen: boolean
   onClose: () => void
   cart: CartItem[]
   updateQuantity: (id: number, qty: number) => void
   removeFromCart: (id: number) => void
-  totalPrice: number
+  subtotal: number
+  tax: number
+  total: number
+  onPay: () => void
 }) {
   if (!isOpen) return null
+
+  const handlePay = () => {
+    if (cart.length === 0) return
+    onPay()
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
@@ -41,12 +52,22 @@ export function CartModal({
                 </div>
               </div>
             ))}
-            <div className="text-right font-bold text-lg">Total: ${totalPrice.toFixed(2)}</div>
+            <div className="text-right space-y-1">
+              <div className="text-gray-600">Subtotal: ${subtotal.toFixed(2)}</div>
+              <div className="text-gray-600">Impuesto: ${tax.toFixed(2)}</div>
+              <div className="font-bold text-lg">Total: ${total.toFixed(2)}</div>
+            </div>
           </div>
         )}
         <div className="mt-6 flex justify-end gap-4">
           <Button variant="outline" onClick={onClose}>Cerrar</Button>
-          <Button className="bg-amber-600 hover:bg-amber-700 text-white">Pagar</Button>
+          <Button
+            className="bg-amber-600 hover:bg-amber-700 text-white"
+            onClick={handlePay}
+            disabled={cart.length === 0}
+          >
+            Pagar
+          </Button>
         </div>
       </div>
     </div>

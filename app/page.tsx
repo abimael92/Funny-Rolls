@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Product, CartItem } from "@/lib/types"
-import { getProducts } from "@/lib/services"
+import { getProducts, getCartTotals, createOrderFromCart } from "@/lib/services"
 import { Hero } from "@/components/sections/Hero"
 import { Navbar } from "@/components/sections/Navbar"
 import { MenuSection } from "@/components/sections/MenuSection"
@@ -10,7 +10,7 @@ import { About } from "@/components/sections/About"
 import { Contact } from "@/components/sections/Contact"
 import { Footer } from "@/components/sections/Footer"
 import { CartModal } from "@/components/sections/CartModal"
-import { supabase } from "@/lib/supabase" 
+import { supabase } from "@/lib/supabase"
 
 export default function FunnyRollsPage() {
   const [isCartOpen, setIsCartOpen] = useState(false)
@@ -43,14 +43,18 @@ export default function FunnyRollsPage() {
     ))
   }
 
-  const getTotalPrice = () =>
-    cart.reduce((total, item) => total + item.price * item.quantity, 0)
-    
+  const cartTotals = getCartTotals(cart)
 
+  const handlePay = () => {
+    if (cart.length === 0) return
+    createOrderFromCart(cart)
+    setCart([])
+    setIsCartOpen(false)
+  }
 
   // Combine with existing products (single source of truth via services)
   const allProducts = [...getProducts(), ...dbProducts]
-    
+
   useEffect(() => {
     const fetchRecipes = async () => {
       const { data } = await supabase.from('recipes').select('*')
@@ -85,7 +89,10 @@ export default function FunnyRollsPage() {
         cart={cart}
         updateQuantity={updateQuantity}
         removeFromCart={removeFromCart}
-        totalPrice={getTotalPrice()}
+        subtotal={cartTotals.subtotal}
+        tax={cartTotals.tax}
+        total={cartTotals.total}
+        onPay={handlePay}
       />
     </div>
   )
