@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, Trash2, Download, Upload, Wrench } from 'lucide-react';
 import { Calculator } from 'lucide-react';
-import { products, toolCategories } from '@/lib/data';
+import { getProducts, getToolCategories } from '@/lib/services';
 import { Ingredient, Recipe, Tool, ToolUsage } from '@/lib/types';
 import {
     calculateRecipeCost,
@@ -547,7 +547,7 @@ export function RecipeCalculatorPanel({
                         <label className='block text-lg font-medium mb-2'>
                             Seleccionar Receta
                         </label>
-                        {products.filter((p) => p.available).length === 0 ? (
+                        {getProducts().filter((p) => p.available).length === 0 ? (
                             <div className='p-4 bg-amber-50 border border-amber-200 rounded text-center'>
                                 <p className='text-amber-700'>No hay recetas disponibles</p>
                             </div>
@@ -555,18 +555,18 @@ export function RecipeCalculatorPanel({
                             <CustomSelect
                                 value={selectedRecipe.id}
                                 onChange={(value) => {
-                                    const product = products.find((p) => p.recipe.id === value);
+                                    const product = getProducts().find((p) => p.recipe.id === value);
                                     if (product) {
                                         setSelectedRecipe(product.recipe);
                                         setIsCardFlipped(false);
                                         setIsEditingSteps(false);
                                     }
                                 }}
-                                options={products
-                                    .filter((product) => product.available)
-                                    .map((product) => ({
-                                        value: product.recipe.id,
-                                        label: product.recipe.name,
+                                options={getProducts()
+                                    .filter((p) => p.available)
+                                    .map((p) => ({
+                                        value: p.recipe.id,
+                                        label: p.recipe.name,
                                     }))}
                                 placeholder='Seleccionar receta'
                                 color='amber'
@@ -915,7 +915,7 @@ export function RecipeCalculatorPanel({
                                                         {tool.type}
                                                     </span>
                                                     <span className='text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full'>
-                                                        {toolCategories[tool.type]?.find(
+                                                        {getToolCategories()[tool.type]?.find(
                                                             (cat) => cat.value === tool.category
                                                         )?.label || 'General'}
                                                     </span>
@@ -1291,7 +1291,7 @@ export function RecipeCalculatorPanel({
                                 Seleccionar Receta
                             </label>
 
-                            {products.filter((p) => p.available).length === 0 ? (
+                            {getProducts().filter((p) => p.available).length === 0 ? (
                                 <div className='p-4 bg-amber-50 border border-amber-200 rounded text-center'>
                                     <p className='text-amber-700'>No hay recetas disponibles</p>
                                 </div>
@@ -1299,14 +1299,14 @@ export function RecipeCalculatorPanel({
                                 <CustomSelect
                                     value={selectedRecipe.id}
                                     onChange={(value) => {
-                                        const product = products.find((p) => p.recipe.id === value);
+                                        const product = getProducts().find((p) => p.recipe.id === value);
                                         if (product) {
                                             setSelectedRecipe(product.recipe);
                                             setIsCardFlipped(false);
                                             setIsEditingSteps(false);
                                         }
                                     }}
-                                    options={products
+                                    options={getProducts()
                                         .filter((product) => product.available)
                                         .map((product) => ({
                                             value: product.recipe.id,
@@ -1542,7 +1542,7 @@ export function RecipeCalculatorPanel({
                                                     <div className='flex items-center justify-between gap-4'>
                                                         <div className='flex items-center gap-2 text-sm text-gray-600'>
                                                             <span>
-                                                                {toolCategories[tool.type]?.find(
+                                                                {getToolCategories()[tool.type]?.find(
                                                                     (cat) => cat.value === tool.category
                                                                 )?.label || 'General'}
                                                             </span>

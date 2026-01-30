@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { products, defaultIngredients, defaultTools } from "@/lib/data";
+import { getProducts, getIngredients, getTools, getProductionRecords } from "@/lib/services";
 import { Ingredient, InventoryItem, Recipe, ProductionRecord, Tool } from '@/lib/types';
 import { MobileViewSwitcher } from './MobileViewSwitcher'
 import { IngredientsPanel } from './IngredientsPanel'
@@ -10,12 +10,11 @@ import { ProductionTrackerPanel } from './ProductionTrackerPanel'
 import { RecipeManagerModal } from './RecipeManagerModal'
 import { Database, BookOpen, ChevronDown } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-import { generateMockProductionData } from '@/lib/mock-data'
 
 export function RecipeCalculator() {
-    const [ingredients, setIngredients] = useState<Ingredient[]>(defaultIngredients);
-    const [tools, setTools] = useState<Tool[]>(defaultTools);
-    const [recipes, setRecipes] = useState<Recipe[]>(products.map(p => p.recipe))
+    const [ingredients, setIngredients] = useState<Ingredient[]>(() => [...getIngredients()]);
+    const [tools, setTools] = useState<Tool[]>(() => [...getTools()]);
+    const [recipes, setRecipes] = useState<Recipe[]>(() => getProducts().map(p => p.recipe))
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe>(recipes[0])
     const [mobileView, setMobileView] = useState<'ingredients' | 'calculator' | 'production'>('calculator')
     // const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>([])
@@ -33,9 +32,7 @@ export function RecipeCalculator() {
         mode: 'add'
     })
 
-    const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>(() => {
-        return generateMockProductionData(products.map(p => p.recipe), products)
-    })
+    const [productionHistory, setProductionHistory] = useState<ProductionRecord[]>(() => [...getProductionRecords()])
 
     const [ingredientsInDatabase, setIngredientsInDatabase] = useState<Set<string>>(new Set());
     const [toolsInDatabase, setToolsInDatabase] = useState<Set<string>>(new Set());
@@ -191,18 +188,18 @@ export function RecipeCalculator() {
 
     // Load data from localStorage
     useEffect(() => {
-        const savedIngredients = safeGetLocalStorage('recipe-calculator-ingredients', defaultIngredients)
-        const savedRecipes = safeGetLocalStorage('recipe-calculator-recipes', products.map(p => p.recipe))
+        const savedIngredients = safeGetLocalStorage('recipe-calculator-ingredients', [...getIngredients()])
+        const savedRecipes = safeGetLocalStorage('recipe-calculator-recipes', getProducts().map(p => p.recipe))
         const savedProductionHistory = safeGetLocalStorage('recipe-calculator-production-history', [])
         const savedInventory = safeGetLocalStorage('recipe-calculator-inventory', []);
-        const savedTools = safeGetLocalStorage('recipe-calculator-tools', defaultTools);
+        const savedTools = safeGetLocalStorage('recipe-calculator-tools', [...getTools()]);
 
         setIngredients(savedIngredients);
         setTools(savedTools);
 
         // FIX: Add missing tools to saved recipes
         const recipesWithTools = savedRecipes.map((savedRecipe: Recipe) => {
-            const defaultRecipe = products.find(p => p.recipe.id === savedRecipe.id)?.recipe;
+            const defaultRecipe = getProducts().find(p => p.recipe.id === savedRecipe.id)?.recipe;
 
             // If saved recipe doesn't have tools, add them from default
             if (!savedRecipe.tools && defaultRecipe?.tools) {
@@ -227,7 +224,7 @@ export function RecipeCalculator() {
         if (savedInventory.length > 0) {
             setInventory(savedInventory)
         } else {
-            const initialInventory = defaultIngredients.map(ingredient => ({
+            const initialInventory = getIngredients().map(ingredient => ({
                 ingredientId: ingredient.id,
                 currentStock: 0,
                 unit: ingredient.unit,
