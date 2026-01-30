@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ChevronDown, Info, Save, Trash2, Zap, Utensils, Star, DollarSign, Edit } from "lucide-react";
 import { Tool, TOOL_CATEGORY_CONFIGS } from '@/lib/types';
-import { toolCategories } from '@/lib/data';
+import { getToolCategories } from '@/lib/services';
 import { CloseButton, ActionButton } from './ModalHelpers';
 import { EditableToolRow } from './EditableToolRow';
 import { CustomSelect } from './CustomSelect';
@@ -232,7 +232,7 @@ export function ToolsPanel({ tools, setTools, saveToolToSupabase, deleteToolFrom
                                             const newType = selectedValue as 'consumible' | 'herramienta' | 'equipo';
 
                                             // FIX: Use type assertion to access toolCategories
-                                            const categories = (toolCategories as Record<string, Array<{ value: string; label: string }>>)[newType] || [];
+                                            const categories = (getToolCategories() as Record<string, Array<{ value: string; label: string }>>)[newType] || [];
                                             const defaultCategory = categories[0]?.value || 'general';
 
                                             const categoryConfig = TOOL_CATEGORY_CONFIGS[defaultCategory];
@@ -298,7 +298,7 @@ export function ToolsPanel({ tools, setTools, saveToolToSupabase, deleteToolFrom
                                         }}
                                         options={
                                             // FIX: Use type assertion (toolCategories as any)[newTool.type]
-                                            ((toolCategories as Record<string, Array<{ value: string; label: string }>>)[newTool.type] || []).map((category) => ({
+                                            ((getToolCategories() as Record<string, Array<{ value: string; label: string }>>)[newTool.type] || []).map((category) => ({
                                                 value: category.value,
                                                 label: category.label
                                             }))
@@ -306,7 +306,7 @@ export function ToolsPanel({ tools, setTools, saveToolToSupabase, deleteToolFrom
                                         placeholder={
                                             !newTool.type
                                                 ? "Primero selecciona un tipo"
-                                                : (toolCategories[newTool.type as keyof typeof toolCategories]?.length > 0)
+                                                : (getToolCategories()[newTool.type as keyof ReturnType<typeof getToolCategories>]?.length > 0)
                                                     ? "Seleccionar categoría"
                                                     : "No hay categorías disponibles"
                                         }
@@ -534,7 +534,7 @@ export function ToolsPanel({ tools, setTools, saveToolToSupabase, deleteToolFrom
             {/* Tools List */}
             <div className="space-y-4 max-h-292 overflow-y-auto pr-2">
                 {tools.map((tool) => {
-                    const categoryLabel = toolCategories[tool.type as keyof typeof toolCategories]?.find(cat => cat.value === tool.category)?.label || 'General'
+                    const categoryLabel = getToolCategories()[tool.type as keyof ReturnType<typeof getToolCategories>]?.find(cat => cat.value === tool.category)?.label || 'General'
 
                     return (
                         <div
@@ -706,7 +706,7 @@ export function ToolsPanel({ tools, setTools, saveToolToSupabase, deleteToolFrom
                             <div className="p-6 overflow-y-auto max-h-96">
                                 <div className="space-y-3">
                                     {tools.map((tool) => {
-                                        const categoryLabel = (toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General';
+                                        const categoryLabel = (getToolCategories()[tool.type as keyof ReturnType<typeof getToolCategories>] || []).find(cat => cat.value === tool.category)?.label || 'General';
 
                                         return (
                                             <div key={tool.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
@@ -793,7 +793,7 @@ export function ToolsPanel({ tools, setTools, saveToolToSupabase, deleteToolFrom
                                                 <div className="flex-1">
                                                     <div className="font-semibold text-gray-900">{tool.name}</div>
                                                     <div className="text-sm text-gray-600 mt-1 capitalize">
-                                                        {tool.type} • {(toolCategories[tool.type as keyof typeof toolCategories] || []).find(cat => cat.value === tool.category)?.label || 'General'}
+                                                        {tool.type} • {(getToolCategories()[tool.type as keyof ReturnType<typeof getToolCategories>] || []).find(cat => cat.value === tool.category)?.label || 'General'}
                                                     </div>
                                                 </div>
                                                 <div className="text-right">

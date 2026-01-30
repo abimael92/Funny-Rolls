@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChefHat, Edit, FlipHorizontal, Plus, Save, Trash2, CheckCircle } from "lucide-react"
 import Image from "next/image"
-import { products } from "@/lib/data"
+import { getProducts } from "@/lib/services"
 import { Recipe } from '@/lib/types'
 import { CustomNumberInput } from './CustomNumberInput'
 import { useState } from "react"  // Add this import
@@ -44,7 +44,7 @@ export function FlipCard({
     addStep,
     saveSteps
 }: FlipCardProps) {
-    const product = products.find(p => p.name === selectedRecipe.name)
+    const product = getProducts().find(p => p.name === selectedRecipe.name)
     const steps = selectedRecipe.steps || []
 
     // Add state for completed steps
