@@ -1,7 +1,8 @@
 // lib/data.ts
-import { Product, Ingredient, Tool } from './types';
+import type { Product, Ingredient, Tool } from "./types";
+import { costPerUnit, marginPercent } from "./calculations";
+import { buildMockSalesAndPaymentIntents } from "./mock-sales";
 
-// lib/data.ts
 export const defaultIngredients: Ingredient[] = [
 	{ id: '1', name: 'Harina', price: 25, unit: 'kg', amount: 1, minAmount: 0.8 },
 	{ id: '2', name: 'Azúcar', price: 18, unit: 'kg', amount: 1, minAmount: 0.2 },
@@ -55,10 +56,15 @@ export const defaultIngredients: Ingredient[] = [
 		id: '8',
 		name: 'Sal',
 		price: 15,
-		unit: 'g', // Change from kg to g!
-		amount: 1000, // 1kg in grams
+		unit: 'g',
+		amount: 1000,
 		minAmount: 20,
 	},
+	{ id: '9', name: 'Cacao en polvo', price: 85, unit: 'kg', amount: 1, minAmount: 0.1 },
+	{ id: '10', name: 'Mermelada de fresa', price: 45, unit: 'kg', amount: 1, minAmount: 0.2 },
+	{ id: '11', name: 'Arándanos', price: 120, unit: 'kg', amount: 1, minAmount: 0.15 },
+	{ id: '12', name: 'Caramelo', price: 90, unit: 'kg', amount: 1, minAmount: 0.1 },
+	{ id: '13', name: 'Queso crema', price: 95, unit: 'kg', amount: 1, minAmount: 0.2 },
 
 	// Add more non-standard units as needed
 	{
@@ -139,7 +145,7 @@ export const defaultIngredients: Ingredient[] = [
 	},
 ];
 
-export const products: Product[] = [
+const rawProducts: Product[] = [
 	{
 		id: 1,
 		name: 'Roll Clásico Risueño',
@@ -612,3 +618,18 @@ export const toolCategories = {
 		{ value: 'profesional', label: 'Profesional' },
 	],
 };
+
+export const products: Product[] = rawProducts.map((p) => {
+	const cost = costPerUnit(p.recipe, defaultIngredients, defaultTools);
+	const price = p.price;
+	const margin = marginPercent(price, cost);
+	return {
+		...p,
+		price,
+		recipe: { ...p.recipe, sellingPrice: price, profitMargin: margin },
+	};
+});
+
+const { sales, paymentIntents } = buildMockSalesAndPaymentIntents(products);
+export const mockSales = sales;
+export const mockPaymentIntents = paymentIntents;

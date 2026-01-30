@@ -1,14 +1,8 @@
 // lib/types.ts
-export interface Product {
-	id: number;
-	name: string;
-	price: number;
-	image: string;
-	description: string;
-	rating: number;
-	available: boolean;
-	recipe: Recipe;
-}
+// -----------------------------------------------------------------------------
+// Domain models: Product, Recipe, Ingredient, Tool, Sale, SaleItem, PaymentIntent.
+// Cost, price, margin, and tax are calculated centrally via lib/calculations.
+// -----------------------------------------------------------------------------
 
 export interface Ingredient {
 	id: string;
@@ -20,8 +14,21 @@ export interface Ingredient {
 	minAmountUnit?: string;
 	category?: IngredientCategory;
 	allergenInfo?: string[];
-	containsAmount?: number; // For non-standard units
-	containsUnit?: string; // For non-standard units
+	containsAmount?: number;
+	containsUnit?: string;
+}
+
+export interface RecipeIngredient {
+	ingredientId: string;
+	amount: number;
+}
+
+export type ToolUsage = "full" | "partial" | "depreciated";
+
+export interface RecipeTool {
+	toolId: string;
+	usage?: ToolUsage;
+	usagePercentage?: number;
 }
 
 export interface Recipe {
@@ -37,15 +44,73 @@ export interface Recipe {
 	image?: string;
 }
 
-export interface RecipeIngredient {
-	ingredientId: string;
-	amount: number;
+export interface Product {
+	id: number;
+	name: string;
+	price: number;
+	image: string;
+	description: string;
+	rating: number;
+	available: boolean;
+	recipe: Recipe;
 }
 
 export interface CartItem extends Product {
 	quantity: number;
-	customizations?: string[]; // For custom orders
+	customizations?: string[];
 	specialInstructions?: string;
+}
+
+export type SaleStatus =
+	| "draft"
+	| "pending"
+	| "confirmed"
+	| "preparing"
+	| "ready"
+	| "completed"
+	| "cancelled";
+
+export interface SaleItem {
+	productId: number;
+	productName?: string;
+	quantity: number;
+	unitPrice: number;
+	lineTotal: number;
+	customizations?: string[];
+	notes?: string;
+}
+
+export interface Sale {
+	id: string;
+	status: SaleStatus;
+	items: SaleItem[];
+	subtotal: number;
+	taxRate: number;
+	taxAmount: number;
+	total: number;
+	currency: string;
+	createdAt: string;
+	customerName?: string;
+	customerPhone?: string;
+	notes?: string;
+}
+
+export type PaymentIntentStatus =
+	| "created"
+	| "pending"
+	| "succeeded"
+	| "failed"
+	| "cancelled";
+
+export interface PaymentIntent {
+	id: string;
+	saleId: string;
+	amount: number;
+	currency: string;
+	status: PaymentIntentStatus;
+	idempotencyKey?: string;
+	provider?: string;
+	createdAt: string;
 }
 
 
@@ -137,16 +202,12 @@ export const TOOL_CATEGORY_CONFIGS: Record<string, ToolCategoryConfig> = {
 
 	// Default fallback
 	general: { batchesPerYear: 400, yearsLifespan: 3, recoveryRate: 0.1 },
+	// Aliases used by mock tools (data.ts)
+	medicion: { batchesPerYear: 200, yearsLifespan: 3, recoveryRate: 0.1 },
+	mezcla: { batchesPerYear: 400, yearsLifespan: 2, recoveryRate: 0.05 },
+	electrodomestico: { batchesPerYear: 500, yearsLifespan: 5, recoveryRate: 0.1 },
+	cocina: { batchesPerYear: 300, yearsLifespan: 3, recoveryRate: 0.1 },
 };
-
-export type ToolUsage = 'full' | 'partial' | 'depreciated';
-
-export interface RecipeTool {
-	toolId: string;
-	usage?: ToolUsage;
-	usagePercentage?: number; // For partial usage
-}
-
 
 export interface UnitInfo {
 	unit: string;
@@ -225,26 +286,3 @@ export interface ProductionRecord {
 
 
 
-export interface Order {
-	id: string;
-	customerName: string;
-	customerPhone: string;
-	items: OrderItem[];
-	total: number;
-	status:
-		| 'pending'
-		| 'confirmed'
-		| 'preparing'
-		| 'ready'
-		| 'completed'
-		| 'cancelled';
-	orderDate: string;
-	pickupDate: string;
-	notes?: string;
-}
-
-export interface OrderItem {
-	productId: number;
-	quantity: number;
-	customizations?: string[];
-}
