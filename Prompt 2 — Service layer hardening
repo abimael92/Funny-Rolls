@@ -1,0 +1,6 @@
+Create or refactor service layer to fully abstract data access.
+Rules:
+- UI cannot read mock data directly
+- Services are read-only
+- Single source of truth
+No mutations yet.
