@@ -22,5 +22,8 @@ export {
 	getOrderById,
 	listOrders,
 	getCartTotals,
+	getDailySalesSummary,
 	type CartTotals,
+	type CreateOrderPayload,
+	type DailySalesSummary,
 } from "./orders";

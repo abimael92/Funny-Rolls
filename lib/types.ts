@@ -114,10 +114,12 @@ export interface PaymentIntent {
 }
 
 // -----------------------------------------------------------------------------
-// Order (POS Phase 1 – mock-only)
+// Order (POS – mock-only, in-store)
 // -----------------------------------------------------------------------------
 
 export type OrderStatus = "pending" | "completed" | "cancelled";
+
+export type OrderPaymentMethod = "cash" | "mock";
 
 export interface OrderItem {
 	productId: number;
@@ -135,6 +137,10 @@ export interface Order {
 	total: number;
 	status: OrderStatus;
 	createdAt: string;
+	notes?: string;
+	paymentMethod?: OrderPaymentMethod;
+	amountReceived?: number;
+	changeDue?: number;
 }
 
 

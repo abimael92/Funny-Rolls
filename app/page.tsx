@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Product, CartItem } from "@/lib/types"
-import { getProducts, getCartTotals, createOrderFromCart } from "@/lib/services"
+import { getProducts, getCartTotals, createOrderFromCart, getDailySalesSummary } from "@/lib/services"
 import { Hero } from "@/components/sections/Hero"
 import { Navbar } from "@/components/sections/Navbar"
 import { MenuSection } from "@/components/sections/MenuSection"
@@ -10,10 +10,12 @@ import { About } from "@/components/sections/About"
 import { Contact } from "@/components/sections/Contact"
 import { Footer } from "@/components/sections/Footer"
 import { CartModal } from "@/components/sections/CartModal"
+import { DailySalesSummaryModal } from "@/components/sections/DailySalesSummaryModal"
 import { supabase } from "@/lib/supabase"
 
 export default function FunnyRollsPage() {
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false)
   const [cart, setCart] = useState<CartItem[]>([])
   const [dbProducts, setDbProducts] = useState<Product[]>([])
 
@@ -43,14 +45,10 @@ export default function FunnyRollsPage() {
     ))
   }
 
-  const cartTotals = getCartTotals(cart)
+  const getTotalPrice = () =>
+    cart.reduce((total, item) => total + item.price * item.quantity, 0)
+    
 
-  const handlePay = () => {
-    if (cart.length === 0) return
-    createOrderFromCart(cart)
-    setCart([])
-    setIsCartOpen(false)
-  }
 
   // Combine with existing products (single source of truth via services)
   const allProducts = [...getProducts(), ...dbProducts]
@@ -77,7 +75,11 @@ export default function FunnyRollsPage() {
 
   return (
     <div className="min-h-screen bg-[#FFF5E6]">
-      <Navbar cart={cart} onCartOpen={() => setIsCartOpen(true)} />
+      <Navbar
+        cart={cart}
+        onCartOpen={() => setIsCartOpen(true)}
+        onSalesSummaryOpen={() => setIsSummaryOpen(true)}
+      />
       <Hero />
       <MenuSection products={allProducts} addToCart={addToCart} />
       <About />
@@ -89,10 +91,7 @@ export default function FunnyRollsPage() {
         cart={cart}
         updateQuantity={updateQuantity}
         removeFromCart={removeFromCart}
-        subtotal={cartTotals.subtotal}
-        tax={cartTotals.tax}
-        total={cartTotals.total}
-        onPay={handlePay}
+        totalPrice={getTotalPrice()}
       />
     </div>
   )

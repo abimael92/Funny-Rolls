@@ -2,7 +2,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { CartItem } from "@/lib/types"
-import { ShoppingCart, Menu, X } from "lucide-react"
+import { ShoppingCart, Menu, X, BarChart3 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -10,9 +10,10 @@ import { usePathname, useRouter } from "next/navigation"
 interface NavbarProps {
   cart: CartItem[]
   onCartOpen: () => void
+  onSalesSummaryOpen?: () => void
 }
 
-export function Navbar({ cart, onCartOpen }: NavbarProps) {
+export function Navbar({ cart, onCartOpen, onSalesSummaryOpen }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -64,6 +65,16 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
         {/* Desktop Menu Right */}
         <div className="hidden md:flex flex-col items-end gap-2 ml-auto mt-5">
 
+          {onSalesSummaryOpen != null && (
+            <Button
+              variant="outline"
+              onClick={onSalesSummaryOpen}
+              className="rounded-full px-4 py-2 flex items-center gap-2 border-amber-700 text-amber-800 hover:bg-amber-50"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Resumen
+            </Button>
+          )}
           <Button
             onClick={onCartOpen}
             className="relative bg-amber-600 hover:bg-amber-700 text-white rounded-full px-4 py-2 flex items-center gap-2"
@@ -117,6 +128,17 @@ export function Navbar({ cart, onCartOpen }: NavbarProps) {
 
         {/* Mobile Menu Right */}
         <div className="md:hidden flex items-center gap-2 absolute right-6 top-1/2 -translate-y-1/2">
+          {onSalesSummaryOpen != null && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onSalesSummaryOpen}
+              className="rounded-full border-amber-700 text-amber-800 hover:bg-amber-50"
+              aria-label="Resumen ventas"
+            >
+              <BarChart3 className="w-5 h-5" />
+            </Button>
+          )}
           <Button
             onClick={onCartOpen}
             className="relative bg-amber-600 hover:bg-amber-700 text-white rounded-full px-3 py-2 flex items-center gap-1"
