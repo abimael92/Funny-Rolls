@@ -1,6 +1,5 @@
 /**
- * Orders service – POS Phase 1 mock-only.
- * UI must use this service for order creation and reads; no direct order-store or localStorage access.
+ * Orders service – POS mock-only. UI must use this for order creation and reads.
  */
 
 import type { CartItem, Order, OrderItem } from "../types";
@@ -13,11 +12,17 @@ import {
 } from "../calculations";
 import * as store from "../order-store";
 
-/**
- * Build order items and totals from cart using centralized calculations.
- * No duplication of pricing logic.
- */
-function cartToOrderPayload(cart: CartItem[]): Omit<Order, "id" | "createdAt"> {
+export interface CreateOrderPayload {
+	notes?: string;
+	paymentMethod: "cash" | "mock";
+	amountReceived?: number;
+	changeDue?: number;
+}
+
+function cartToOrderPayload(
+	cart: CartItem[],
+	payload: CreateOrderPayload
+): Omit<Order, "id" | "createdAt"> {
 	const items: OrderItem[] = cart.map((item) => ({
 		productId: item.id,
 		productName: item.name,
@@ -33,43 +38,39 @@ function cartToOrderPayload(cart: CartItem[]): Omit<Order, "id" | "createdAt"> {
 		subtotal,
 		tax,
 		total,
-		status: "completed", // mock payment successful
+		status: "completed",
+		notes: payload.notes?.trim() || undefined,
+		paymentMethod: payload.paymentMethod,
+		amountReceived: payload.amountReceived,
+		changeDue: payload.changeDue,
 	};
 }
 
 /**
- * Create an order from the current cart and persist it.
- * Returns the created order (mock payment successful).
+ * Create an order from the current cart with notes and payment info. Persist and return order.
  */
-export function createOrderFromCart(cart: CartItem[]): Order {
-	const payload = cartToOrderPayload(cart);
-	return store.createOrder(payload);
+export function createOrderFromCart(
+	cart: CartItem[],
+	payload: CreateOrderPayload
+): Order {
+	const orderPayload = cartToOrderPayload(cart, payload);
+	return store.createOrder(orderPayload);
 }
 
-/**
- * Create and persist an order (e.g. for future use).
- */
 export function createOrder(
 	order: Omit<Order, "id" | "createdAt"> & { id?: string; createdAt?: string }
 ): Order {
 	return store.createOrder(order);
 }
 
-/**
- * Get a single order by id.
- */
 export function getOrderById(id: string): Order | null {
 	return store.getOrderById(id);
 }
 
-/**
- * List all orders (newest first).
- */
 export function listOrders(): Order[] {
 	return store.listOrders();
 }
 
-/** Cart totals using centralized tax rate and calculations. */
 export interface CartTotals {
 	subtotal: number;
 	tax: number;
@@ -77,7 +78,7 @@ export interface CartTotals {
 }
 
 /**
- * Compute subtotal, tax, and total for a cart. Use for display only; no persistence.
+ * Compute subtotal, tax, and total for a cart (display only).
  */
 export function getCartTotals(cart: CartItem[]): CartTotals {
 	const items = cart.map((c) => ({ quantity: c.quantity, unitPrice: c.price }));
@@ -85,4 +86,27 @@ export function getCartTotals(cart: CartItem[]): CartTotals {
 	const tax = saleTaxFromSubtotal(subtotal, DEFAULT_TAX_RATE);
 	const total = saleTotalFromSubtotal(subtotal, DEFAULT_TAX_RATE);
 	return { subtotal, tax, total };
+}
+
+export interface DailySalesSummary {
+	orderCount: number;
+	totalSales: number;
+	averageTicket: number;
+}
+
+/**
+ * Read-only daily sales summary (today's orders). Computed from OrderStore via service.
+ */
+export function getDailySalesSummary(): DailySalesSummary {
+	const orders = listOrders();
+	const today = new Date();
+	const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+	const todayOrders = orders.filter((o) => {
+		const d = o.createdAt.slice(0, 10);
+		return d === todayStr;
+	});
+	const totalSales = todayOrders.reduce((sum, o) => sum + o.total, 0);
+	const orderCount = todayOrders.length;
+	const averageTicket = orderCount > 0 ? totalSales / orderCount : 0;
+	return { orderCount, totalSales, averageTicket };
 }
