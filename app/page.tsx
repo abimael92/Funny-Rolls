@@ -45,10 +45,14 @@ export default function FunnyRollsPage() {
     ))
   }
 
-  const getTotalPrice = () =>
-    cart.reduce((total, item) => total + item.price * item.quantity, 0)
-    
+  const cartTotals = getCartTotals(cart)
 
+  const handleCompleteSale = (payload: Parameters<typeof createOrderFromCart>[1]) => {
+    if (cart.length === 0) return
+    createOrderFromCart(cart, payload)
+    setCart([])
+    setIsCartOpen(false)
+  }
 
   // Combine with existing products (single source of truth via services)
   const allProducts = [...getProducts(), ...dbProducts]
@@ -91,7 +95,15 @@ export default function FunnyRollsPage() {
         cart={cart}
         updateQuantity={updateQuantity}
         removeFromCart={removeFromCart}
-        totalPrice={getTotalPrice()}
+        subtotal={cartTotals.subtotal}
+        tax={cartTotals.tax}
+        total={cartTotals.total}
+        onCompleteSale={handleCompleteSale}
+      />
+      <DailySalesSummaryModal
+        isOpen={isSummaryOpen}
+        onClose={() => setIsSummaryOpen(false)}
+        summary={getDailySalesSummary()}
       />
     </div>
   )

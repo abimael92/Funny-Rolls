@@ -76,11 +76,6 @@ export function CartModal({
 
   if (!isOpen) return null
 
-  const handlePay = () => {
-    if (cart.length === 0) return
-    onPay()
-  }
-
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
       <div className="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -201,14 +196,22 @@ export function CartModal({
                   </Button>
                 </div>
               </div>
-            ))}
-            <div className="text-right font-bold text-lg">Total: ${totalPrice.toFixed(2)}</div>
-          </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-gray-600">Venta sin efectivo (registro interno).</p>
+                <Button
+                  className="w-full min-h-12 text-base bg-amber-600 hover:bg-amber-700 text-white"
+                  onClick={handleMockComplete}
+                >
+                  Completar venta
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => setPaymentMethod(null)}>
+                  ← Otra forma de pago
+                </Button>
+              </div>
+            )}
+          </>
         )}
-        <div className="mt-6 flex justify-end gap-4">
-          <Button variant="outline" onClick={onClose}>Cerrar</Button>
-          <Button className="bg-amber-600 hover:bg-amber-700 text-white">Pagar</Button>
-        </div>
       </div>
     </div>
   )
