@@ -53,8 +53,12 @@ export function createOrder(order: Omit<Order, "id" | "createdAt"> & { id?: stri
 		subtotal: order.subtotal,
 		tax: order.tax,
 		total: order.total,
-		status: order.status ?? "pending",
+		status: order.status ?? "completed",
 		createdAt,
+		notes: order.notes,
+		paymentMethod: order.paymentMethod,
+		amountReceived: order.amountReceived,
+		changeDue: order.changeDue,
 	};
 	const orders = readOrders();
 	orders.push(full);
