@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Product, CartItem } from "@/lib/types"
-import { products } from "@/lib/data"
+import { getProducts } from "@/lib/services"
 import { Hero } from "@/components/sections/Hero"
 import { Navbar } from "@/components/sections/Navbar"
 import { MenuSection } from "@/components/sections/MenuSection"
@@ -48,8 +48,8 @@ export default function FunnyRollsPage() {
     
 
 
-  // Combine with existing products
-  const allProducts = [...products, ...dbProducts]
+  // Combine with existing products (single source of truth via services)
+  const allProducts = [...getProducts(), ...dbProducts]
     
   useEffect(() => {
     const fetchRecipes = async () => {
