@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Tool } from '@/lib/types'
-import { toolCategories } from '@/lib/data'
+import { getToolCategories } from '@/lib/services'
 
 interface EditableToolRowProps {
     tool: Tool
@@ -33,7 +33,7 @@ export function EditableToolRow({ tool, onSave, onCancel }: EditableToolRowProps
                     value={editedTool.type}
                     onChange={(e) => {
                         const newType = e.target.value as 'consumible' | 'herramienta' | 'equipo'
-                        const defaultCategory = toolCategories[newType]?.[0]?.value || 'measuring'
+                        const defaultCategory = getToolCategories()[newType]?.[0]?.value || 'measuring'
                         setEditedTool({
                             ...editedTool,
                             type: newType,
@@ -52,7 +52,7 @@ export function EditableToolRow({ tool, onSave, onCancel }: EditableToolRowProps
                     onChange={(e) => setEditedTool({ ...editedTool, category: e.target.value })}
                     className="px-3 py-2 border-2 border-blue-300 rounded-lg"
                 >
-                    {toolCategories[editedTool.type as keyof typeof toolCategories]?.map(category => (
+                    {getToolCategories()[editedTool.type as keyof ReturnType<typeof getToolCategories>]?.map(category => (
                         <option key={category.value} value={category.value}>
                             {category.label}
                         </option>
