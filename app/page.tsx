@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Product, CartItem } from "@/lib/types"
-import { getProducts, getCartTotals, createOrderFromCart, getDailySalesSummary } from "@/lib/services"
+import { getProducts, getCartTotals, startCheckout, completePayment, getDailySalesSummary } from "@/lib/services"
 import { Hero } from "@/components/sections/Hero"
 import { Navbar } from "@/components/sections/Navbar"
 import { MenuSection } from "@/components/sections/MenuSection"
@@ -16,6 +16,7 @@ import { supabase } from "@/lib/supabase"
 export default function FunnyRollsPage() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isSummaryOpen, setIsSummaryOpen] = useState(false)
+  const [checkoutOrderId, setCheckoutOrderId] = useState<string | null>(null)
   const [cart, setCart] = useState<CartItem[]>([])
   const [dbProducts, setDbProducts] = useState<Product[]>([])
 
@@ -47,10 +48,17 @@ export default function FunnyRollsPage() {
 
   const cartTotals = getCartTotals(cart)
 
-  const handleCompleteSale = (payload: Parameters<typeof createOrderFromCart>[1]) => {
-    if (cart.length === 0) return
-    createOrderFromCart(cart, payload)
+  const handleStartCheckout = () => {
+    if (cart.length === 0) return null
+    const result = startCheckout(cart)
+    setCheckoutOrderId(result.orderId)
+    return result
+  }
+
+  const handleCompleteSale = (orderId: string, payload: Parameters<typeof completePayment>[1]) => {
+    completePayment(orderId, payload)
     setCart([])
+    setCheckoutOrderId(null)
     setIsCartOpen(false)
   }
 
@@ -91,13 +99,15 @@ export default function FunnyRollsPage() {
       <Footer />
       <CartModal
         isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
+        onClose={() => { setIsCartOpen(false); setCheckoutOrderId(null) }}
         cart={cart}
         updateQuantity={updateQuantity}
         removeFromCart={removeFromCart}
         subtotal={cartTotals.subtotal}
         tax={cartTotals.tax}
         total={cartTotals.total}
+        checkoutOrderId={checkoutOrderId}
+        onStartCheckout={handleStartCheckout}
         onCompleteSale={handleCompleteSale}
       />
       <DailySalesSummaryModal
