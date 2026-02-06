@@ -3,7 +3,8 @@
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { CartItem } from "@/lib/types"
-import type { CreateOrderPayload } from "@/lib/services"
+import type { CompletePaymentPayload, StartCheckoutResult } from "@/lib/services"
+import { getPaymentStatus } from "@/lib/services"
 
 export function CartModal({
   isOpen,
@@ -14,6 +15,8 @@ export function CartModal({
   subtotal,
   tax,
   total,
+  checkoutOrderId,
+  onStartCheckout,
   onCompleteSale,
 }: {
   isOpen: boolean
@@ -24,17 +27,21 @@ export function CartModal({
   subtotal: number
   tax: number
   total: number
-  onCompleteSale: (payload: CreateOrderPayload) => void
+  checkoutOrderId: string | null
+  onStartCheckout: () => StartCheckoutResult | null
+  onCompleteSale: (orderId: string, payload: CompletePaymentPayload) => void
 }) {
   const [step, setStep] = useState<"cart" | "payment">("cart")
   const [notes, setNotes] = useState("")
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "mock" | null>(null)
   const [amountReceived, setAmountReceived] = useState("")
+  const [alreadyPaidMessage, setAlreadyPaidMessage] = useState(false)
 
   const resetPaymentStep = useCallback(() => {
     setStep("cart")
     setPaymentMethod(null)
     setAmountReceived("")
+    setAlreadyPaidMessage(false)
   }, [])
 
   const handleClose = useCallback(() => {
@@ -45,14 +52,21 @@ export function CartModal({
 
   const goToPayment = () => {
     if (cart.length === 0) return
+    const result = onStartCheckout()
+    if (!result) return
+    if (result.alreadyPaid) {
+      setAlreadyPaidMessage(true)
+      return
+    }
     setStep("payment")
   }
 
   const handleCashComplete = () => {
+    if (!checkoutOrderId) return
     const received = parseFloat(amountReceived) || 0
     if (received < total) return
     const changeDue = received - total
-    onCompleteSale({
+    onCompleteSale(checkoutOrderId, {
       notes: notes.trim() || undefined,
       paymentMethod: "cash",
       amountReceived: received,
@@ -62,7 +76,8 @@ export function CartModal({
   }
 
   const handleMockComplete = () => {
-    onCompleteSale({
+    if (!checkoutOrderId) return
+    onCompleteSale(checkoutOrderId, {
       notes: notes.trim() || undefined,
       paymentMethod: "mock",
     })
@@ -121,6 +136,11 @@ export function CartModal({
                 </div>
               </div>
             )}
+            {alreadyPaidMessage && (
+              <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+                Este pedido ya fue completado. Puedes cerrar y continuar.
+              </div>
+            )}
             <div className="mt-6 flex justify-end gap-3">
               <Button variant="outline" onClick={handleClose} className="min-h-11 px-5">Cerrar</Button>
               <Button className="bg-amber-600 hover:bg-amber-700 text-white min-h-11 px-5" onClick={goToPayment} disabled={cart.length === 0}>
@@ -131,6 +151,17 @@ export function CartModal({
         ) : (
           <>
             <h2 className="text-2xl font-bold mb-4">Forma de pago</h2>
+
+            {/* Payment status (read-only via service) */}
+            {checkoutOrderId && (() => {
+              const statusInfo = getPaymentStatus(checkoutOrderId)
+              const label = statusInfo?.status === "initiated" ? "Pago iniciado" : statusInfo?.status === "paid" ? "Pagado" : statusInfo?.status ?? "—"
+              return (
+                <div className="mb-3 text-sm text-gray-600">
+                  Estado: <span className="font-medium text-amber-800">{label}</span>
+                </div>
+              )
+            })()}
 
             {/* Total due – emphasized */}
             <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-200 rounded-xl">
