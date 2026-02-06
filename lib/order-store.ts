@@ -59,6 +59,7 @@ export function createOrder(order: Omit<Order, "id" | "createdAt"> & { id?: stri
 		paymentMethod: order.paymentMethod,
 		amountReceived: order.amountReceived,
 		changeDue: order.changeDue,
+		paymentId: order.paymentId,
 	};
 	const orders = readOrders();
 	orders.push(full);
@@ -80,4 +81,20 @@ export function getOrderById(id: string): Order | null {
 export function listOrders(): Order[] {
 	const orders = readOrders();
 	return [...orders].reverse();
+}
+
+/**
+ * Update an existing order (e.g. set paymentId, status). Partial update.
+ * Returns the updated order or null if not found.
+ */
+export function updateOrder(
+	id: string,
+	updates: Partial<Pick<Order, "status" | "paymentId" | "notes" | "paymentMethod" | "amountReceived" | "changeDue">>
+): Order | null {
+	const orders = readOrders();
+	const index = orders.findIndex((o) => o.id === id);
+	if (index === -1) return null;
+	orders[index] = { ...orders[index]!, ...updates };
+	writeOrders(orders);
+	return orders[index]!;
 }

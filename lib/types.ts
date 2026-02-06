@@ -141,6 +141,29 @@ export interface Order {
 	paymentMethod?: OrderPaymentMethod;
 	amountReceived?: number;
 	changeDue?: number;
+	/** Set when checkout starts; one active payment per order. */
+	paymentId?: string;
+}
+
+// -----------------------------------------------------------------------------
+// Payment (Phase 2 – payment-ready, mock execution)
+// -----------------------------------------------------------------------------
+
+export type PaymentStatus = "initiated" | "authorized" | "paid" | "failed";
+
+export type PaymentMethodType = "cash" | "mock";
+
+export interface Payment {
+	id: string;
+	orderId: string;
+	method: PaymentMethodType;
+	amount: number;
+	status: PaymentStatus;
+	createdAt: string;
+	/** For cash: amount received from customer. */
+	amountReceived?: number;
+	/** For cash: change due. */
+	changeDue?: number;
 }
 
 
