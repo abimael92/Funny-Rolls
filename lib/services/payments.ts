@@ -5,12 +5,12 @@
 
 import type { CartItem, Order, OrderItem } from "../types";
 import {
-	DEFAULT_TAX_RATE,
+	// _DEFAULT_TAX_RATE,
 	lineTotal,
-	saleSubtotalFromItems,
-	saleTaxFromSubtotal,
-	saleTotalFromSubtotal,
-} from "../calculations";
+	// _saleSubtotalFromItems,
+	// _saleTaxFromSubtotal,
+	// _saleTotalFromSubtotal,
+} from '../calculations';
 import type { CartTotals } from "./orders";
 import { getCartTotals } from "./orders";
 import * as orderStore from "../order-store";
