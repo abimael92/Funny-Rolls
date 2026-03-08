@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack -p 2000",
     "build": "next build",
     "start": "next start ",
+    "db:audit": "tsx scripts/db-audit.ts",
     "lint": "next lint"
   },
   "dependencies": {
@@ -14,17 +15,19 @@
     "@aws-sdk/util-stream-node": "^3.370.0",
     "@headlessui/react": "^2.2.9",
     "@radix-ui/react-slot": "^1.2.3",
-    "@supabase/supabase-js": "^2.86.2",
+    "@supabase/supabase-js": "^2.98.0",
     "aws-sdk": "^2.1693.0",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.3.1",
     "lucide-react": "^0.542.0",
     "next": "^15.2.8",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-hot-toast": "^2.6.0",
     "react-to-print": "^3.2.0",
+    "stripe": "^14.0.0",
     "stream-browserify": "^3.0.0",
     "tailwind-merge": "^3.3.1"
   },
