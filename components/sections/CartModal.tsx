@@ -3,8 +3,15 @@
 import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { CartItem } from "@/lib/types"
-import type { CompletePaymentPayload, StartCheckoutResult } from "@/lib/services"
+import type { CompletePaymentPayload } from "@/lib/services"
 import { getPaymentStatus } from "@/lib/services"
+
+export type StartCheckoutResult = {
+  orderId: string
+  orderNumber?: string | null
+  alreadyPaid: boolean
+  paymentStatus: "initiated" | "authorized" | "paid" | "failed"
+}
 
 export function CartModal({
   isOpen,
@@ -16,6 +23,7 @@ export function CartModal({
   tax,
   total,
   checkoutOrderId,
+  checkoutOrderNumber,
   onStartCheckout,
   onCompleteSale,
 }: {
@@ -28,14 +36,16 @@ export function CartModal({
   tax: number
   total: number
   checkoutOrderId: string | null
-  onStartCheckout: () => StartCheckoutResult | null
-  onCompleteSale: (orderId: string, payload: CompletePaymentPayload) => void
+  checkoutOrderNumber?: string | null
+  onStartCheckout: (notes?: string) => Promise<StartCheckoutResult | null>
+  onCompleteSale: (orderId: string, payload: CompletePaymentPayload) => void | Promise<void>
 }) {
   const [step, setStep] = useState<"cart" | "payment">("cart")
   const [notes, setNotes] = useState("")
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "mock" | null>(null)
   const [amountReceived, setAmountReceived] = useState("")
   const [alreadyPaidMessage, setAlreadyPaidMessage] = useState(false)
+  const [isStartingCheckout, setIsStartingCheckout] = useState(false)
 
   const resetPaymentStep = useCallback(() => {
     setStep("cart")
@@ -50,23 +60,28 @@ export function CartModal({
     onClose()
   }, [onClose, resetPaymentStep])
 
-  const goToPayment = () => {
+  const goToPayment = async () => {
     if (cart.length === 0) return
-    const result = onStartCheckout()
-    if (!result) return
-    if (result.alreadyPaid) {
-      setAlreadyPaidMessage(true)
-      return
+    setIsStartingCheckout(true)
+    try {
+      const result = await onStartCheckout(notes.trim() || undefined)
+      if (!result) return
+      if (result.alreadyPaid) {
+        setAlreadyPaidMessage(true)
+        return
+      }
+      setStep("payment")
+    } finally {
+      setIsStartingCheckout(false)
     }
-    setStep("payment")
   }
 
-  const handleCashComplete = () => {
+  const handleCashComplete = async () => {
     if (!checkoutOrderId) return
     const received = parseFloat(amountReceived) || 0
     if (received < total) return
     const changeDue = received - total
-    onCompleteSale(checkoutOrderId, {
+    await onCompleteSale(checkoutOrderId, {
       notes: notes.trim() || undefined,
       paymentMethod: "cash",
       amountReceived: received,
@@ -75,9 +90,9 @@ export function CartModal({
     handleClose()
   }
 
-  const handleMockComplete = () => {
+  const handleMockComplete = async () => {
     if (!checkoutOrderId) return
-    onCompleteSale(checkoutOrderId, {
+    await onCompleteSale(checkoutOrderId, {
       notes: notes.trim() || undefined,
       paymentMethod: "mock",
     })
@@ -143,8 +158,8 @@ export function CartModal({
             )}
             <div className="mt-6 flex justify-end gap-3">
               <Button variant="outline" onClick={handleClose} className="min-h-11 px-5">Cerrar</Button>
-              <Button className="bg-amber-600 hover:bg-amber-700 text-white min-h-11 px-5" onClick={goToPayment} disabled={cart.length === 0}>
-                Pagar
+              <Button className="bg-amber-600 hover:bg-amber-700 text-white min-h-11 px-5" onClick={goToPayment} disabled={cart.length === 0 || isStartingCheckout}>
+                {isStartingCheckout ? "Creando pedido…" : "Pagar"}
               </Button>
             </div>
           </>
@@ -152,8 +167,13 @@ export function CartModal({
           <>
             <h2 className="text-2xl font-bold mb-4">Forma de pago</h2>
 
-            {/* Payment status (read-only via service) */}
-            {checkoutOrderId && (() => {
+            {/* Order number (API) or payment status (local) */}
+            {checkoutOrderNumber && (
+              <div className="mb-3 text-sm text-gray-600">
+                Pedido: <span className="font-medium text-amber-800">{checkoutOrderNumber}</span>
+              </div>
+            )}
+            {checkoutOrderId && !checkoutOrderNumber && (() => {
               const statusInfo = getPaymentStatus(checkoutOrderId)
               const label = statusInfo?.status === "initiated" ? "Pago iniciado" : statusInfo?.status === "paid" ? "Pagado" : statusInfo?.status ?? "—"
               return (

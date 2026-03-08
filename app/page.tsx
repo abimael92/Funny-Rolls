@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Product, CartItem } from "@/lib/types"
 import { getProducts, getCartTotals, startCheckout, completePayment, getDailySalesSummary } from "@/lib/services"
+import { createOrderApi, completeOrderApi } from "@/lib/order-api"
 import { Hero } from "@/components/sections/Hero"
 import { Navbar } from "@/components/sections/Navbar"
 import { MenuSection } from "@/components/sections/MenuSection"
@@ -13,10 +14,15 @@ import { CartModal } from "@/components/sections/CartModal"
 import { DailySalesSummaryModal } from "@/components/sections/DailySalesSummaryModal"
 import { supabase } from "@/lib/supabase"
 
+function isUuid(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+}
+
 export default function FunnyRollsPage() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isSummaryOpen, setIsSummaryOpen] = useState(false)
   const [checkoutOrderId, setCheckoutOrderId] = useState<string | null>(null)
+  const [checkoutOrderNumber, setCheckoutOrderNumber] = useState<string | null>(null)
   const [cart, setCart] = useState<CartItem[]>([])
   const [dbProducts, setDbProducts] = useState<Product[]>([])
 
@@ -48,19 +54,41 @@ export default function FunnyRollsPage() {
 
   const cartTotals = getCartTotals(cart)
 
-  const handleStartCheckout = () => {
+  const handleStartCheckout = useCallback(async (notes?: string) => {
     if (cart.length === 0) return null
+    const apiOrder = await createOrderApi(cart, { notes })
+    if (apiOrder) {
+      setCheckoutOrderId(apiOrder.id)
+      setCheckoutOrderNumber(apiOrder.order_number)
+      return { orderId: apiOrder.id, orderNumber: apiOrder.order_number, alreadyPaid: false, paymentStatus: "initiated" as const }
+    }
     const result = startCheckout(cart)
     setCheckoutOrderId(result.orderId)
-    return result
-  }
+    setCheckoutOrderNumber(null)
+    return { ...result, orderNumber: null }
+  }, [cart])
 
-  const handleCompleteSale = (orderId: string, payload: Parameters<typeof completePayment>[1]) => {
+  const handleCompleteSale = useCallback(async (orderId: string, payload: Parameters<typeof completePayment>[1]) => {
+    if (isUuid(orderId)) {
+      const ok = await completeOrderApi(orderId, {
+        paymentMethod: payload.paymentMethod,
+        amountReceived: payload.amountReceived,
+        changeDue: payload.changeDue,
+      })
+      if (ok) {
+        setCart([])
+        setCheckoutOrderId(null)
+        setCheckoutOrderNumber(null)
+        setIsCartOpen(false)
+        return
+      }
+    }
     completePayment(orderId, payload)
     setCart([])
     setCheckoutOrderId(null)
+    setCheckoutOrderNumber(null)
     setIsCartOpen(false)
-  }
+  }, [])
 
   // Combine with existing products (single source of truth via services)
   const allProducts = [...getProducts(), ...dbProducts]
@@ -99,7 +127,7 @@ export default function FunnyRollsPage() {
       <Footer />
       <CartModal
         isOpen={isCartOpen}
-        onClose={() => { setIsCartOpen(false); setCheckoutOrderId(null) }}
+        onClose={() => { setIsCartOpen(false); setCheckoutOrderId(null); setCheckoutOrderNumber(null) }}
         cart={cart}
         updateQuantity={updateQuantity}
         removeFromCart={removeFromCart}
@@ -107,6 +135,7 @@ export default function FunnyRollsPage() {
         tax={cartTotals.tax}
         total={cartTotals.total}
         checkoutOrderId={checkoutOrderId}
+        checkoutOrderNumber={checkoutOrderNumber}
         onStartCheckout={handleStartCheckout}
         onCompleteSale={handleCompleteSale}
       />
