@@ -62,7 +62,7 @@ El objetivo es que cualquier desarrollador pueda clonar el repo, configurar vari
 - Vista móvil adaptativa (flip-card).
 - Panel de producción (registro mock) y resumen.
 
-### E-commerce y POS (mock)
+### E-commerce y POS
 
 - Carrito con actualización de cantidades y totales (subtotal, impuesto, total).
 - Notas e instrucciones especiales por pedido.
@@ -90,8 +90,9 @@ No hay autenticación ni roles. La misma interfaz sirve para:
 | Componentes | shadcn/ui (button, card, badge), Radix, Headless UI |
 | Fuentes | Google Fonts (Pacifico, Inter) |
 | Iconos | Lucide React |
-| Datos (mock/local) | LocalStorage, capa de servicios en `lib/services` |
-| Backend (opcional) | Supabase (recetas, ingredientes), API Route upload (S3) |
+| Datos (mock/local) | LocalStorage (fallback), capa de servicios en `lib/services` |
+| Backend | Supabase (órdenes, pagos, ingredientes, recetas, inventario), API Routes (orders, payments, inventory, kitchen, receipts, reports), upload (S3) |
+| Pagos | Efectivo/mock; Stripe (opcional) para tarjeta |
 
 ---
 
@@ -220,6 +221,17 @@ funny-rolls/
 
 La UI consume datos **solo a través de `lib/services`**; no importa directamente `lib/data` ni el store.
 
+### Documentación POS (sistema de punto de venta)
+
+En la carpeta `docs/`:
+
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Flujo de datos y capas (orden, pago, inventario, cocina).
+- **[API.md](docs/API.md)** — Referencia de rutas API (orders, payments, inventory, kitchen, reports, receipts).
+- **[DATABASE.md](docs/DATABASE.md)** — Esquema Supabase y migraciones.
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** — Variables de entorno, webhook Stripe y despliegue.
+- **[USER_MANUAL.md](docs/USER_MANUAL.md)** — Uso del POS (cliente, cocina, recibos).
+- **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** — Problemas frecuentes y soluciones.
+
 ---
 
 ## Configuración
@@ -232,9 +244,15 @@ Crear `.env.local` en la raíz:
 # Opcional: URL base de la app (ej. para links en emails o meta)
 NEXT_PUBLIC_APP_URL=http://localhost:2000
 
-# Supabase (si usas recetas/ingredientes en BD)
+# Supabase (recetas, ingredientes, órdenes, pagos, inventario)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # Solo servidor; nunca exponer
+
+# Stripe (opcional; pagos con tarjeta)
+STRIPE_SECRET_KEY=sk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_...
 
 # S3 / upload (si usas la API de subida)
 AWS_ACCESS_KEY_ID=

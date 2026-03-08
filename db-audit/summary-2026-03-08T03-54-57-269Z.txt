@@ -1,0 +1,15 @@
+FUNNY ROLLS DATABASE AUDIT SUMMARY
+==================================================
+Generated: 2026-03-08T03:54:57.269Z
+
+EXISTING TABLES (1)
+------------------------------
+
+recipes:
+  📊 Rows: 1
+  🔒 RLS: ❓ Unknown
+
+MISSING TABLES (0)
+------------------------------
+
+RECOMMENDATIONS (0)

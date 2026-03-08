@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-03-08T03:54:57.269Z",
+  "environment": {
+    "supabaseUrl": "https://vnldrvrgfwdwoeuyjrot.supabase.co",
+    "nodeVersion": "v20.19.6",
+    "packageManager": "yarn"
+  },
+  "tables": {
+    "recipes": {
+      "name": "recipes",
+      "exists": true,
+      "rowCount": 1,
+      "needsFixes": [],
+      "rlsEnabled": "unknown"
+    }
+  },
+  "missingTables": [],
+  "rlsIssues": [],
+  "schemaIssues": [],
+  "dataIssues": [],
+  "recommendations": []
+}
