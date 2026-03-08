@@ -1,0 +1,334 @@
+{
+  "timestamp": "2026-03-08T06:54:11.238Z",
+  "tables": {
+    "recipes": {
+      "exists": true,
+      "rowCount": 1,
+      "columns": [
+        "id",
+        "name",
+        "batch_size",
+        "selling_price",
+        "profit_margin",
+        "available",
+        "ingredients",
+        "tools",
+        "steps",
+        "image",
+        "created_at",
+        "updated_at"
+      ],
+      "columnDetails": [],
+      "rls": "unknown",
+      "sample": {
+        "id": "recipe-1765954167358",
+        "name": "Oreo",
+        "batch_size": 10,
+        "selling_price": 60,
+        "profit_margin": 60,
+        "available": true,
+        "ingredients": [
+          {
+            "amount": 1,
+            "ingredientId": "12b821ba-b571-4808-95ec-0a84873a79d3"
+          },
+          {
+            "amount": 0.3,
+            "ingredientId": "23ba22a2-1500-4531-bfd7-7a3db4bf7627"
+          },
+          {
+            "amount": 0.25,
+            "ingredientId": "0d7b833d-f1fa-48ca-86be-c44577528025"
+          },
+          {
+            "amount": 0.05,
+            "ingredientId": "158abdf7-6b55-461f-ae65-2c0bfef358bf"
+          },
+          {
+            "amount": 0.05,
+            "ingredientId": "12b821ba-b571-4808-95ec-0a84873a79d3"
+          },
+          {
+            "amount": 0.5,
+            "ingredientId": "0d7b833d-f1fa-48ca-86be-c44577528025"
+          },
+          {
+            "amount": 0.5,
+            "ingredientId": "23ba22a2-1500-4531-bfd7-7a3db4bf7627"
+          }
+        ],
+        "tools": [
+          {
+            "usage": "full",
+            "toolId": "util-1"
+          },
+          {
+            "usage": "full",
+            "toolId": "util-3"
+          },
+          {
+            "usage": "full",
+            "toolId": "uten-1"
+          },
+          {
+            "usage": "full",
+            "toolId": "uten-2"
+          },
+          {
+            "usage": "full",
+            "toolId": "uten-3"
+          },
+          {
+            "usage": "full",
+            "toolId": "uten-6"
+          },
+          {
+            "usage": "full",
+            "toolId": "uten-7"
+          }
+        ],
+        "steps": [
+          "Mezclar harina, azúcar, levadura y sal en un bowl grande",
+          "Agregar mantequilla derretida y huevos batidos",
+          "Incorporar leche tibia poco a poco mientras se amasa",
+          "Amasar por 10 minutos hasta obtener una masa suave",
+          "Dejar reposar en lugar tibio por 1 hora hasta que duplique su tamaño",
+          "Extender la masa en rectángulo de 40x30 cm",
+          "Espolvorear canela y azúcar uniformemente",
+          "Enrollar firmemente desde el lado largo",
+          "Cortar en 12 porciones iguales",
+          "Colocar en molde engrasado y dejar reposar 30 minutos",
+          "Hornear a 180°C por 25-30 minutos hasta dorar",
+          "Dejar enfriar y decorar con glaseado de crema"
+        ],
+        "image": "https://funny-rolls.s3.eu-west-1.amazonaws.com/recipe-images/recipe-1765955116215-bch0hae6dhc.jpeg",
+        "created_at": "2025-12-17T07:05:16.507+00:00",
+        "updated_at": "2025-12-17T07:05:16.507+00:00"
+      },
+      "priority": "P0",
+      "purpose": "Recipe definitions"
+    },
+    "ingredients": {
+      "exists": true,
+      "rowCount": 4,
+      "columns": [
+        "id",
+        "name",
+        "price",
+        "unit",
+        "amount",
+        "min_amount",
+        "contains_amount",
+        "contains_unit",
+        "created_at",
+        "updated_at",
+        "min_amount_unit",
+        "price_per_unit",
+        "current_stock",
+        "reorder_level",
+        "category"
+      ],
+      "columnDetails": [],
+      "rls": "unknown",
+      "sample": {
+        "id": "0d7b833d-f1fa-48ca-86be-c44577528025",
+        "name": "Canela",
+        "price": 22,
+        "unit": "bolsa",
+        "amount": 1,
+        "min_amount": 30,
+        "contains_amount": 60,
+        "contains_unit": "g",
+        "created_at": "2026-01-12T23:52:00.585096+00:00",
+        "updated_at": "2026-01-12T23:52:00.585096+00:00",
+        "min_amount_unit": "g",
+        "price_per_unit": 22,
+        "current_stock": 0,
+        "reorder_level": 0,
+        "category": null
+      },
+      "priority": "P0",
+      "purpose": "Ingredient inventory"
+    },
+    "orders": {
+      "exists": true,
+      "rowCount": 1,
+      "columns": [
+        "id",
+        "order_number",
+        "status",
+        "payment_status",
+        "payment_method",
+        "subtotal_cents",
+        "tax_cents",
+        "total_cents",
+        "customer_name",
+        "customer_phone",
+        "customer_email",
+        "special_instructions",
+        "created_at",
+        "completed_at",
+        "metadata"
+      ],
+      "columnDetails": [],
+      "rls": "unknown",
+      "sample": {
+        "id": "5ab8d3ed-e6df-448f-8c70-ab8eb970f03d",
+        "order_number": "TEST-001",
+        "status": "completed",
+        "payment_status": "paid",
+        "payment_method": null,
+        "subtotal_cents": null,
+        "tax_cents": null,
+        "total_cents": 6000,
+        "customer_name": "Test Customer",
+        "customer_phone": null,
+        "customer_email": null,
+        "special_instructions": null,
+        "created_at": "2026-03-08T04:02:42.787276",
+        "completed_at": null,
+        "metadata": null
+      },
+      "priority": "P0",
+      "purpose": "Customer orders"
+    },
+    "order_items": {
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "columnDetails": [],
+      "rls": "unknown",
+      "sample": null,
+      "priority": "P0",
+      "purpose": "Order line items"
+    },
+    "payments": {
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "columnDetails": [],
+      "rls": "unknown",
+      "sample": null,
+      "priority": "P0",
+      "purpose": "Payment processing"
+    },
+    "inventory_transactions": {
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "columnDetails": [],
+      "rls": "unknown",
+      "sample": null,
+      "priority": "P1",
+      "purpose": "Stock movement tracking"
+    },
+    "production_batches": {
+      "exists": true,
+      "rowCount": 0,
+      "columns": [],
+      "columnDetails": [],
+      "rls": "unknown",
+      "sample": null,
+      "priority": "P1",
+      "purpose": "Production records"
+    },
+    "profiles": {
+      "exists": true,
+      "rowCount": 2,
+      "columns": [
+        "id",
+        "user_id",
+        "full_name",
+        "role",
+        "email",
+        "created_at",
+        "updated_at"
+      ],
+      "columnDetails": [],
+      "rls": "unknown",
+      "sample": {
+        "id": "b48b6265-8535-4a5b-8ad6-a901fa9d7054",
+        "user_id": null,
+        "full_name": "Admin User",
+        "role": "admin",
+        "email": "admin@funnyrolls.com",
+        "created_at": "2026-03-08T06:49:39.973142",
+        "updated_at": "2026-03-08T06:49:39.973142"
+      },
+      "priority": "P1",
+      "purpose": "User profiles"
+    },
+    "materials": {
+      "exists": false,
+      "error": "Could not find the table 'public.materials' in the schema cache",
+      "priority": "P2"
+    },
+    "products": {
+      "exists": false,
+      "error": "Could not find the table 'public.products' in the schema cache",
+      "priority": "P2"
+    },
+    "tools": {
+      "exists": false,
+      "error": "Could not find the table 'public.tools' in the schema cache",
+      "priority": "P2"
+    },
+    "categories": {
+      "exists": false,
+      "error": "Could not find the table 'public.categories' in the schema cache",
+      "priority": "P2"
+    },
+    "users": {
+      "exists": false,
+      "error": "Could not find the table 'public.users' in the schema cache",
+      "priority": "P2"
+    },
+    "production_records": {
+      "exists": false,
+      "error": "Could not find the table 'public.production_records' in the schema cache",
+      "priority": "P2"
+    }
+  },
+  "relationships": [
+    {
+      "from": "order_items",
+      "col": "order_id",
+      "to": "orders",
+      "status": "⚠️  missing or broken"
+    },
+    {
+      "from": "payments",
+      "col": "order_id",
+      "to": "orders",
+      "status": "⚠️  missing or broken"
+    },
+    {
+      "from": "inventory_transactions",
+      "col": "ingredient_id",
+      "to": "ingredients",
+      "status": "⚠️  missing or broken"
+    }
+  ],
+  "issues": [
+    {
+      "table": "orders",
+      "issue": "Order numbers not using FR-YYYY-XXXXX format",
+      "impact": "Inconsistent order numbering",
+      "fix": "Use generate_order_number() function"
+    }
+  ],
+  "recommendations": [
+    "🟡 P2: order_items - Missing recipe_id column",
+    "🟠 P1: No ingredients have stock - need to set initial inventory"
+  ],
+  "missingTables": [],
+  "rlsIssues": [],
+  "schemaIssues": [
+    {
+      "table": "order_items",
+      "issue": "Missing recipe_id column",
+      "impact": "Cannot decrement inventory from orders",
+      "fix": "ALTER TABLE order_items ADD COLUMN recipe_id uuid;"
+    }
+  ]
+}
