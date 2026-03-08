@@ -769,7 +769,7 @@ export function ProductionTrackerPanel({
 
                 <div className="lg:grid lg:grid-cols-3 lg:gap-6 xl:gap-8 space-y-6 lg:space-y-0">
                     {/* Production History */}
-                    <Card className="lg:col-span-2">
+                    <Card className="lg:col-span-2 md:mb-6!">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <TrendingUp className="h-5 w-5" />

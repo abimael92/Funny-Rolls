@@ -1,0 +1,23 @@
+FUNNY ROLLS DATABASE AUDIT SUMMARY
+==================================================
+Generated: 2026-03-08T06:54:11.238Z
+
+EXISTING TABLES:
+------------------------------
+✅ recipes (1 rows, RLS: unknown)
+✅ ingredients (4 rows, RLS: unknown)
+✅ orders (1 rows, RLS: unknown)
+✅ order_items (0 rows, RLS: unknown)
+✅ payments (0 rows, RLS: unknown)
+✅ inventory_transactions (0 rows, RLS: unknown)
+✅ production_batches (0 rows, RLS: unknown)
+✅ profiles (2 rows, RLS: unknown)
+
+MISSING TABLES (0):
+
+ISSUES (1):
+⚠️  orders: Order numbers not using FR-YYYY-XXXXX format
+
+RECOMMENDATIONS (2):
+1. 🟡 P2: order_items - Missing recipe_id column
+2. 🟠 P1: No ingredients have stock - need to set initial inventory
