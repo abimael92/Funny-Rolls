@@ -749,9 +749,9 @@ export function RecipeCalculator() {
             />
 
             {/* Content */}
-            <div className="lg:grid lg:grid-cols-3 lg:gap-6 xl:gap-8 space-y-6 lg:space-y-0">
+            <div className="lg:grid lg:grid-cols-3 lg:gap-8 xl:gap-10 space-y-6 md:space-y-8 lg:space-y-0">
                 {/* Ingredients Panel - Hidden on mobile unless selected */}
-                <div className={`${mobileView === 'ingredients' ? 'block' : 'hidden'} lg:block lg:col-span-1`}>
+                 <div className={`${mobileView === 'ingredients' ? 'block' : 'hidden'} lg:block lg:col-span-1 mb-6 md:mb-8! lg:mb-0`}>
                     <IngredientsPanel
                         ingredients={ingredients}
                         inventory={inventory}
@@ -766,7 +766,7 @@ export function RecipeCalculator() {
                     />
                 </div>
 
-                <div className={`${mobileView === 'calculator' ? 'block' : 'hidden'} lg:block lg:col-span-2`}>
+                <div className={`${mobileView === 'calculator' ? 'block' : 'hidden'} lg:block lg:col-span-2 mb-6 md:mb-8! lg:mb-0`}>
                     <RecipeCalculatorPanel
                         selectedRecipe={selectedRecipe}
                         setSelectedRecipe={setSelectedRecipe}
@@ -780,7 +780,7 @@ export function RecipeCalculator() {
                 </div>
 
                 {/* Production Tracker Panel - Hidden on mobile unless selected */}
-                <div className={`${mobileView === 'production' ? 'block' : 'hidden'} lg:block lg:col-span-3`}>
+                <div className={`${mobileView === 'production' ? 'block' : 'hidden'} lg:block lg:col-span-3 mb-6 md:mb-8! lg:mb-0`}>
                     <ProductionTrackerPanel
                         productionHistory={productionHistory}
                         inventory={inventory}
