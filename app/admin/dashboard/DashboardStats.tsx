@@ -24,23 +24,29 @@ export default function DashboardStats() {
             try {
                 // Get today's date
                 const today = new Date().toISOString().split('T')[0]
+                console.log('Fetching stats for date:', today)
 
                 // Fetch daily sales
                 const salesRes = await fetch(`/api/reports/sales/daily?date=${today}`)
+                console.log('Sales response status:', salesRes.status)
                 const salesData = await salesRes.json()
+                console.log('Sales data:', salesData)
 
                 // Fetch total customers (from orders)
                 const customersRes = await fetch('/api/orders/history')
+                console.log('Customers response status:', customersRes.status)
                 const customersData = await customersRes.json()
+                console.log('Customers data:', customersData)
 
                 // Calculate unique customers
                 const uniqueCustomers = new Set(customersData.orders?.map((o: any) => o.customer_email)).size
+                console.log('Unique customers:', uniqueCustomers)
 
                 setStats({
                     todayRevenue: salesData.totalSales || 0,
                     todayOrders: salesData.orderCount || 0,
                     totalCustomers: uniqueCustomers || 0,
-                    growth: 12.5 // This would come from comparing to yesterday
+                    growth: 12.5
                 })
             } catch (error) {
                 console.error('Error fetching stats:', error)
