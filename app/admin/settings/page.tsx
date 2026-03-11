@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import ProtectedContent from "@/components/ProtectedContent"
 import { Button } from "@/components/ui/button"
-import { Navbar } from "@/components/Navbar" // ADD THIS
+import { Navbar } from "@/components/Navbar"
 
 interface SettingsData {
   store_name: string
@@ -16,25 +16,30 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [cart] = useState([]) // ADD THIS - empty cart for admin
+  const [cart] = useState([])
 
   const loadSettings = async () => {
     setLoading(true)
     setError(null)
     try {
       const res = await fetch("/api/admin/settings").catch(() => null)
+
       if (!res || !res.ok) {
-        throw new Error("Settings API not available")
+        throw new Error("Error cargando configuración")
       }
+
       const data = await res.json()
+
       setSettings({
         store_name: data.store_name ?? "Funny Rolls",
-        tax_rate: Number(data.tax_rate ?? 0),
-        receipt_footer: data.receipt_footer ?? "",
+        tax_rate: Number(data.tax_rate ?? 16),
+        receipt_footer:
+          data.receipt_footer ??
+          "Gracias por su compra.\nFunny Rolls - Chihuahua, Chihuahua.\nConserve su recibo.",
       })
     } catch (e: any) {
       console.error(e)
-      setError(e.message || "Error loading settings")
+      setError(e.message || "Error cargando configuración")
     } finally {
       setLoading(false)
     }
@@ -46,20 +51,23 @@ export default function AdminSettingsPage() {
 
   const handleSave = async () => {
     if (!settings) return
+
     setSaving(true)
     setError(null)
+
     try {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       }).catch(() => null)
+
       if (!res || !res.ok) {
-        throw new Error("Error saving settings")
+        throw new Error("Error guardando configuración")
       }
     } catch (e: any) {
       console.error(e)
-      setError(e.message || "Error saving settings")
+      setError(e.message || "Error guardando configuración")
     } finally {
       setSaving(false)
     }
@@ -68,15 +76,17 @@ export default function AdminSettingsPage() {
   return (
     <ProtectedContent requiredRole="admin">
       <div className="min-h-screen bg-[#FFF5E6]">
-        <Navbar cart={cart} onCartOpen={() => { }} /> {/* ADD THIS */}
-        <div className="py-8 px-4 sm:px-20"> {/* FIXED: Match other admin pages padding */}
+        <Navbar cart={cart} onCartOpen={() => { }} />
+
+        <div className="py-8 px-4 sm:px-20">
           <div className="max-w-3xl mx-auto space-y-6">
+
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-amber-900">
-                Settings
+                Configuración
               </h1>
               <p className="text-sm text-amber-800/80">
-                Configure store settings, tax rates, and receipt footer.
+                Configura los datos de la tienda, impuestos y el pie del recibo.
               </p>
             </div>
 
@@ -95,9 +105,10 @@ export default function AdminSettingsPage() {
 
             {!loading && !error && settings && (
               <div className="bg-white/90 border border-amber-200 rounded-2xl p-6 shadow-sm space-y-4">
+
                 <div>
                   <label className="block text-xs font-semibold text-amber-800 mb-1">
-                    Store name
+                    Nombre de la tienda
                   </label>
                   <input
                     value={settings.store_name}
@@ -112,7 +123,7 @@ export default function AdminSettingsPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-amber-800 mb-1">
-                    Tax rate (%)
+                    Tasa de impuesto (%)
                   </label>
                   <input
                     type="number"
@@ -131,7 +142,7 @@ export default function AdminSettingsPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-amber-800 mb-1">
-                    Receipt footer
+                    Pie del recibo
                   </label>
                   <textarea
                     rows={4}
@@ -151,9 +162,10 @@ export default function AdminSettingsPage() {
                     disabled={saving}
                     className="rounded-full bg-amber-600 hover:bg-amber-700 text-white px-6"
                   >
-                    {saving ? "Saving..." : "Save changes"}
+                    {saving ? "Guardando..." : "Guardar cambios"}
                   </Button>
                 </div>
+
               </div>
             )}
           </div>
