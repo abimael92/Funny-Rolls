@@ -174,6 +174,11 @@ export const PRODUCTION_STATUSES = [
 	'bad',
 	'burned',
 	'damaged',
+	// Batch lifecycle statuses for production planning/tracking
+	'planned',
+	'in_progress',
+	'completed',
+	'cancelled',
 ] as const;
 export type ProductionStatus = (typeof PRODUCTION_STATUSES)[number];
 
@@ -331,6 +336,12 @@ export interface ProductionRecord {
 	totalProduced: number;
 	items?: ProductionItem[];
 	status?: ProductionStatus;
+	/** Optional planned production date (ISO string, local date without time or full ISO). */
+	plannedDate?: string;
+	/** Optional actual completion timestamp (ISO string). */
+	completedAt?: string;
+	/** Optional recipe category/type for filtering (e.g. 'rolls', 'bread'). */
+	recipeType?: string;
 	unitPrice?: number;
 	productionCost?: number; // Cost of ingredients used
 	wasteCost?: number; // Cost of wasted/burned items
