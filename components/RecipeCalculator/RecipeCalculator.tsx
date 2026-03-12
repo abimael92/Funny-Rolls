@@ -268,8 +268,14 @@ export function RecipeCalculator() {
         loadIngredients();
     }, [loadIngredientsFromSupabase]);
 
-    // Enhanced record production with validation
-    const recordProduction = (recipeId: string, batchCount: number, date: Date = new Date()) => {
+    /**
+     * Record production by calling the real API route, which:
+     * - Persists to production_batches
+     * - Updates inventory via inventory-service
+     *
+     * Also performs local validation against current inventory for better UX.
+     */
+    const recordProduction = async (recipeId: string, batchCount: number) => {
         setError(null)
 
         const validBatchCount = validateNumber(batchCount.toString(), 1, 1000)
@@ -284,7 +290,7 @@ export function RecipeCalculator() {
             return
         }
 
-        // Check inventory
+        // Client-side inventory check (server will also validate/update)
         const lowStockIngredients: string[] = []
         recipe.ingredients.forEach(recipeIngredient => {
             const inventoryItem = inventory.find(item => item.ingredientId === recipeIngredient.ingredientId)
@@ -300,28 +306,37 @@ export function RecipeCalculator() {
             return
         }
 
-        const productionRecord: ProductionRecord = {
-            id: Date.now().toString(),
-            recipeId,
-            recipeName: recipe.name,
-            batchCount: validBatchCount,
-            date: date.toISOString(),
-            totalProduced: validBatchCount * recipe.batchSize
-        }
-
-        // Update production history
-        setProductionHistory(prev => [productionRecord, ...prev])
-
-        // Update inventory (deduct ingredients used)
-        const updatedInventory = [...inventory]
-        recipe.ingredients.forEach(recipeIngredient => {
-            const inventoryItem = updatedInventory.find(item => item.ingredientId === recipeIngredient.ingredientId)
-            if (inventoryItem) {
-                const amountUsed = recipeIngredient.amount * validBatchCount
-                inventoryItem.currentStock = Math.max(0, inventoryItem.currentStock - amountUsed)
+        try {
+            if (process.env.NODE_ENV !== 'production') {
+                // eslint-disable-next-line no-console
+                console.log('[RecipeCalculator] Creating production batch', {
+                    recipeId,
+                    recipeName: recipe.name,
+                    batchCount: validBatchCount,
+                })
             }
-        })
-        setInventory(updatedInventory)
+
+            const res = await fetch('/api/production/record', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    recipeId,
+                    recipeName: recipe.name,
+                    batchCount: validBatchCount,
+                }),
+            })
+
+            const body = await res.json().catch(() => null) as { error?: string } | null
+            if (!res.ok || body?.error) {
+                throw new Error(body?.error || 'Error al registrar la producción')
+            }
+        } catch (err) {
+            if (process.env.NODE_ENV !== 'production') {
+                // eslint-disable-next-line no-console
+                console.error('[RecipeCalculator] Failed to create production batch', err)
+            }
+            setError(err instanceof Error ? err.message : 'Error al registrar la producción')
+        }
     }
 
     // Function to update inventory manually
@@ -775,7 +790,11 @@ export function RecipeCalculator() {
                         ingredients={ingredients}
                         tools={tools}
                         inventory={inventory}
-                        recordProduction={recordProduction}
+                        recordProduction={(recipeId, batchCount) => {
+                            // Fire and forget; the production management page will be updated
+                            // via realtime subscriptions on production_batches.
+                            void recordProduction(recipeId, batchCount)
+                        }}
                     />
                 </div>
 
