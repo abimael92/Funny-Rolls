@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-03-12T19:18:25.673Z",
+  "backupDir": "/Users/abimael/Desktop/myProjects/myApps/funny-rolls/backups/pre-migration-2026-03-12T19-18-24-198Z",
+  "backups": [
+    {
+      "table": "recipes",
+      "rows": 1,
+      "file": "/Users/abimael/Desktop/myProjects/myApps/funny-rolls/backups/pre-migration-2026-03-12T19-18-24-198Z/recipes.json"
+    },
+    {
+      "table": "ingredients",
+      "rows": 4,
+      "file": "/Users/abimael/Desktop/myProjects/myApps/funny-rolls/backups/pre-migration-2026-03-12T19-18-24-198Z/ingredients.json"
+    },
+    {
+      "table": "production_batches",
+      "rows": 0,
+      "file": "/Users/abimael/Desktop/myProjects/myApps/funny-rolls/backups/pre-migration-2026-03-12T19-18-24-198Z/production_batches.json"
+    },
+    {
+      "table": "inventory_transactions",
+      "rows": 0,
+      "file": "/Users/abimael/Desktop/myProjects/myApps/funny-rolls/backups/pre-migration-2026-03-12T19-18-24-198Z/inventory_transactions.json"
+    },
+    {
+      "table": "orders",
+      "rows": 1,
+      "file": "/Users/abimael/Desktop/myProjects/myApps/funny-rolls/backups/pre-migration-2026-03-12T19-18-24-198Z/orders.json"
+    },
+    {
+      "table": "order_items",
+      "rows": 0,
+      "file": "/Users/abimael/Desktop/myProjects/myApps/funny-rolls/backups/pre-migration-2026-03-12T19-18-24-198Z/order_items.json"
+    },
+    {
+      "table": "clients",
+      "rows": 0,
+      "file": ""
+    },
+    {
+      "table": "profiles",
+      "rows": 1,
+      "file": "/Users/abimael/Desktop/myProjects/myApps/funny-rolls/backups/pre-migration-2026-03-12T19-18-24-198Z/profiles.json"
+    }
+  ],
+  "notes": [
+    "Backups created under /Users/abimael/Desktop/myProjects/myApps/funny-rolls/backups/pre-migration-2026-03-12T19-18-24-198Z",
+    "Run Supabase migrations (e.g. `supabase db push` or your CI pipeline) to apply new schema.",
+    "Review `analysis/mock-usage-report.*` and replace remaining mock data sources with real Supabase queries before going live.",
+    "After migrations, run `ts-node scripts/validate-data-consistency.ts` to verify IDs and cross-table references.",
+    "Optionally seed minimal test data for dev/staging (clients, suppliers, one or two recipes) using a separate seed script."
+  ]
+}

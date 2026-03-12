@@ -1,0 +1,71 @@
+{
+  "generatedAt": "2026-03-12T19:17:09.466Z",
+  "phases": [
+    {
+      "phase": 1,
+      "title": "Stabilize production data model & identifiers",
+      "goals": [
+        "Stop all 500s from schema mismatches (e.g. missing columns)",
+        "Ensure every core table has a stable primary key strategy",
+        "Preserve existing production data during migrations"
+      ],
+      "steps": []
+    },
+    {
+      "phase": 2,
+      "title": "Introduce orders, customers and inventory enforcement",
+      "goals": [
+        "Persist all sales as structured orders",
+        "Link orders to production batches for traceability",
+        "Tie inventory movements to orders and production"
+      ],
+      "steps": []
+    },
+    {
+      "phase": 3,
+      "title": "Cost calculation, production planning and shopping lists",
+      "goals": [
+        "Use real supplier prices for all cost calculations",
+        "Drive ingredient shopping lists from planned production and current stock",
+        "Align production statuses with UI flows (planned → in_progress → completed)"
+      ],
+      "steps": [
+        {
+          "phase": 3,
+          "id": "p3-ingredient-pricing",
+          "title": "Harden ingredient pricing model",
+          "description": "Ensure ingredients table includes price_per_unit, current_stock, reorder_level and category; migrate any legacy price fields and update all cost calculations to use these columns."
+        },
+        {
+          "phase": 3,
+          "id": "p3-production-planning",
+          "title": "Add planning metadata to production_batches",
+          "description": "Introduce planned_at / planned_for dates, per-batch status (planned, in_progress, completed) and link batches to orders, enabling shopping lists and capacity planning."
+        }
+      ]
+    },
+    {
+      "phase": 4,
+      "title": "Reporting, CFDI and SAT-compliant operations",
+      "goals": [
+        "Provide reliable financial and operational reporting",
+        "Support SAT/CFDI invoicing for qualifying sales",
+        "Enable CSV/Excel exports for accountants and management"
+      ],
+      "steps": [
+        {
+          "phase": 4,
+          "id": "p4-financial-views",
+          "title": "Create reporting views for sales and production",
+          "description": "Add database views (and optional materialized views) that aggregate daily/monthly sales, product mix, and production yields to power dashboards and export endpoints."
+        },
+        {
+          "phase": 4,
+          "id": "p4-cfdi-sat-integration",
+          "title": "Prepare CFDI/SAT integration",
+          "description": "Extend orders with SAT-required fields (uso CFDI, RFC, regimen fiscal) and design an integration layer to generate CFDI documents via a PAC, ensuring Chihuahua/México commercial compliance."
+        }
+      ]
+    }
+  ]
+}
